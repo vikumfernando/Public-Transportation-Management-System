@@ -1,0 +1,27 @@
+{
+  "name": "public-transportation-management-system",
+  "version": "1.0.0",
+  "description": "An IoT-integrated web application for real-time bus tracking, schedule and route management, and RFID-based contactless fare payment, built with the MERN stack and ESP32.",
+  "homepage": "https://github.com/vikumfernando/Public-Transportation-Management-System#readme",
+  "bugs": {
+    "url": "https://github.com/vikumfernando/Public-Transportation-Management-System/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vikumfernando/Public-Transportation-Management-System.git"
+  },
+  "license": "ISC",
+  "author": "vikum fernando, tharindu nethmal, saliya buwaneka, nethshan dulmin",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "mongoose": "^8.16.4"
+  }
+}
