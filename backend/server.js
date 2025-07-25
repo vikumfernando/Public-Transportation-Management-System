@@ -27,6 +27,18 @@ connection.once("open", () => {
 
 //Add routes here later
 
+const busStopRouter = require("./routes/Stops.js");
+const busRouter = require("./routes/Busses.js");
+
+const routesRouter = require("./routes/Routes.js");
+const schedulesRouter = require("./routes/Schedules.js");
+
+
+app.use("/Stops", busStopRouter);
+app.use("/Busses", busRouter);
+app.use("/Routes", routesRouter);
+app.use("/Schedules", schedulesRouter);
+
 
 app.listen(PORT, () => {
   console.log(`Server is up and running on port number: ${PORT}`);
