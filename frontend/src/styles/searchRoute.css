@@ -1,0 +1,47 @@
+.input-field {
+  width: 250px;
+  padding: 10px 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.input-field:focus {
+  border-color: #007bff;
+}
+
+.submit-button {
+  padding: 10px 16px;
+  margin-left: 8px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+/* Container to center the input and button */
+.input-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 270px;
+  margin: 0;
+}
+
+.mapDiv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    width: 800px;
+    height: 500px;
+}

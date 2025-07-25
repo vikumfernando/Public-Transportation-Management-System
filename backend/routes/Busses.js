@@ -38,14 +38,15 @@ router.route("/addBus").post(async (req, res) => {
 router.route("/updateLocation/:id").put(async (req, res) => {
   let vehicleId = req.params.id;
 
+  console.log("Vehicle ID" + vehicleId);
+
   //this should be replaced by the gps data
 
   const lat = 6.915298;
   const lon = 79.870903;
-
   const bus = await Bus.findById(vehicleId).populate("route").populate("schedule");
 
-  console.log("Test " + bus.lat);
+  //console.log("Test " + bus.lat);
 
   if (!bus || !bus.schedule || !bus.schedule.stopSchedules) {
     console.log("\nSchedule data missing");
