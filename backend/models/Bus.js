@@ -52,7 +52,7 @@ const busSchema = new Schema({
 
    activeStatus: {
     type : String,
-    default : "idle"
+    default : "On duty"
    }
 });
 

@@ -5,14 +5,17 @@ let Schedule = require("../models/Schedule");
 //adding schedules
 router.route("/addschedule").post(async (req, res) => {
     const {routeId, dayType, stopSchedules} = req.body;
+    const startTime = stopSchedules[0].expectedArrival;
 
     try {
+        //checking whether theres already a shcedule for the route number and the start time
         const existingSchedule = await Schedule.findOne({
-            routeId : routeId
+            routeId : routeId,
+            "stopSchedules.0.expectedArrival": startTime,
         })
 
         if (existingSchedule) {
-        return res.status(400).json("Schedule already added");
+         return res.status(400).json("Schedule already added");
         }
 
         const newSchedule = new Schedule({

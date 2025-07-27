@@ -6,7 +6,7 @@ import "../styles/searchRoute.css";
 function SearchRoute({ setBusLocation, setStops }) {
   const [routeNum, setRouteNum] = useState("");
   const [busId, setId] = useState([]);
-  const [busInfo, setBusInfo] = useState(null);
+  const [busInfo, setBusInfo] = useState([]);
 
   //retreiving bsus ID from the backend based on the route number
   async function getBusId() {
@@ -14,6 +14,7 @@ function SearchRoute({ setBusLocation, setStops }) {
       const res = await axios.get(
         `http://localhost:8070/Busses/getId/${routeNum}`
       );
+
       const ids = res.data.busIds || res.data.busId || [];
       setId(ids);
       console.log("Bus IDs:", ids);
@@ -35,7 +36,7 @@ function SearchRoute({ setBusLocation, setStops }) {
         );
         console.log("Bus update response for ID", id, ":", res.data);
 
-        setBusInfo(res.data);
+        setBusInfo((prev) => [...prev, res.data]);
 
         setBusLocation({
           lat: res.data.lat,
@@ -43,8 +44,6 @@ function SearchRoute({ setBusLocation, setStops }) {
         });
 
         setStops(res.data.route || []);
-
-        console.log("Stops:", res.data.route);
 
 
       } catch (err) {
@@ -70,17 +69,18 @@ function SearchRoute({ setBusLocation, setStops }) {
         </form>
       </div>
 
-      {busInfo && (
-        <div>
-          <h1>Status : {busInfo.status}</h1>
-          <h1>Next Stop : {busInfo.nextStop}</h1>
-          <h1>Prev Stop : {busInfo.previousStop}</h1>
-          <h1>Latitude : {busInfo.lat}</h1>
-          <h1>Longtitude : {busInfo.lon}</h1>
-          <h1>Vehicle Num : {busInfo.vehicleNumber}</h1>
-        </div>
-      )}
-    </div>
-  );
-}
+      {busInfo.length > 0 &&
+        busInfo.map((busInfo, index) => (
+          <div key={index} >
+            <h2>Bus {index + 1}</h2>
+            <p><strong>Vehicle Num:</strong> {busInfo.vehicleNumber}</p>
+            <p><strong>Status:</strong> {busInfo.status}</p>
+            <p><strong>Next Stop:</strong> {busInfo.nextStop}</p>
+            <p><strong>Prev Stop:</strong> {busInfo.previousStop}</p>
+            <p><strong>Latitude:</strong> {busInfo.lat}</p>
+            <p><strong>Longitude:</strong> {busInfo.lon}</p>
+            <hr/>
+          </div> ))}
+  </div>
+  )};
 export default SearchRoute;
