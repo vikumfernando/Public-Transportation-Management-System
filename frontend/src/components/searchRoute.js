@@ -7,8 +7,9 @@ function SearchRoute({ setBusLocation, setStops }) {
   const [routeNum, setRouteNum] = useState("");
   const [busId, setId] = useState([]);
   const [busInfo, setBusInfo] = useState([]);
-
-  //retreiving bsus ID from the backend based on the route number
+  const [displayInfo, setDisplayInfo] = useState([]);
+  
+  /* delete 
   async function getBusId() {
     try {
       const res = await axios.get(
@@ -23,64 +24,100 @@ function SearchRoute({ setBusLocation, setStops }) {
       console.log("Error while fetching bus Id " + err);
       return [];
     }
-  }
+  } 
+    */
 
   //updating current location of the bus
-  const updateLocation = async (e) => {
+  const updateLocation = async (busId, e) => {
     if (e) e.preventDefault();
-    const ids = await getBusId();
-    for (const id of ids) {
-      try {
-        const res = await axios.put(
-          `http://localhost:8070/Busses/updateLocation/${id}`
-        );
-        console.log("Bus update response for ID", id, ":", res.data);
 
-        setBusInfo((prev) => [...prev, res.data]);
+    console.log("Bus ID to update:", busId);
+    try {
+      
+      const res = await axios.put(
+        `http://localhost:8070/Busses/updateLocation/${busId}`
+      );
 
-        setBusLocation({
-          lat: res.data.lat,
-          lng: res.data.lon,
-        });
+      console.log("Bus update response for ID", busId, ":", res.data);
 
-        setStops(res.data.route || []);
+      setBusInfo((prev) =>
+        prev.map((bus) => (bus._id === busId ? res.data : bus))
+      );
 
+      setBusLocation({
+        lat: res.data.lat,
+        lng: res.data.lon,
+      });
 
-      } catch (err) {
-        console.error("Error updating location for ID", id, ":", err);
-      }
+      setStops(res.data.route || []);
+    } catch (err) {
+      console.error("Error updating location for ID", busId, ":", err);
+    }
+  };
+
+  //displaying bus information
+  const displayBusses = async (e) => {
+    if (e) {
+      e.preventDefault();
+    }
+    try {
+      const res = await axios.get(
+        `http://localhost:8070/Busses/loadBus/${routeNum}`
+      );
+
+      setDisplayInfo(res.data);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   return (
     <div>
-      <div class="input-container">
-        <form onSubmit={updateLocation}>
+      <div className="input-container">
+        <form onSubmit={displayBusses}>
           <input
-            class="input-field"
+            className="input-field"
             type="text"
             placeholder="Enter route number"
             value={routeNum}
             onChange={(e) => setRouteNum(e.target.value)}
           />
-          <button class="submit-button" type="submit">
+          <button className="submit-button" type="submit">
             Search Buses
           </button>
         </form>
       </div>
 
-      {busInfo.length > 0 &&
-        busInfo.map((busInfo, index) => (
-          <div key={index} >
+      {displayInfo.length > 0 &&
+        displayInfo.map((bus, index) => (
+          <div
+            onClick={() => updateLocation(bus._id)}
+            className="busInfoDiv"
+            key={bus._id}
+          >
             <h2>Bus {index + 1}</h2>
-            <p><strong>Vehicle Num:</strong> {busInfo.vehicleNumber}</p>
-            <p><strong>Status:</strong> {busInfo.status}</p>
-            <p><strong>Next Stop:</strong> {busInfo.nextStop}</p>
-            <p><strong>Prev Stop:</strong> {busInfo.previousStop}</p>
-            <p><strong>Latitude:</strong> {busInfo.lat}</p>
-            <p><strong>Longitude:</strong> {busInfo.lon}</p>
-            <hr/>
-          </div> ))}
-  </div>
-  )};
+            <p>
+              <strong>Vehicle Num: </strong> {bus.vehicleNumber}
+            </p>
+            <p>
+              <strong>Status:</strong> {bus.status}
+            </p>
+            <p>
+              <strong>Next Stop:</strong> {bus.nextStop}
+            </p>
+            <p>
+              <strong>Prev Stop:</strong> {bus.previousStop}
+            </p>
+            <p>
+              <strong>Latitude:</strong> {bus.lat}
+            </p>
+            <p>
+              <strong>Longitude:</strong> {bus.lon}
+            </p>
+          </div>
+        ))}
+    </div>
+  );
+}
+
 export default SearchRoute;

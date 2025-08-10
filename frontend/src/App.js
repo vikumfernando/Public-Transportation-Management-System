@@ -1,6 +1,8 @@
 import Header from "./components/Header";
 import SearchRoute from "./components/searchRoute";
 import BusMap from "./components/BusMap";
+import AdminDashboard from "./components/AdminDashboard";
+import OffCanvas from './components/OffCanvas';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from 'react';
 
@@ -19,6 +21,16 @@ function App() {
               <Header />
               <SearchRoute setBusLocation={setBusLocation} setStops={setStops}/>
               <BusMap busLocation={busLocation} stops={stops} />
+            </div>
+          }
+        />
+         <Route
+          path="/admin"
+          element={
+            <div>
+              <Header />
+              <OffCanvas />
+              <AdminDashboard />
             </div>
           }
         />

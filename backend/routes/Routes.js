@@ -30,4 +30,15 @@ router.route("/addRoute").post(async (req, res) => {
 
 });
 
+//returning the number of active routes
+router.route("/getcount").get(async (req, res) => {
+    const routeCount = await Route.countDocuments();
+
+    if(routeCount === 0){
+        res.status(404).json("No routes found")
+    }
+
+    res.status(200).json({count : routeCount});
+})
+
 module.exports = router;
