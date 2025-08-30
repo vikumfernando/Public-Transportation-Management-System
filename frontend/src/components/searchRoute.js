@@ -5,11 +5,10 @@ import "../styles/searchRoute.css";
 //searching the bus route for the given route number
 function SearchRoute({ setBusLocation, setStops }) {
   const [routeNum, setRouteNum] = useState("");
-  const [busId, setId] = useState([]);
   const [busInfo, setBusInfo] = useState([]);
   const [displayInfo, setDisplayInfo] = useState([]);
   
-  /* delete 
+  /* delete this
   async function getBusId() {
     try {
       const res = await axios.get(
@@ -28,20 +27,19 @@ function SearchRoute({ setBusLocation, setStops }) {
     */
 
   //updating current location of the bus
-  const updateLocation = async (busId, e) => {
+  async function updateLocation(busId, e) {
     if (e) e.preventDefault();
 
     console.log("Bus ID to update:", busId);
     try {
-      
+
       const res = await axios.put(
         `http://localhost:8070/Busses/updateLocation/${busId}`
       );
 
       console.log("Bus update response for ID", busId, ":", res.data);
 
-      setBusInfo((prev) =>
-        prev.map((bus) => (bus._id === busId ? res.data : bus))
+      setBusInfo((prev) => prev.map((bus) => (bus._id === busId ? res.data : bus))
       );
 
       setBusLocation({
@@ -49,11 +47,12 @@ function SearchRoute({ setBusLocation, setStops }) {
         lng: res.data.lon,
       });
 
-      setStops(res.data.route || []);
+      setStops(res.data.route.stopsSequence || []);
+
     } catch (err) {
       console.error("Error updating location for ID", busId, ":", err);
     }
-  };
+  }
 
   //displaying bus information
   const displayBusses = async (e) => {

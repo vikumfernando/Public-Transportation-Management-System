@@ -1,6 +1,7 @@
 const router = require("express").Router();
 let Bus = require("../models/Bus");
 const calcDistance = require("../distanceCalculation");
+const Route = require("../models/Route");
 
 //adding new bus to the data base
 router.route("/addBus").post(async (req, res) => {
@@ -131,6 +132,7 @@ router.route("/updateLocation/:id").put(async (req, res) => {
     _id: bus._id,
     lat: bus.lat,
     lon: bus.lon,
+    route: bus.route
   };
   res.status(200).send(response);
 
@@ -219,5 +221,8 @@ router.route("/getcount").get(async (req, res) => {
 
   res.status(200).json({ count: busCount });
 });
+
+
+
 
 module.exports = router;

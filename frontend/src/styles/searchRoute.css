@@ -41,11 +41,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0 auto;
+    margin: 20px auto;
     width: 800px;
     height: 500px;
 }
-
 
 .busInfoDiv{
   width : 300px;

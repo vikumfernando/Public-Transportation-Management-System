@@ -26,4 +26,29 @@ router.route("/addStop").post(async (req, res) => {
     }
 });
 
+
+//Loading bus stop data
+router.route("/loadstops").get(async (req, res) => {
+    const stops = await BusStop.find();
+
+    if(stops){
+        res.status(200).send(stops);
+    }else{
+        res.status(404).json("Bus Stop data not found")
+    }
+});
+
+
+router.route("/displayStop/:stopId").get(async(req, res) => {
+    
+    const stopId = req.params.stopId;
+    const stop = await BusStop.findById(stopId);
+
+    if(stop){
+        res.status(200).json(stop)
+    }else{
+        res.status(404).json("Stop not found")
+    }
+});
+
 module.exports = router;

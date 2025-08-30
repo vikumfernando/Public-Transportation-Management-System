@@ -1,7 +1,13 @@
-import React, { useCallback, useRef } from "react";
-import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
+import React, { useCallback, useEffect, useRef} from "react";
 import "../styles/searchRoute.css";
+import {
+  GoogleMap,
+  useJsApiLoader,
+  Marker,
+  Polyline,
+} from "@react-google-maps/api";
 
+//To remove unwanted tags and names from the map
 const mapOptions = {
   disableDefaultUI: true, //Hiding HUD
   styles: [
@@ -14,8 +20,7 @@ const mapOptions = {
       featureType: "transit",
       elementType: "labels",
       stylers: [{ visibility: "off" }], // Hiding default bus stops
-    },
-    
+    }
   ],
 };
 
@@ -29,31 +34,31 @@ const center = {
   lng: 79.8612,
 };
 
-function BusMap({ busLocation, stops }) {
+function RouteMap({ stops }) {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyAJGs8eo5fJNIyJb60H3br0F-1-twWT2MY",
   });
-
+  
   const mapRef = useRef();
 
   const onLoad = useCallback((map) => {
     mapRef.current = map;
   }, []);
 
+
   if (!isLoaded) return <div>Loading Map...</div>;
+
+  const path = stops?.map((stop) => ({ lat: stop.lat, lng: stop.lon })) || [];
 
   return (
     <div className="mapDiv">
       <GoogleMap
         mapContainerStyle={containerStyle}
-        center={busLocation || center}
+        center={center}
         zoom={16}
         onLoad={onLoad}
-        options = {mapOptions}
+        options={mapOptions}
       >
-        {/* Bus Marker */}
-        {busLocation && <Marker position={busLocation} label="test" />}
-
         {/* Stop Markers */}
         {stops?.map((stop, index) => (
           <Marker
@@ -65,9 +70,20 @@ function BusMap({ busLocation, stops }) {
             }}
           />
         ))}
+
+        {path.length > 1 && (
+          <Polyline
+            path={path}
+            option={{
+              strokeColor: "#29b944ff",
+              strokeOpacity: 0.8,
+              strokeWeight: 5,
+            }}
+          />
+        )}
       </GoogleMap>
     </div>
   );
 }
 
-export default BusMap;
+export default RouteMap;

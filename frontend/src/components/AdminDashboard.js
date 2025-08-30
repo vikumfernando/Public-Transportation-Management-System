@@ -15,7 +15,7 @@ function AdminDashboard(){
         const activeBusCount = async () => {
             try {
                 const res = await axios.get(`http://localhost:8070/Busses/getcount`);
-                setActiveBuses(res.data.count); // assuming the API returns { count: number }
+                setActiveBuses(res.data.count);
             } catch (error) {
                 console.error("Failed to fetch active bus count:", error);
             }
@@ -30,6 +30,7 @@ function AdminDashboard(){
             console.error("Failed to fetch active route count : " + err);
            }
         };
+        
         //implement the issue count function here
 
         //implement the total revenue function here
@@ -57,7 +58,7 @@ function AdminDashboard(){
 
                 <div class="stat-card">
                     <div class="stat-title">Total Revenue</div>
-                    <div class="stat-number">1,234</div>
+                    <div class="stat-number">$1,234</div>
                 </div> 
 
             </div>
