@@ -36,16 +36,16 @@ router.route("/addBus").post(async (req, res) => {
 
 //Updating the current location of the bus
 //longtitude and latitude needs to be taken from the gps module - !! Important !!
+router.route("/updateLocation").put(async (req, res) => {
 
-router.route("/updateLocation/:id").put(async (req, res) => {
-  let vehicleId = req.params.id;
   let destinationReached = false;
 
-  //this should be replaced by the gps data
-  const lat = 6.927076;
-  const lon = 79.861241;
+  //Lat and Lon taken from the GPS module is here
+  const {busId, lat, lon} = req.body;
 
-  const bus = await Bus.findById(vehicleId)
+  console.log("Bus ID :" + busId);
+
+  const bus = await Bus.findById(busId)
     .populate({
       path: "route",
       populate: {
@@ -128,14 +128,6 @@ router.route("/updateLocation/:id").put(async (req, res) => {
   bus.lat = lat;
   bus.lon = lon;
 
-  const response = {
-    _id: bus._id,
-    lat: bus.lat,
-    lon: bus.lon,
-    route: bus.route
-  };
-  res.status(200).send(response);
-
   await bus.save();
 });
 
@@ -164,7 +156,54 @@ router.route("/getId/:routeNumber").get(async (req, res) => {
   }
 }); */
 
-//Passing bus information to the front end
+//Loading all bus information
+router.route("/loadBuses").get(async (req, res) => {
+  try {
+    const buses = await Bus.find()
+      .populate({
+        path: "route",
+        populate: {
+          path: "stopsSequence",
+          model: "BusStop",
+        },
+      })
+      .populate("schedule");
+
+    if (!buses || buses.length === 0) {
+      return res.status(404).json({ message: "Buses not found" });
+    }
+
+    const response = buses.map((bus) => ({
+      _id: bus._id,
+      status: bus.status,
+      nextStop:
+        bus.nextStopIndex < bus.route.stopsSequence.length
+          ? bus.route.stopsSequence[bus.nextStopIndex].stopName
+          : "Destination reached",
+      previousStop:
+        bus.nextStopIndex > 0 &&
+        bus.nextStopIndex - 1 < bus.route.stopsSequence.length
+          ? bus.route.stopsSequence[bus.nextStopIndex - 1].stopName
+          : "Not started",
+      vehicleNumber: bus.vehicleNumber,
+      currentStatus: bus.status,
+      activeStatus: bus.activeStatus,
+      lat: bus.lat,
+      lon: bus.lon,
+      type : bus.vehicleType,
+      busImage : bus.busImage,
+      routeNum : bus.route.routeNum,
+      ETA : bus.schedule.stopSchedules[bus.nextStopIndex].expectedArrival,
+      route: bus.route.stopsSequence,
+    }));
+
+    res.status(200).send(response);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+//Loading bus information after filtering
 router.route("/loadBus/:routeNumber").get(async (req, res) => {
   const { routeNumber } = req.params;
   try {
@@ -203,13 +242,47 @@ router.route("/loadBus/:routeNumber").get(async (req, res) => {
       activeStatus: bus.activeStatus,
       lat: bus.lat,
       lon: bus.lon,
+      type : bus.vehicleType,
+      busImage : bus.busImage,
+      routeNum : bus.route.routeNum,
       route: bus.route.stopsSequence,
+      ETA : bus.schedule.stopSchedules[bus.nextStopIndex].expectedArrival,
     }));
 
     res.status(200).send(response);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+});
+
+//view location of the bus 
+router.route("/viewlocation/:id").get(async(req, res) => {
+
+  const busId = req.params.id;
+  
+  const bus = await Bus.findById(busId)
+    .populate({
+      path: "route",
+      populate: {
+        path: "stopsSequence",
+        model: "BusStop",
+      },
+    })
+    .populate("schedule");
+
+    if (!bus){
+      return res.status(404).send("Bus not found");
+    } 
+    
+    const response = {
+      _id: bus._id,
+      lat: bus.lat,
+      lon: bus.lon,
+      route: bus.route
+    };
+
+    res.status(200).send(response);
+
 });
 
 //returning the count of active buses
@@ -221,8 +294,6 @@ router.route("/getcount").get(async (req, res) => {
 
   res.status(200).json({ count: busCount });
 });
-
-
 
 
 module.exports = router;

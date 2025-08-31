@@ -1,6 +1,7 @@
 import React, { useCallback, useRef } from "react";
 import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
 import "../styles/searchRoute.css";
+import locationMarker from "../images/redDot.gif";
 
 const mapOptions = {
   disableDefaultUI: true, //Hiding HUD
@@ -21,7 +22,7 @@ const mapOptions = {
 
 const containerStyle = {
   width: "100%",
-  height: "500px",
+  height: "550px",
 };
 
 const center = {
@@ -43,16 +44,16 @@ function BusMap({ busLocation, stops }) {
   if (!isLoaded) return <div>Loading Map...</div>;
 
   return (
-    <div className="mapDiv">
+    <div className = "mapDiv">
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={busLocation || center}
-        zoom={16}
+        zoom={15}
         onLoad={onLoad}
         options = {mapOptions}
       >
         {/* Bus Marker */}
-        {busLocation && <Marker position={busLocation} label="test" />}
+        {busLocation && <Marker position={busLocation} label="" />}
 
         {/* Stop Markers */}
         {stops?.map((stop, index) => (
@@ -66,7 +67,7 @@ function BusMap({ busLocation, stops }) {
           />
         ))}
       </GoogleMap>
-    </div>
+      </div>
   );
 }
 

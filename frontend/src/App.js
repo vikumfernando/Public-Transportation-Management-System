@@ -2,7 +2,6 @@ import Header from "./components/Header";
 import OffCanvas from './components/OffCanvas';
 
 import SearchRoute from "./components/searchRoute";
-import BusMap from "./components/BusMap";
 import AdminDashboard from "./components/AdminDashboard";
 import RoutesPage from "./components/RoutesPage";
 import RouteMap from "./components/RouteMap";
@@ -19,9 +18,6 @@ function App() {
   const [stops, setStops] = useState([]);
   const [routeStop, setRouteStop] = useState([]);
 
-  
-
-
   return (
     <Router>
       <Routes>
@@ -30,8 +26,8 @@ function App() {
           element={
             <div>
               <Header />
-              <SearchRoute setBusLocation={setBusLocation} setStops={setStops}/>
-              <BusMap busLocation={busLocation} stops={stops} />
+              <SearchRoute setBusLocation={setBusLocation} setStops={setStops} busLocation = {busLocation} stops = {stops}/>
+                  
             </div>
           }
         />

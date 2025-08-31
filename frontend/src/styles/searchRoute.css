@@ -1,63 +1,166 @@
-.input-field {
-  width: 250px;
-  padding: 10px 12px;
-  border: 2px solid #ddd;
-  border-radius: 6px;
-  font-size: 16px;
-  outline: none;
-  transition: border-color 0.3s ease;
+body {
+  background-color: #f0ebe8;
+  font-family: "Poppins", sans-serif;
 }
 
-.input-field:focus {
-  border-color: #007bff;
+.mainContainer {
+  padding: 20px;
+  width: 100%;
+  overflow: hidden;
 }
 
-.submit-button {
-  padding: 10px 16px;
-  margin-left: 8px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+.leftDiv {
+  height: 100%;
+  width: 40%;
+  float: left;
+  overflow-y: auto;
+  padding: 50px 10px 10px 40px;
+  scrollbar-width: none;
 }
 
-.submit-button:hover {
-  background-color: #0056b3;
-}
-
-/* Container to center the input and button */
-.input-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 270px;
-  margin: 0;
+.rightDiv {
+  width: 60%;
+  float: right;
+  position: fixed;
+  right: 0;
+  padding-right: 20px;
+  margin-top: 30px;
 }
 
 .mapDiv {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px auto;
-    width: 800px;
-    height: 500px;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  float: right;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-.busInfoDiv{
-  width : 300px;
-  height : 330px;
-  display : inline-block;
-  margin: 0px 10px 30px 10px;
-  padding : 20px;
-  border : 1px solid;
-  border-radius : 12px;
+/*Bus Details Card */
+
+.busInfoDiv {
+  width: 90%;
+  height: 300px;
+  display: inline-block;
+  padding: 20px;
+  border-radius: 12px;
   transition-duration: 0.5s;
+  margin-bottom: 65px;
+  background-color: white;
 }
 
-.busInfoDiv:hover{
-  scale : 103%;
+.busInfoDiv:hover {
+  scale: 102%;
   transition-duration: 0.5s;
+  cursor: pointer;
 }
+
+.topRow {
+  height: 50px;
+
+  .busId {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 35px;
+    width: 60%;
+    float: left;
+  }
+
+  button {
+    font-size: 30px;
+    float: right;
+    width: 40%;
+  }
+}
+
+/* Text styles */
+
+h1 {
+  font-size: 50px;
+  font-weight: bold;
+  color: #0b5648;
+}
+
+.busInfoText {
+  float: left;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+p {
+  margin-bottom: 2px;
+}
+
+.routeNum {
+  font-size: 100px;
+  margin-top: -14px;
+  opacity: 0.2;
+  font-weight: bold;
+  margin-right: 11px;
+}
+
+.warningText {
+  color: #e74c3c;
+  margin-top: 0px;
+  margin-bottom: 25px;
+  text-align: left;
+  display : none;
+}
+
+.notfoundCode{
+  font-size: 150px;
+  font-weight: bold;
+  opacity : 0.2;
+  width : 100%;
+}
+
+.notfoundMsg{
+  font-size: 40px;
+  text-align: center;
+  line-height: 60px;
+  margin-top: -18px;
+  font-weight: 500;
+}
+
+.notfoundDiv{
+  width : 88%;
+ text-align: center;
+display : none;
+}
+
+/*Status Label */
+
+.status-label {
+  background-color: #4caf50;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  border: none;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+  transition: all 0.2s ease;
+  float: right;
+}
+
+.status-label:hover {
+  background-color: #45a049;
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.busImage {
+  margin-top: -83px;
+  float: right;
+  margin-right: -71px;
+}
+
+.busType {
+  font-weight: 400;
+  opacity: 0.6;
+  font-size: 18px;
+  margin-bottom: 21px;
+  margin-top: -10px;
+}
+
