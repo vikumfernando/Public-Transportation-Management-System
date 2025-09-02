@@ -8,7 +8,7 @@ import {
 
 //To remove unwanted tags and names from the map
 const mapOptions = {
-  disableDefaultUI: true, //Hiding HUD
+  disableDefaultUI: true, 
   styles: [
     {
       featureType: "poi",
@@ -25,7 +25,7 @@ const mapOptions = {
 
 const containerStyle = {
   width: "100%",
-  height: "500px",
+  height: "650px",
 };
 
 const center = {
@@ -77,9 +77,9 @@ function BusStopMap({ stops, pickedPosition, onPickPosition }) {
         {stops && !Array.isArray(stops) && (
           <Marker
             position={{ lat: stops.lat, lng: stops.lon }}
-            label={stops.stopName}
             icon={{
-              url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+              url: process.env.PUBLIC_URL + "/images/busStopIcon.png",
+              scaledSize: new window.google.maps.Size(30, 30),
             }}
           />
         )}

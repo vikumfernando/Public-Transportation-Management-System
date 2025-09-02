@@ -7,7 +7,6 @@ import RoutesPage from "./components/RoutesPage";
 import RouteMap from "./components/RouteMap";
 
 import BusStopPage from "./components/BusStopPage";
-import BusStopMap from "./components/BusStopMap";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from 'react';
@@ -59,9 +58,8 @@ function App() {
           element={
             <div>
               <Header/>
-              <OffCanvas/>
-              <BusStopPage setStops={setStops}/>
-              <BusStopMap stops={stops}/>
+              <BusStopPage setStops={setStops} stops={stops}/>
+              
 
             </div>
           } />

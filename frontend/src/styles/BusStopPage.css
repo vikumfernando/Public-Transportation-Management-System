@@ -1,0 +1,339 @@
+.mainContainer {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  padding: 0px;
+}
+
+.mapContainer {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  pointer-events: none;
+}
+
+.stopCards {
+  width: 412px;
+  height: 100%;
+  overflow-y: auto;
+  pointer-events: auto;
+  margin-top: 74px;
+  margin-left: -57px;
+  padding: 10px 10px 100px 10px;
+  scrollbar-width: none;
+  color: white;
+}
+
+.offCanvas {
+  pointer-events: auto;
+  margin-left: -26px;
+}
+
+.stopinfoDiv {
+  background-color: #0b5648;
+  box-shadow: inset;
+  height: 154px;
+  width: 280px;
+  margin-top: 10px;
+  padding: 18px;
+  border-radius: 12px;
+  transition-duration: 0.5s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.stopinfoDiv:hover {
+  scale: 103%;
+  transition-duration: 0.5s;
+  cursor: pointer;
+}
+
+/*Text styles */
+
+.stopName {
+  font-size: 30px;
+  font-weight: 600;
+  color: white;
+}
+
+.stopInfo {
+  font-size: 20px;
+}
+
+.addbusTopic {
+  font-size: 41px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 20px;
+  margin-top: -5px;
+}
+
+
+.inputLabel {
+  font-size: 20px;
+  color: white;
+  margin-bottom: 5px;
+  font-weight: 400;
+}
+
+/*Bus stop searching bar */
+
+.search-container {
+  position: relative;
+  width: 505px;
+  max-width: 90vw;
+  margin: 0px 0px 20px 0px;
+  display: inline-block;
+}
+
+.search-box2 {
+  width: 55%;
+  height: 50px;
+  background: white;
+  border: none;
+  border-radius: 25px;
+  padding: 0 20px 0 25px;
+  font-size: 16px;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.search-box2:focus {
+  border-color: #2e7d32;
+  box-shadow: 0 6px 20px rgba(97, 237, 65, 0.2);
+  transform: translateY(-2px);
+}
+
+.search-container2:hover .search-box {
+  border-color: #2e7d32;
+}
+
+.search-box2:focus + .search-icon {
+  opacity: 1;
+  color: #2e7d32;
+}
+
+/*For invalid Inputs */
+.search-box2.invalid {
+  width: 74%;
+  height: 50px;
+  background: #ffe6e6;
+  border: 1px red;
+  border-radius: 25px;
+  padding: 0 20px 0 50px;
+  font-size: 16px;
+  outline: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.search-box2:focus.invalid {
+  box-shadow: 0 0 20px 1px rgba(255, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+.filter-button2 {
+  background: white;
+  border: none;
+  border-radius: 25px;
+  padding: 0 20px;
+  height: 50px;
+  font-size: 16px;
+  font-family: inherit;
+  color: rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  vertical-align: top;
+  width: 14%;
+}
+
+.filter-button2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(97, 237, 65, 0.15);
+}
+
+.filter-button2:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(97, 237, 65, 0.2);
+}
+
+.filter-icon2 {
+  width: 24px;
+  height: 24px;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+  margin-left: 1px;
+}
+
+.filter-button:hover .filter-icon {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+.controls-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.search-box::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+  transition: opacity 0.3s ease;
+}
+
+.search-box:focus::placeholder {
+  opacity: 0.6;
+}
+
+.search-icon {
+  position: absolute;
+  left: 18px;
+  top: 25px;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.search-container:hover .search-icon {
+  opacity: 0.8;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/*End of search bar styles */
+
+.sidebar {
+  width: 371px;
+  height: 78%;
+  position: fixed;
+  right: -450px;
+  background: #0b5648;
+  pointer-events: auto;
+  padding: 15px 24px 24px 24px;
+  border-radius: 12px;
+  margin-left: auto;
+  margin-top: 40px;
+  margin-right: 19px;
+  z-index: 1000;
+  transition: right 0.4s ease;
+}
+
+.sidebar.open {
+  right: 20px; /* slide in */
+}
+
+.slideBtn {
+  pointer-events: auto;
+  width: 70px;
+  border : none;
+  height: 70px;
+  position: absolute;
+  bottom: 10px; /* distance from bottom */
+  right: 50px;
+  border-radius: 50px;
+  transition: all 0.5s ease;
+  background-color: #8cdb66;
+}
+
+.slideBtn:hover{
+  scale: 103%;
+  transform: translateY(-2px);
+  transition: all 0.5s ease;
+}
+
+.slideImg{
+  width: 50%;  
+  height: 50%;  
+  object-fit: contain;
+}
+
+/*New bus stop form styles */
+
+.inputField {
+  width: 100%;
+  height: 50px;
+  background: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0 20px 0 25px;
+  font-size: 16px;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+}
+
+.inputField:focus {
+  transform: translateY(-2px);
+}
+
+
+.inputBtn {
+  margin-top: 10px;
+  background: #8cdb66;
+  border: none;
+  border-radius: 12px;
+  padding: 0 15px;
+  height: 70px;
+  width: 70px;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.inputBtn:hover {
+  scale: 103%;
+}
+
+.submitImage {
+  background-color: transparent;
+  width: 40px;
+  height: 40px;
+}
+
+.closeBtn{
+  float : right;
+  padding: 0 20px;
+  height : 40px;
+  width : 40px;
+  display: flex;
+  align-items: center;
+  border : none;
+  background-color: transparent;
+}
+
+.closeImg{
+  background-color: transparent;
+  width: 20px;
+  height: 20px;
+}

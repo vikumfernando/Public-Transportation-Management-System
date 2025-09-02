@@ -3,6 +3,9 @@ const mongoose = require("mongoose");
 const bodyparser = require("body-parser");
 const cors = require("cors");
 
+const { Server } = require("socket.io"); //new
+const http = require("http");
+
 const app = express();
 require("dotenv").config();
 
@@ -12,7 +15,15 @@ app.use(cors());
 
 app.use(bodyparser.json());
 
+const server = http.createServer(app); //new
+
 const URL = process.env.MONGODB_URL;
+
+const io = new Server(server, {
+  cors: { origin: "*" } // new
+});
+
+app.set("io", io);
 
 mongoose.connect(URL, {
   useNewUrlParser: true,
@@ -40,6 +51,7 @@ app.use("/Routes", routesRouter);
 app.use("/Schedules", schedulesRouter);
 
 
-app.listen(PORT, () => {
+//changed from app to server
+server.listen(PORT, () => {
   console.log(`Server is up and running on port number: ${PORT}`);
 });

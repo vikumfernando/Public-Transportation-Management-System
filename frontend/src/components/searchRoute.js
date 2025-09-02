@@ -3,6 +3,7 @@ import axios from "axios";
 import "../styles/searchRoute.css";
 import "../styles/searchBox.css";
 import BusMap from "../components/BusMap";
+import { io } from "socket.io-client";
 
 <link
   href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
@@ -14,18 +15,55 @@ function SearchRoute({ setBusLocation, setStops, busLocation, stops }) {
   const [routeNum, setRouteNum] = useState("");
   const [busInfo, setBusInfo] = useState([]);
   const [displayInfo, setDisplayInfo] = useState([]);
+  const [selectedBus, setSelectedBus] = useState(null);
 
   useEffect(() => {
     const getBuses = async () => {
       try {
         const res = await axios.get("http://localhost:8070/Busses/loadBuses");
         setDisplayInfo(res.data);
+
       } catch (err) {
-        console.log("Error while getching buses : " + err);
+        console.log("Error while fetching buses : " + err);
       }
     };
+
     getBuses();
   }, []);
+
+  // Socket.io Part
+  useEffect(() => {
+    const socket = io("http://localhost:8070");
+
+    socket.on("connect", () => {
+      console.log("Connected to Socket.IO server, id:", socket.id);
+    });
+
+    socket.on("busLocationUpdate", (data) => {
+      console.log("Bus location update received:", data);
+
+      //if the card bus id and the gps bus id doesn't match, location won't be updated
+      if (selectedBus != data.busId) return;
+
+      // Updating map location
+      setBusLocation({ lat: data.lat, lng: data.lon });
+
+      changeBtnClr(data.busStatus);
+
+      // Update bus info in the list
+      setBusInfo((prev) =>
+        prev.map((bus) =>
+          bus._id === data.busId
+            ? { ...bus, lat: data.lat, lon: data.lon }
+            : bus
+        )
+      );
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [selectedBus]);
 
   /* delete this
   async function getBusId() {
@@ -49,12 +87,13 @@ function SearchRoute({ setBusLocation, setStops, busLocation, stops }) {
   async function fetchLocation(busId, e) {
     if (e) e.preventDefault();
 
+    setSelectedBus(busId);
     try {
       const res = await axios.get(
         `http://localhost:8070/Busses/viewlocation/${busId}`
       );
 
-      console.log("Bus update response for ID", busId, ":", res.data);
+      console.log("Bus information for ID", busId, ":", res.data);
 
       setBusInfo((prev) =>
         prev.map((bus) => (bus._id === busId ? res.data : bus))
@@ -86,6 +125,17 @@ function SearchRoute({ setBusLocation, setStops, busLocation, stops }) {
       console.log("Invalid value detected");
       input.classList.add("invalid");
       warning.style.display = "block";
+    }
+  }
+
+  //Button color change based on the arrival status
+  function changeBtnClr(status) {
+    const button = document.getElementById("statusBtn");
+
+    if (status === "Late") {
+      button.classList.add("late");
+    } else {
+      button.classList.remove("late");
     }
   }
 
@@ -185,7 +235,9 @@ function SearchRoute({ setBusLocation, setStops, busLocation, stops }) {
             >
               <div className="topRow">
                 <p className="busId"> {bus.vehicleNumber}</p>
-                <div className="status-label">{bus.status}</div>
+                <div id="statusBtn" className="status-label">
+                  {bus.status}
+                </div>
               </div>
 
               <label className="routeNum" style={{ float: "right" }}>

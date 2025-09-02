@@ -1,7 +1,6 @@
 import React, { useCallback, useRef } from "react";
 import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
 import "../styles/searchRoute.css";
-import locationMarker from "../images/redDot.gif";
 
 const mapOptions = {
   disableDefaultUI: true, //Hiding HUD
@@ -9,7 +8,7 @@ const mapOptions = {
     {
       featureType: "poi",
       elementType: "labels",
-      stylers: [{ visibility: "off" }], // hide points of interest labels
+      stylers: [{ visibility: "off" }], 
     },
     {
       featureType: "transit",
@@ -53,7 +52,12 @@ function BusMap({ busLocation, stops }) {
         options = {mapOptions}
       >
         {/* Bus Marker */}
-        {busLocation && <Marker position={busLocation} label="" />}
+        {busLocation && <Marker position={busLocation} label="" 
+        icon={{
+              url: process.env.PUBLIC_URL + "/images/busLocation.gif",
+              scaledSize: new window.google.maps.Size(50, 50),
+            }} />}
+
 
         {/* Stop Markers */}
         {stops?.map((stop, index) => (
@@ -62,7 +66,8 @@ function BusMap({ busLocation, stops }) {
             position={{ lat: stop.lat, lng: stop.lon }}
             label={stop.stopName}
             icon={{
-              url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+              url: process.env.PUBLIC_URL + "/images/busStopIcon.png",
+              scaledSize: new window.google.maps.Size(30, 30),
             }}
           />
         ))}

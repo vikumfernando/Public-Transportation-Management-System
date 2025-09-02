@@ -46,8 +46,9 @@ body {
   padding: 20px;
   border-radius: 12px;
   transition-duration: 0.5s;
-  margin-bottom: 65px;
-  background-color: white;
+  margin-bottom: 90px;
+  background-color: #0b5648;
+  color: white;
 }
 
 .busInfoDiv:hover {
@@ -62,7 +63,7 @@ body {
   .busId {
     font-family: "Poppins", sans-serif;
     font-weight: 600;
-    font-size: 35px;
+    font-size: 40px;
     width: 60%;
     float: left;
   }
@@ -84,7 +85,7 @@ h1 {
 
 .busInfoText {
   float: left;
-  font-size: 20px;
+  font-size: 22px;
   margin-bottom: 20px;
 }
 
@@ -93,9 +94,9 @@ p {
 }
 
 .routeNum {
-  font-size: 100px;
+  font-size: 120px;
   margin-top: -14px;
-  opacity: 0.2;
+  opacity: 0.4;
   font-weight: bold;
   margin-right: 11px;
 }
@@ -105,17 +106,18 @@ p {
   margin-top: 0px;
   margin-bottom: 25px;
   text-align: left;
-  display : none;
+  display: none;
 }
 
-.notfoundCode{
+.notfoundCode {
   font-size: 150px;
   font-weight: bold;
-  opacity : 0.2;
-  width : 100%;
+  opacity: 0.9;
+  width: 100%;
+  color: #0b5648;
 }
 
-.notfoundMsg{
+.notfoundMsg {
   font-size: 40px;
   text-align: center;
   line-height: 60px;
@@ -123,10 +125,10 @@ p {
   font-weight: 500;
 }
 
-.notfoundDiv{
-  width : 88%;
- text-align: center;
-display : none;
+.notfoundDiv {
+  width: 88%;
+  text-align: center;
+  display: none;
 }
 
 /*Status Label */
@@ -150,6 +152,25 @@ display : none;
   box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
 }
 
+.status-label.late {
+  background-color: #c24b19;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  border: none;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+  transition: all 0.2s ease;
+  float: right;
+}
+
+.status-label.invalid:hover {
+  background-color: #c24b19;
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
 .busImage {
   margin-top: -83px;
   float: right;
@@ -163,4 +184,3 @@ display : none;
   margin-bottom: 21px;
   margin-top: -10px;
 }
-

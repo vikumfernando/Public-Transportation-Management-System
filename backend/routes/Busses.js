@@ -40,7 +40,7 @@ router.route("/updateLocation").put(async (req, res) => {
 
   let destinationReached = false;
 
-  //Lat and Lon taken from the GPS module is here
+  //Lat and Lon taken from the GPS module
   const {busId, lat, lon} = req.body;
 
   console.log("Bus ID :" + busId);
@@ -68,19 +68,17 @@ router.route("/updateLocation").put(async (req, res) => {
     hour12: false,
   });
 
+  const busStatus = bus.status;
+
   const expectedTime =
     bus.schedule.stopSchedules[bus.nextStopIndex].expectedArrival;
   console.log("Expected time : " + expectedTime);
 
   //updating the active status of the bus if the bus is in the initial bus stop
-
-  /*
   if (arrivedTime == expectedTime) {
     bus.activeStatus = "On duty";
     await bus.save();
   }
-    */
-
   const distance = calcDistance(
     bus.route.stopsSequence[bus.nextStopIndex].lat,
     bus.route.stopsSequence[bus.nextStopIndex].lon,
@@ -129,6 +127,11 @@ router.route("/updateLocation").put(async (req, res) => {
   bus.lon = lon;
 
   await bus.save();
+
+  //creating event to pass
+  const io = req.app.get("io");
+  io.emit("busLocationUpdate", { busId, lat, lon, busStatus  });
+  res.sendStatus(200);
 });
 
 //Useless now
@@ -186,7 +189,6 @@ router.route("/loadBuses").get(async (req, res) => {
           ? bus.route.stopsSequence[bus.nextStopIndex - 1].stopName
           : "Not started",
       vehicleNumber: bus.vehicleNumber,
-      currentStatus: bus.status,
       activeStatus: bus.activeStatus,
       lat: bus.lat,
       lon: bus.lon,
