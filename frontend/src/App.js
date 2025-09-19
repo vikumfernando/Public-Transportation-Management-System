@@ -1,21 +1,20 @@
 import Header from "./components/Header";
-import OffCanvas from './components/OffCanvas';
+import OffCanvas from "./components/OffCanvas";
 
 import SearchRoute from "./components/searchRoute";
 import AdminDashboard from "./components/AdminDashboard";
-import RoutesPage from "./components/RoutesPage";
-import RouteMap from "./components/RouteMap";
 
+import RoutesPage from "./components/RoutesPage";
 import BusStopPage from "./components/BusStopPage";
+import SchedulesPage from "./components/SchedulesPage";
+
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useState } from 'react';
+import { useState } from "react";
 
 function App() {
-
   const [busLocation, setBusLocation] = useState(null);
   const [stops, setStops] = useState([]);
-  const [routeStop, setRouteStop] = useState([]);
 
   return (
     <Router>
@@ -25,12 +24,16 @@ function App() {
           element={
             <div>
               <Header />
-              <SearchRoute setBusLocation={setBusLocation} setStops={setStops} busLocation = {busLocation} stops = {stops}/>
-                  
+              <SearchRoute
+                setBusLocation={setBusLocation}
+                setStops={setStops}
+                busLocation={busLocation}
+                stops={stops}
+              />
             </div>
           }
         />
-         <Route
+        <Route
           path="/admin"
           element={
             <div>
@@ -38,31 +41,47 @@ function App() {
               <OffCanvas />
               <AdminDashboard />
             </div>
-          } />
+          }
+        />
 
-          <Route
+        <Route
           path="/routepage"
           element={
             <div>
               <Header />
-              <OffCanvas />
-              <div style={{display:"flex"}}>
-                <RoutesPage setRouteStop={setRouteStop}/>
-                <RouteMap stops={routeStop}/>
+              <div style={{ display: "flex" }}>
+                <RoutesPage />
               </div>
             </div>
-          } />
+          }
+        />
 
-          <Route
+        <Route
           path="/stoppage"
           element={
             <div>
-              <Header/>
-              <BusStopPage setStops={setStops} stops={stops}/>
-              
-
+              <Header />
+              <BusStopPage setStops={setStops} stops={stops} />
             </div>
-          } />
+          }
+        />
+
+        <Route path="/schedulepage" element={
+          <div>
+            <Header />
+            <SchedulesPage />
+
+
+
+         </div>
+        }>
+        </Route>
+
+
+
+
+
+
       </Routes>
     </Router>
   );

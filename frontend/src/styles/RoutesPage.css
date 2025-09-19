@@ -1,22 +1,278 @@
-
-.routeinfoDiv{
-  width: 325px;
-  height: 240px;
-  display : inline-block;
-  margin: 0px 10px 30px 10px;
-  padding : 20px;
-  border : 1px solid;
-  border-radius : 12px;
-  transition-duration: 0.5s;
+.routeCardsDiv {
+  margin: 20px 20px 10px 30px;
+  width: 546px;
 }
 
-.routeinfoDiv:hover{
+.mainContainer2 {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  padding: 0px;
+}
+
+.mapContainer2 {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+}
+
+.overlay2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.offCanvas2 {
+  pointer-events: auto;
+  margin-left: -26px;
+}
+
+.routeinfoDiv {
+  background-color: #0b5648;
+  box-shadow: inset;
+  height: 150px;
+  width: 74%;
+  margin-top: 10px;
+  margin-bottom: 16px;
+  padding: 18px 0px;
+  border-radius: 12px;
+  transition-duration: 0.5s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  pointer-events: all;
+}
+
+.routeinfoDiv.open {
+  background-color: #0b5648;
+  box-shadow: inset;
+  height: 350px;  
+  width: 74%;
+  margin-top: 10px;
+  margin-bottom: 16px;
+  padding: 18px 0px 0px 0px;
+  border-radius: 12px;
+  transition-duration: 0.5s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  pointer-events: all;
+  display: inline-block;
+}
+
+.stopList {
+  display: none;
+  margin-top: 20px;
+  background-color: white;
+  width: 100%;
+  height: 150px;
+  border-radius: 0 0 12px 12px;
+  padding: 18px 20px;
+}
+
+.stopList.open {
+  display: block;
+  display: inline-block;
+  height: auto;  
+}
+
+.routeinfoDiv:hover {
+  scale: 103%;
+  transition-duration: 0.5s;
+  cursor: pointer;
+}
+
+.mapDiv2 {
+  float: right;
+  width: 100%;
+  height: 600px;
+}
+
+.routeNumDiv{
+  padding :0px 30px
+}
+
+/* Text style */
+
+.routeNum2{
+  font-size: 50px;
+  font-weight: 600;
+  color : white;
+}
+
+.routeSumText{
+  font-size: 20px;
+  color: white;
+  margin-left: 15px;
+  opacity : 0.7;
+}
+
+.routeName{
+  font-size: 23px;
+  font-weight: 400;
+}
+
+.stopNames{
+  font-size: 18px;
+  line-height: 40px;
+  opacity : 0.9;
+}
+
+/*Text styles for bus route adding side bar */
+
+.newStopContainer{
+  background-color: white;
+  border-radius: 12px;
+}
+
+.selectedStopsLabel{
+  color : black;
+  font-size: 20px;
+  margin-bottom: 10px;
+  text-align: left;
+   align-items: center;  
+  }
+
+
+/*Image styles */
+.timeIcon{
+  width : 25px;
+  height: 25px;
+  opacity : 0.7;
+}
+
+.roadIcon{
+  width : 25px;
+  height: 25px;
+  margin-left: 130px;
+  opacity : 0.7;
+}
+
+
+/*Side bar for adding new bus routes */
+.sidebar2 {
+  top : 0;
+  width: 600px;
+  height: 550px;
+  position: fixed;
+  right: -650px;
+  background: #0b5648;
+  pointer-events: auto;
+  padding: 20px 30px 35px 24px;
+  border-radius: 12px;
+  margin-left: auto;
+  margin-top: 140px;
+  margin-right: 12px;
+  z-index: 1000;
+  transition: right 0.5s ease;
+  overflow-y: auto; 
+  overflow-x: hidden;
+}
+
+.sidebar2.open {
+  right: 20px; /* slide in */
+}
+
+.inputField2 {
+  width: 100%;
+  height: 50px;
+  background: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0 20px 0 25px;
+  font-size: 16px;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+}
+
+.inputField2:focus {
+  transform: translateY(-2px);
+}
+
+.inputBtn {
+  margin-top: 10px;
+  background: #8cdb66;
+  border: none;
+  border-radius: 12px;
+  padding: 0 15px;
+  height: 70px;
+  width: 70px;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.inputBtn:hover {
+  scale: 103%;
+}
+
+/*New stop adding */
+.newStopsDiv{
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px 15px 15px 25px;
+}
+
+.routeDropDown{
+  padding-bottom: 10px;
+}
+
+
+/*For the dropdown Bar */
+.dropdown-select {
+  width: 100%;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  appearance: none; /* Remove default arrow */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.dropdown-select:hover {
+  background-color: #f5f5f5;
+}
+
+.dropdown-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+/* Option styling (limited support across browsers) */
+.dropdown-select option {
+  padding: 8px;
+}
+
+.addButton{
+  transition-duration: 0.3s;
+  border-radius: 12px;
+  padding : 6px 10px;
+  border : none;
+}
+
+.addButton:hover{
+  transition-duration: 0.3s;
   scale : 103%;
-  transition-duration: 0.5s;
-}
-
-.routeContainer{
-   margin: 20px 20px 10px 50px;
-    width: 546px;
-    display: flex;
+  border-radius: 12px;
+  padding : 6px 10px;
+  border : none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }

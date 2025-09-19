@@ -52,7 +52,7 @@ router.route("/searchstop/:stop").get(async (req, res) => {
   }
 });
 
-//displaying the bus stops loaction on the map
+//displaying the bus stops location on the map
 router.route("/displayStop/:stopId").get(async (req, res) => {
   const stopId = req.params.stopId;
   const stop = await BusStop.findById(stopId);

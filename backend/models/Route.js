@@ -23,6 +23,16 @@ const routeSchema = new Schema ({
     startFare : {
         type : Number,
         dafault : 0
+    },
+
+    distance : {
+        type: Number,
+        defualt : 0
+    },
+
+    duration : {
+        type : Number,
+        default : 0
     }
 });
 
