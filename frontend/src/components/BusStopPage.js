@@ -80,6 +80,23 @@ function BusStopPage({ setStops }) {
       console.error("Error while adding bus stop : " + err);
     }
   };
+  
+  //Deleting bus stop
+  const deleteStop = async (stopId) =>{
+    if (!window.confirm("Are you sure you want to delete this stop?")) return;
+
+    try{
+      const res = await axios.delete(`http://localhost:8070/Stops/deletestop/${stopId}`);
+      
+    
+    }catch(err){
+      console.log("Error while deleting bus stop " + err);
+      
+    }
+  }
+
+
+
 
   return (
     <div className="mainContainer">
@@ -126,6 +143,7 @@ function BusStopPage({ setStops }) {
           {stops.length > 0 &&
             stops.map((stop, index) => (
               <div className="stopinfoDiv">
+                <button onClick={deleteStop}></button>
                 <div onClick={() => loadStops(stop._id)} key={index}>
                   <label className="stopName">{stop.stopName}</label>
                   <br />

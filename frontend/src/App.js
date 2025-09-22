@@ -6,14 +6,11 @@ import AdminDashboard from "./components/AdminDashboard";
 
 import RoutesPage from "./components/RoutesPage";
 import BusStopPage from "./components/BusStopPage";
-<<<<<<< Updated upstream
 import SchedulesPage from "./components/SchedulesPage";
 
-=======
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
 import UserManagement from "./components/UserManagement";
->>>>>>> Stashed changes
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
@@ -69,7 +66,6 @@ function App() {
               <Header />
               <BusStopPage setStops={setStops} stops={stops} />
             </div>
-<<<<<<< Updated upstream
           }
         />
 
@@ -83,14 +79,6 @@ function App() {
          </div>
         }>
         </Route>
-
-
-
-
-
-
-=======
-          } />
 
           <Route
           path="/signup"
@@ -112,7 +100,6 @@ function App() {
             </div>
           }
           />
->>>>>>> Stashed changes
       </Routes>
     </Router>
   );

@@ -1,5 +1,6 @@
 const router = require("express").Router();
 let BusStop = require("../models/BusStop");
+const Route = require("../models/Route");
 
 //adding new bus stop to the data base
 router.route("/addStop").post(async (req, res) => {
@@ -63,5 +64,36 @@ router.route("/displayStop/:stopId").get(async (req, res) => {
     res.status(404).json("Stop not found");
   }
 });
+
+//Deleting bus stops
+router.delete("/deletestop/:id", async (req, res) => {
+  try {
+    const stopId = req.params.id;
+
+    console.log("Stop to delete:", stopId);
+
+    const referenced = await Route.findOne({ stopsSequence: stopId });
+
+    if (referenced) {
+      return res.status(400).json({
+        message: `Cannot delete: Stop is used in route ${referenced.routeNum} (${referenced.routeName})`,
+      });
+    }
+
+    const deletedStop = await BusStop.findByIdAndDelete(stopId);
+
+    if (!deletedStop) {
+      return res.status(404).json({ message: "Stop not found" });
+    }
+
+    console.log("Bus stop deleted successfully");
+    res.json({ message: "Stop deleted successfully" });
+
+  } catch (err) {
+    console.error("Error while deleting bus stop:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 
 module.exports = router;

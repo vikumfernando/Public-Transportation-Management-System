@@ -47,14 +47,14 @@ function Header() {
                         onMouseEnter={() => dropdownEnter('test1')}
                         onMouseLeave={dropdownLeave}
                     >
-                        <Link to="#" className="nav-link" onClick={closeMobileMenu}>Test 1 </Link>
+                        <Link to="#" className="nav-link" onClick={closeMobileMenu}>Location Service</Link>
                         
                         <div className={`dropdown-menu ${activeDropdown === 'test1' ? 'show' : ''}`}>
-                            <Link to="/route-planning" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 1
+                            <Link to="/" className="dropdown-item" onClick={closeMobileMenu}>
+                                Live Location
                             </Link>
                             <Link to="/fleet-management" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 2
+                                Schedule 
                             </Link>
                             <Link to="/real-time-tracking" className="dropdown-item" onClick={closeMobileMenu}>
                                 sub 3
@@ -71,14 +71,14 @@ function Header() {
                         onMouseLeave={dropdownLeave}
                     >
                         <Link to="#" className="nav-link" onClick={closeMobileMenu}>
-                            Test 2
+                            Payment
                         </Link>
                         <div className={`dropdown-menu ${activeDropdown === 'test2' ? 'show' : ''}`}>
                             <Link to="/bus-transit" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 1
+                                My Wallet
                             </Link>
                             <Link to="/rail-systems" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub2 
+                                NFC Card Service
                             </Link>
                             <Link to="/multi-modal-transport" className="dropdown-item" onClick={closeMobileMenu}>
                                 sub 3
@@ -95,11 +95,11 @@ function Header() {
                         onMouseLeave={dropdownLeave}
                     >
                         <Link to="#" className="nav-link" onClick={closeMobileMenu}>
-                            Test 3
+                            Booking Service
                         </Link>
                         <div className={`dropdown-menu ${activeDropdown === 'test3' ? 'show' : ''}`}>
                             <Link to="/documentation" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 1
+                                Seat Booking
                             </Link>
                             <Link to="/case-studies" className="dropdown-item" onClick={closeMobileMenu}>
                                 sub 2
