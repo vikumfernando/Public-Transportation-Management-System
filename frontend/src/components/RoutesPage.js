@@ -32,9 +32,7 @@ function RoutePage() {
     };
     getRoutes();
 
-    {
-      /*Loading all stops when rendering for the dropdown box*/
-    }
+    {/*Loading all stops when rendering for the dropdown box*/}
     const getStops = async () => {
       try {
         const res = await axios.get("http://localhost:8070/Stops/loadStops");
@@ -277,7 +275,6 @@ function RoutePage() {
             <div className="newStopsDiv">
               {selectedStops.map((stopId, index) => (
                 <div style={{ display: "flex" }}>
-
                   {/*Left div */}
                   <div style={{ width: "65%" }}>
                     <label className="selectedStopsLabel">
@@ -293,27 +290,27 @@ function RoutePage() {
 
                   {/*Right div */}
 
-                    <div style={{ width: "50%" }}>
-                      <select
-                        className = "dropdown-select"
-                        value={stopId || ""}
-                        onChange={(e) => handleChange(index, e.target.value)}
-                      >
-                        <option value={""}>Select Bus Stop</option>
-                        {dropdownStops.map((stop) => (
-                          <option  key={stop._id} value={stop._id}>
-                            {stop.stopName}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  <div style={{ width: "50%" }}>
+                    <select
+                      className="dropdown-select"
+                      value={stopId || ""}
+                      onChange={(e) => handleChange(index, e.target.value)}
+                    >
+                      <option value={""}>Select Bus Stop</option>
+                      {dropdownStops.map((stop) => (
+                        <option key={stop._id} value={stop._id}>
+                          {stop.stopName}
+                        </option>
+                      ))}
+                    </select>
                   </div>
+                </div>
               ))}
 
               <button
                 type="button"
                 onClick={() => setSelectedStops([...selectedStops, ""])}
-                className = "addButton"
+                className="addButton"
               >
                 Add More
               </button>

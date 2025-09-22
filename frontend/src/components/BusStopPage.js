@@ -21,7 +21,7 @@ function BusStopPage({ setStops }) {
         const res = await axios.get("http://localhost:8070/Stops/loadStops");
         setBusStop(res.data);
       } catch (err) {
-        console.log("Error while fetching bus stop data : " + err);
+        console.log("Error while fetching bus stop data : User side " + err);
       }
     };
 
@@ -53,7 +53,7 @@ function BusStopPage({ setStops }) {
       setBusStop(res.data);
       console.log("Search stop data : ", stops);
     } else {
-      console.log("Bus stop not found");
+      console.log("Bus stop not found : For the user side displaying");
     }
   }
 

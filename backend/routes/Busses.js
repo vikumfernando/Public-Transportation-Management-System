@@ -197,6 +197,7 @@ router.route("/loadBuses").get(async (req, res) => {
       routeNum : bus.route.routeNum,
       ETA : bus.schedule.stopSchedules[bus.nextStopIndex].expectedArrival,
       route: bus.route.stopsSequence,
+      schedule : bus.schedule
     }));
 
     res.status(200).send(response);
@@ -249,6 +250,7 @@ router.route("/loadBus/:routeNumber").get(async (req, res) => {
       routeNum : bus.route.routeNum,
       route: bus.route.stopsSequence,
       ETA : bus.schedule.stopSchedules[bus.nextStopIndex].expectedArrival,
+      schedule : bus.schedule
     }));
 
     res.status(200).send(response);
