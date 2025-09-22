@@ -60,8 +60,8 @@ function OffCanvas() {
             <a href="#" className="nav-link-custom">
               Buses
             </a>
-            <a href="#" className="nav-link-custom">
-              User
+            <a href="/users" className="nav-link-custom">
+              User Management
             </a>
           </div>
 

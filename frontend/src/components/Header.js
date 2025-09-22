@@ -1,10 +1,20 @@
 import '../styles/header.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Header() {
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const [user, setUser] = useState(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Check if user is logged in
+        const userData = localStorage.getItem('user');
+        if (userData) {
+            setUser(JSON.parse(userData));
+        }
+    }, []);
 
     const dropdownEnter = (dropdown) => {
         setActiveDropdown(dropdown);
@@ -16,6 +26,12 @@ function Header() {
 
     const closeMobileMenu = () => {
         setActiveDropdown(null);
+    };
+
+    const handleSignOut = () => {
+        localStorage.removeItem('user');
+        setUser(null);
+        navigate('/');
     };
 
     return (
@@ -123,12 +139,19 @@ function Header() {
                 </ul>
 
                 <div className="nav-actions">
-                    <button className="signout-btn" onClick={() => {
-                        console.log('Signing out...');
-                    }}>
-                        SIGN OUT
-                    </button>
-                    
+                    {user ? (
+                        <div className="user-menu">
+                            <span className="welcome-text">Welcome, {user.firstName}!</span>
+                            <button className="signout-btn" onClick={handleSignOut}>
+                                SIGN OUT
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="auth-buttons">
+                            <Link to="/signin" className="signin-btn">SIGN IN</Link>
+                            <Link to="/signup" className="signup-btn">SIGN UP</Link>
+                        </div>
+                    )}
                 </div>
             </div>
         </nav>

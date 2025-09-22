@@ -127,6 +127,59 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(140, 219, 102, 0.4);
 }
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.welcome-text {
+  color: #0b5648;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.signin-btn, .signup-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-block;
+  font-size: 0.9rem;
+}
+
+.signin-btn {
+  color: #0b5648;
+  border: 2px solid #0b5648;
+  background: transparent;
+}
+
+.signin-btn:hover {
+  background: #0b5648;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(11, 86, 72, 0.3);
+}
+
+.signup-btn {
+  background: linear-gradient(135deg, #0b5648 0%, #8cdb66 100%);
+  color: white;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 15px rgba(11, 86, 72, 0.3);
+}
+
+.signup-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(140, 219, 102, 0.4);
+}
 @media (max-width: 768px) {
   .nav-menu {
     position: fixed;
@@ -154,6 +207,16 @@ body {
   .signout-btn {
     padding: 0.6rem 1.2rem;
     font-size: 0.9rem;
+  }
+  .auth-buttons {
+    gap: 0.5rem;
+  }
+  .signin-btn, .signup-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.8rem;
+  }
+  .welcome-text {
+    font-size: 0.8rem;
   }
   .dropdown-menu {
     position: static;
