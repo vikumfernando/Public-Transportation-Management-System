@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/UserManagement.css";
 
 function UserManagement() {
+    const navigate = useNavigate();
     const [userStats, setUserStats] = useState({
         passengers: 0,
         drivers: 0,
@@ -12,24 +14,14 @@ function UserManagement() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedRole, setSelectedRole] = useState('all');
-    const [showCreateModal, setShowCreateModal] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [editingUser, setEditingUser] = useState(null);
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        password: '',
-        role: 'passenger'
-    });
+    const [searchTerm, setSearchTerm] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
     useEffect(() => {
         fetchUserStats();
         fetchUsers();
-    }, [selectedRole]);
+    }, [selectedRole, searchTerm]);
 
     const fetchUserStats = async () => {
         try {
@@ -46,8 +38,20 @@ function UserManagement() {
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const roleParam = selectedRole !== 'all' ? `?role=${selectedRole}` : '';
-            const response = await axios.get(`http://localhost:8070/users${roleParam}`);
+            let params = new URLSearchParams();
+            
+            if (selectedRole !== 'all') {
+                params.append('role', selectedRole);
+            }
+            
+            if (searchTerm.trim()) {
+                params.append('search', searchTerm.trim());
+            }
+            
+            const queryString = params.toString();
+            const url = queryString ? `http://localhost:8070/users?${queryString}` : 'http://localhost:8070/users';
+            
+            const response = await axios.get(url);
             if (response.data.success) {
                 setUsers(response.data.users);
             }
@@ -59,43 +63,14 @@ function UserManagement() {
         }
     };
 
-    const handleCreateUser = async (e) => {
-        e.preventDefault();
-        try {
-            const response = await axios.post('http://localhost:8070/users', formData);
-            if (response.data.success) {
-                setSuccess('User created successfully');
-                setShowCreateModal(false);
-                resetForm();
-                fetchUsers();
-                fetchUserStats();
-            }
-        } catch (error) {
-            setError(error.response?.data?.message || 'Failed to create user');
-        }
+    const handleCreateUser = () => {
+        navigate('/users/create');
     };
 
-    const handleUpdateUser = async (e) => {
-        e.preventDefault();
-        try {
-            const updateData = { ...formData };
-            if (!updateData.password) {
-                delete updateData.password; // Don't update password if not provided
-            }
-            
-            const response = await axios.put(`http://localhost:8070/users/${editingUser._id}`, updateData);
-            if (response.data.success) {
-                setSuccess('User updated successfully');
-                setShowEditModal(false);
-                setEditingUser(null);
-                resetForm();
-                fetchUsers();
-                fetchUserStats();
-            }
-        } catch (error) {
-            setError(error.response?.data?.message || 'Failed to update user');
-        }
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
     };
+
 
     const handleDeleteUser = async (userId) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
@@ -112,37 +87,14 @@ function UserManagement() {
         }
     };
 
-    const handleEditUser = (user) => {
-        setEditingUser(user);
-        setFormData({
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            phone: user.phone,
-            password: '',
-            role: user.role
-        });
-        setShowEditModal(true);
+    const handleViewUser = (userId) => {
+        navigate(`/users/view/${userId}`);
     };
 
-    const resetForm = () => {
-        setFormData({
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            password: '',
-            role: 'passenger'
-        });
+    const handleEditUser = (userId) => {
+        navigate(`/users/view/${userId}`);
     };
 
-    const closeModals = () => {
-        setShowCreateModal(false);
-        setShowEditModal(false);
-        setEditingUser(null);
-        resetForm();
-        setError('');
-    };
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -154,15 +106,25 @@ function UserManagement() {
 
     return (
         <div className="user-management">
+            {/* Header Section */}
+            <div className="user-management-header">
+                <h1 className="user-management-title">User Management</h1>
+                <p className="user-management-subtitle">
+                    Manage passengers, drivers, and administrators in your transportation system
+                </p>
+            </div>
+
             {/* Alert Messages */}
             {error && (
                 <div className="alert alert-error">
+                    <span className="alert-icon">!</span>
                     {error}
                     <button onClick={() => setError('')} className="alert-close">×</button>
                 </div>
             )}
             {success && (
                 <div className="alert alert-success">
+                    <span className="alert-icon">✓</span>
                     {success}
                     <button onClick={() => setSuccess('')} className="alert-close">×</button>
                 </div>
@@ -171,16 +133,34 @@ function UserManagement() {
             {/* Statistics Cards */}
             <div className="stats-container">
                 <div className="stat-card passengers">
+                    <div className="stat-header">
+                        <div className="stat-icon">P</div>
+                    </div>
                     <div className="stat-title">Passengers</div>
                     <div className="stat-number">{userStats.passengers}</div>
+                    <div className="stat-trend">
+                        <span>↗</span> Active users
+                    </div>
                 </div>
                 <div className="stat-card drivers">
+                    <div className="stat-header">
+                        <div className="stat-icon">D</div>
+                    </div>
                     <div className="stat-title">Drivers</div>
                     <div className="stat-number">{userStats.drivers}</div>
+                    <div className="stat-trend">
+                        <span>→</span> Available drivers
+                    </div>
                 </div>
                 <div className="stat-card admins">
-                    <div className="stat-title">Admins</div>
+                    <div className="stat-header">
+                        <div className="stat-icon">A</div>
+                    </div>
+                    <div className="stat-title">Administrators</div>
                     <div className="stat-number">{userStats.admins}</div>
+                    <div className="stat-trend">
+                        <span>⚡</span> System managers
+                    </div>
                 </div>
             </div>
 
@@ -194,65 +174,123 @@ function UserManagement() {
                         onChange={(e) => setSelectedRole(e.target.value)}
                         className="role-filter"
                     >
-                        <option value="all">All Users</option>
-                        <option value="passenger">Passengers</option>
-                        <option value="driver">Drivers</option>
-                        <option value="admin">Admins</option>
+                        <option value="all">All Users ({userStats.total})</option>
+                        <option value="passenger">Passengers ({userStats.passengers})</option>
+                        <option value="driver">Drivers ({userStats.drivers})</option>
+                        <option value="admin">Admins ({userStats.admins})</option>
                     </select>
                 </div>
+                
+                <div className="search-section">
+                    <div className="search-container">
+                        <span className="search-icon">🔍</span>
+                        <input
+                            type="text"
+                            placeholder="Search users by name or email..."
+                            className="search-input"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                        />
+                    </div>
+                </div>
+
                 <button 
-                    onClick={() => setShowCreateModal(true)}
+                    onClick={handleCreateUser}
                     className="create-user-btn"
                 >
-                    Create New User
+                    <span>+</span> Create New User
                 </button>
             </div>
 
             {/* Users Table */}
             <div className="users-table-container">
+                <div className="table-header">
+                    <h3 className="table-title">User Directory</h3>
+                    <p className="table-subtitle">
+                        {users.length} {selectedRole === 'all' ? 'total' : selectedRole} user{users.length !== 1 ? 's' : ''} found
+                    </p>
+                </div>
+                
                 <table className="users-table">
                     <thead>
                         <tr>
+                            <th>User</th>
                             <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
+                            <th>Contact Information</th>
                             <th>Role</th>
-                            <th>Created Date</th>
+                            <th>Member Since</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
                             <tr>
-                                <td colSpan="6" className="loading">Loading users...</td>
+                                <td colSpan="6" className="loading">
+                                    <div className="loading-spinner"></div>
+                                    <br />
+                                    Loading users...
+                                </td>
                             </tr>
                         ) : users.length === 0 ? (
                             <tr>
-                                <td colSpan="6" className="no-users">No users found</td>
+                                <td colSpan="6" className="no-users">
+                                    <div className="no-users-icon">👤</div>
+                                    <br />
+                                    No users found matching your criteria
+                                </td>
                             </tr>
                         ) : (
                             users.map((user) => (
                                 <tr key={user._id}>
-                                    <td>{user.firstName} {user.lastName}</td>
-                                    <td>{user.email}</td>
-                                    <td>{user.phone}</td>
+                                    <td>
+                                        <div className="user-avatar" style={{
+                                            background: user.role === 'admin' ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
+                                                      user.role === 'driver' ? 'linear-gradient(135deg, #10b981, #047857)' :
+                                                      'linear-gradient(135deg, #3b82f6, #1d4ed8)'
+                                        }}>
+                                            {user.firstName?.charAt(0) || 'U'}{user.lastName?.charAt(0) || 'U'}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div className="user-details">
+                                            <h4>{user.firstName} {user.lastName}</h4>
+                                            <p>ID: {user._id?.slice(-8)}</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div className="contact-info">
+                                            <a href={`mailto:${user.email}`} className="email-link">
+                                                {user.email}
+                                            </a>
+                                            <span className="phone-number">{user.phone}</span>
+                                        </div>
+                                    </td>
                                     <td>
                                         <span className={`role-badge role-${user.role}`}>
-                                            {user.role}
+                                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                                         </span>
                                     </td>
                                     <td>{formatDate(user.createdAt)}</td>
                                     <td>
                                         <div className="action-buttons">
                                             <button 
-                                                onClick={() => handleEditUser(user)}
+                                                onClick={() => handleViewUser(user._id)}
+                                                className="view-btn"
+                                                title="View Profile"
+                                            >
+                                                View
+                                            </button>
+                                            <button 
+                                                onClick={() => handleEditUser(user._id)}
                                                 className="edit-btn"
+                                                title="Edit User"
                                             >
                                                 Edit
                                             </button>
                                             <button 
                                                 onClick={() => handleDeleteUser(user._id)}
                                                 className="delete-btn"
+                                                title="Delete User"
                                             >
                                                 Delete
                                             </button>
@@ -265,167 +303,6 @@ function UserManagement() {
                 </table>
             </div>
 
-            {/* Create User Modal */}
-            {showCreateModal && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <div className="modal-header">
-                            <h3>Create New User</h3>
-                            <button onClick={closeModals} className="modal-close">×</button>
-                        </div>
-                        <form onSubmit={handleCreateUser} className="user-form">
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>First Name</label>
-                                    <input
-                                        type="text"
-                                        value={formData.firstName}
-                                        onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Last Name</label>
-                                    <input
-                                        type="text"
-                                        value={formData.lastName}
-                                        onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label>Email</label>
-                                <input
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Phone</label>
-                                <input
-                                    type="tel"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Password</label>
-                                <input
-                                    type="password"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Role</label>
-                                <select
-                                    value={formData.role}
-                                    onChange={(e) => setFormData({...formData, role: e.target.value})}
-                                    required
-                                >
-                                    <option value="passenger">Passenger</option>
-                                    <option value="driver">Driver</option>
-                                    <option value="admin">Admin</option>
-                                </select>
-                            </div>
-                            <div className="form-actions">
-                                <button type="button" onClick={closeModals} className="cancel-btn">
-                                    Cancel
-                                </button>
-                                <button type="submit" className="submit-btn">
-                                    Create User
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Edit User Modal */}
-            {showEditModal && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <div className="modal-header">
-                            <h3>Edit User</h3>
-                            <button onClick={closeModals} className="modal-close">×</button>
-                        </div>
-                        <form onSubmit={handleUpdateUser} className="user-form">
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>First Name</label>
-                                    <input
-                                        type="text"
-                                        value={formData.firstName}
-                                        onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Last Name</label>
-                                    <input
-                                        type="text"
-                                        value={formData.lastName}
-                                        onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label>Email</label>
-                                <input
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Phone</label>
-                                <input
-                                    type="tel"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Password (leave blank to keep current)</label>
-                                <input
-                                    type="password"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                    placeholder="Enter new password or leave blank"
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Role</label>
-                                <select
-                                    value={formData.role}
-                                    onChange={(e) => setFormData({...formData, role: e.target.value})}
-                                    required
-                                >
-                                    <option value="passenger">Passenger</option>
-                                    <option value="driver">Driver</option>
-                                    <option value="admin">Admin</option>
-                                </select>
-                            </div>
-                            <div className="form-actions">
-                                <button type="button" onClick={closeModals} className="cancel-btn">
-                                    Cancel
-                                </button>
-                                <button type="submit" className="submit-btn">
-                                    Update User
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

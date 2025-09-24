@@ -232,7 +232,7 @@ function SignUp() {
     };
 
     return (
-        <div className="auth-container">
+        <div className="auth-container" style={{ '--auth-bg': `url(${process.env.PUBLIC_URL}/images/background.png)` }}>
             <div className="auth-card">
                 <div className="auth-header">
                     <div className="auth-logo">
@@ -327,19 +327,10 @@ function SignUp() {
                                     onClick={() => setShowPassword(!showPassword)}
                                     title={showPassword ? "Hide password" : "Show password"}
                                 >
-                                    {showPassword ? "👁️" : "👁️‍🗨️"}
+                                    {showPassword ? "Hide" : "Show"}
                                 </button>
                             </div>
-                            <button
-                                type="button"
-                                className="generate-password-btn"
-                                onClick={handleGeneratePassword}
-                                title="Generate secure password"
-                            >
-                                🎲 Generate
-                            </button>
                         </div>
-                        
                         {/* Password Strength Meter */}
                         {formData.password && (
                             <div className="password-strength-container">
@@ -363,6 +354,16 @@ function SignUp() {
                                 </div>
                             </div>
                         )}
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+                            <button
+                                type="button"
+                                className="generate-password-btn"
+                                onClick={handleGeneratePassword}
+                                title="Generate secure password"
+                            >
+                                Generate password
+                            </button>
+                        </div>
                         
                         {errors.password && <span className="error-message">{errors.password}</span>}
                     </div>
@@ -385,7 +386,7 @@ function SignUp() {
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                 title={showConfirmPassword ? "Hide password" : "Show password"}
                             >
-                                {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+                                {showConfirmPassword ? "Hide" : "Show"}
                             </button>
                         </div>
                         {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}

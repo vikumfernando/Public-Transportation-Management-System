@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/auth.css';
@@ -10,6 +10,7 @@ function SignIn() {
         password: ''
     });
     const [errors, setErrors] = useState({});
+    const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
@@ -48,6 +49,15 @@ function SignIn() {
         return Object.keys(newErrors).length === 0;
     };
 
+    useEffect(() => {
+        const remembered = localStorage.getItem('rememberMe') === 'true';
+        const rememberedEmail = localStorage.getItem('rememberedEmail') || '';
+        if (remembered && rememberedEmail) {
+            setRememberMe(true);
+            setFormData(prev => ({ ...prev, email: rememberedEmail }));
+        }
+    }, []);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         
@@ -63,6 +73,14 @@ function SignIn() {
             if (response.data.success) {
                 // Store user data in localStorage (you might want to use a more secure method)
                 localStorage.setItem('user', JSON.stringify(response.data.user));
+
+                // Remember Me handling
+                localStorage.setItem('rememberMe', rememberMe ? 'true' : 'false');
+                if (rememberMe) {
+                    localStorage.setItem('rememberedEmail', formData.email);
+                } else {
+                    localStorage.removeItem('rememberedEmail');
+                }
                 
                 // Redirect to main page (home page)
                 navigate('/');
@@ -79,7 +97,7 @@ function SignIn() {
     };
 
     return (
-        <div className="auth-container">
+        <div className="auth-container" style={{ '--auth-bg': `url(${process.env.PUBLIC_URL}/images/background.png)` }}>
             <div className="auth-card">
                 <div className="auth-header">
                     <div className="auth-logo">
@@ -125,6 +143,18 @@ function SignIn() {
                             autoComplete="current-password"
                         />
                         {errors.password && <span className="error-message">{errors.password}</span>}
+                    </div>
+
+                    <div className="form-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <input
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                            />
+                            Remember me
+                        </label>
+                        <Link to="/forgot-password">Forgot password?</Link>
                     </div>
 
                     <button
