@@ -49,14 +49,7 @@ connection.once("open", () => {
     console.log("MongoDB connection established successfully");
 })
 
-//Add routes here later
 
-const busStopRouter = require("./routes/Stops.js");
-const busRouter = require("./routes/Busses.js");
-const routesRouter = require("./routes/Routes.js");
-const schedulesRouter = require("./routes/Schedules.js");
-const authRouter = require("./routes/auth.js");
-const usersRouter = require("./routes/users.js");
 
 // Smart Card Schema (NFC)
 const smartCardSchema = new mongoose.Schema({
@@ -110,6 +103,15 @@ const transactionSchema = new mongoose.Schema({
   paymentMethod: { type: String, default: 'nfc_card' },
   sourceCard: { type: String }
 });
+
+//Add routes here later
+
+const busStopRouter = require("./routes/Stops.js");
+const busRouter = require("./routes/Busses.js");
+const routesRouter = require("./routes/Routes.js");
+const schedulesRouter = require("./routes/Schedules.js");
+const authRouter = require("./routes/auth.js");
+const usersRouter = require("./routes/users.js");
 
 
 app.use("/Stops", busStopRouter);
