@@ -52,6 +52,28 @@ router.route("/searchAssigned/:scheduleId").get(async (req, res) => {
   }
 });
 
+//loading all schedules
+router.route("/loadschedules").get(async (req, res) => {
+
+  console.log("Load schedules route hit"); 
+
+  try {
+    const schedules = await Schedule.find()
+      .populate({
+        path: "routeId",
+        model: "Route",
+        populate: {
+          path: "stopsSequence",
+          model: "BusStop",
+        },
+      });
+
+    res.status(200).json(schedules);
+  } catch (err) {
+    console.error("Error loading schedules: ", err);
+    res.status(500).json({ message: "Error loading schedules: " + err });
+  }
+});
 
 
 

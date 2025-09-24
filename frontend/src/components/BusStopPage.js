@@ -14,6 +14,11 @@ function BusStopPage({ setStops }) {
   const [latitude, setLattitude] = useState("");
   const [longitude, setLongitude] = useState("");
 
+  const [editingStopId, setEditingStopId] = useState(null);
+  const [editedStopName, setEditedStopName] = useState("");
+  const [editedLat, setEditedLat] = useState("");
+  const [editedLon, setEditedLon] = useState("");
+
   //Loading bus stops on rendering
   useEffect(() => {
     const getStops = async () => {
@@ -76,27 +81,50 @@ function BusStopPage({ setStops }) {
         lat: parseFloat(latitude),
         lon: parseFloat(longitude),
       });
+
+      setBusStop([...stops, res.data]);
     } catch (err) {
       console.error("Error while adding bus stop : " + err);
     }
   };
-  
+
   //Deleting bus stop
-  const deleteStop = async (stopId) =>{
+  const deleteStop = async (stopId) => {
     if (!window.confirm("Are you sure you want to delete this stop?")) return;
 
-    try{
-      const res = await axios.delete(`http://localhost:8070/Stops/deletestop/${stopId}`);
-      
-    
-    }catch(err){
+    try {
+      const res = await axios.delete(
+        `http://localhost:8070/Stops/deletestop/${stopId}`
+      );
+
+      setBusStop(stops.filter((stop) => stop._id !== stopId));
+    } catch (err) {
+      if (err.response) {
+        alert(err.response.data.message);
+      }
       console.log("Error while deleting bus stop " + err);
-      
     }
-  }
+  };
 
+  //Updating Stop
+  const updateStop = async (stopId) => {
+    try {
+      const res = await axios.put(
+        `http://localhost:8070/Stops/updatestop/${stopId}`,
+        {
+          stopName: editedStopName,
+          lat: parseFloat(editedLat),
+          lon: parseFloat(editedLon),
+        }
+      );
 
-
+      setBusStop(stops.map((stop) => (stop._id === stopId ? res.data : stop)));
+      setEditingStopId(null);
+      
+    } catch (err) {
+      console.error("Error updating stop: ", err);
+    }
+  };
 
   return (
     <div className="mainContainer">
@@ -139,23 +167,75 @@ function BusStopPage({ setStops }) {
               </button>
             </div>
           </form>
-
           {stops.length > 0 &&
             stops.map((stop, index) => (
-              <div className="stopinfoDiv">
-                <button onClick={deleteStop}></button>
-                <div onClick={() => loadStops(stop._id)} key={index}>
-                  <label className="stopName">{stop.stopName}</label>
-                  <br />
-                  <label className="stopInfo">Lat : {stop.lat}</label>
-                  <br />
-                  <label className="stopInfo">Lon : {stop.lon}</label>
-                </div>
+              <div className="stopinfoDiv" key={index}>
+                {editingStopId === stop._id ? (
+                  
+                  //Editing Part
+                  <div>
+                    <input
+                      className = "updateInput"
+                      value={editedStopName}
+                      onChange={(e) => setEditedStopName(e.target.value)}
+                    />
+                    <input
+                      className = "updateInput"
+                      value={editedLat}
+                      onChange={(e) => setEditedLat(e.target.value)}
+                    />
+                    <input
+                      className = "updateInput"
+                      value={editedLon}
+                      onChange={(e) => setEditedLon(e.target.value)}
+                    />
+                    <button className = "addButton" onClick={() => updateStop(stop._id)} style = {{marginRight : "8px", backgroundColor : "#8cdb66"}}>Save</button>
+                    <button className = "addButton" onClick={() => setEditingStopId(null)}>
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                 
+                 //Displaying part
+                  <div onClick={() => loadStops(stop._id)}>
+                    <label className="stopName">{stop.stopName}</label>
+                    <br />
+                    <label className="stopInfo">Lat : {stop.lat}</label>
+                    <br />
+                    <label className="stopInfo">Lon : {stop.lon}</label><br/>
+
+                     <div className = "edDelBtnContainer">
+                    <button
+                    className="editBtn"
+                      onClick={() => {
+                        setEditingStopId(stop._id);
+                        setEditedStopName(stop.stopName);
+                        setEditedLat(stop.lat);
+                        setEditedLon(stop.lon);
+                      }}
+                    >
+                      <img 
+                      style={{ width: "25px", height: "25px" }}
+                      src = "/images/editicon.png"/>
+                    </button>
+
+                    <button
+                      className="deleteBtn"
+                      onClick={() => deleteStop(stop._id)}
+                    >
+                      <img
+                        style={{ width: "25px", height: "25px" }}
+                        src="/images/trash.png"
+                      />
+                    </button>
+                  </div>
+                  
+                  </div>
+                )}
               </div>
             ))}
         </div>
         <div id="sidebar" className="sidebar">
-
           <button
             onClick={() => handleSideBar(false)}
             className="closeBtn"
@@ -167,7 +247,7 @@ function BusStopPage({ setStops }) {
               alt="Submit btn image"
             />
           </button>
-          
+
           <label className="addbusTopic">Add New Stop</label>
           <form onSubmit={addStop}>
             <label className="inputLabel">Stop Name</label>
@@ -214,7 +294,6 @@ function BusStopPage({ setStops }) {
           </form>
         </div>
         <button className="slideBtn" onClick={() => handleSideBar(true)}>
-          
           <img className="slideImg" src="/images/addBusIcon.png" alt="check" />
         </button>
       </div>

@@ -74,8 +74,8 @@ function RouteMap({ stops }) {
         {path.length > 1 && (
           <Polyline
             path={path}
-            option={{
-              strokeColor: "#29b944ff",
+            options={{
+              strokeColor: "black",
               strokeOpacity: 0.8,
               strokeWeight: 5,
             }}

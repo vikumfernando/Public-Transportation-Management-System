@@ -32,7 +32,9 @@ function RoutePage() {
     };
     getRoutes();
 
-    {/*Loading all stops when rendering for the dropdown box*/}
+    {
+      /*Loading all stops when rendering for the dropdown box*/
+    }
     const getStops = async () => {
       try {
         const res = await axios.get("http://localhost:8070/Stops/loadStops");
@@ -45,7 +47,7 @@ function RoutePage() {
     getStops();
   }, []);
 
-  //onclick
+  //Function to load selected route stops
   async function loadRoute(routeId) {
     setOpenCard(routeId);
     const routes = await axios.get(
@@ -92,6 +94,28 @@ function RoutePage() {
       });
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  //Deleting route
+  const deleteRoute = async (routeId, e) => {
+    
+    e.preventDefault();
+    if (!window.confirm("Are you sure you want to delete this route")) return;
+
+    try {
+      const res = await axios.delete(
+        `http://localhost:8070/Routes/deleteroute/${routeId}`
+      );
+
+      setRoutes(routes.filter((route) => route._id !== routeId));
+
+    } catch (err) {
+      if (err.response) {
+        alert(err.response.data.message);
+      }
+
+      console.log("Error while deleting Route " + err);
     }
   };
 
@@ -162,6 +186,7 @@ function RoutePage() {
                 }`}
                 onClick={() => loadRoute(route.routeNum)}
               >
+                
                 <div className="routeNumDiv">
                   <label className="routeNum2">Route {route.routeNum}</label>
                   <br />
@@ -180,6 +205,7 @@ function RoutePage() {
                   />
                   <label className="routeSumText">{route.distance} Km</label>
                 </div>
+                
                 <div
                   id="stopList"
                   className={`stopList ${
@@ -193,6 +219,11 @@ function RoutePage() {
                       <li key={stopIndex}>{stop.stopName}</li>
                     ))}
                   </ul>
+
+                  <div className="">
+                    <button onClick = {(e) =>deleteRoute(route._id, e)}>Delete</button>
+                    <button>Edit</button>
+                  </div>
                 </div>
               </div>
             ))}

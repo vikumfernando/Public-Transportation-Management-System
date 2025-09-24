@@ -12,6 +12,8 @@ import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
 import UserManagement from "./components/UserManagement";
 
+import BusesPage from "./components/BusesPage";
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 
@@ -97,6 +99,18 @@ function App() {
               <Header />
               <OffCanvas />
               <UserManagement />
+            </div>
+          }
+          />
+
+          <Route
+          path="/busespage"
+          element={
+            <div>
+              <Header />
+              <OffCanvas />
+              <BusesPage />
+
             </div>
           }
           />

@@ -41,7 +41,7 @@
 .stopinfoDiv {
   background-color: #0b5648;
   box-shadow: inset;
-  height: 154px;
+  height: auto;
   width: 280px;
   margin-top: 10px;
   padding: 18px;
@@ -340,4 +340,64 @@
   background-color: transparent;
   width: 20px;
   height: 20px;
+}
+
+
+/*Deleting Button */
+.deleteBtn{
+  background-color: #8cdb66;
+  border : none;
+  padding : 10px;
+  border-radius: 12px;
+  transition-duration: 0.3s;
+  margin-left : 10px;
+}
+
+.deleteBtn:hover{
+  transition-duration: 0.3s;
+  background-color: #DC143C;
+  scale : 101%;
+  border : none;
+  padding : 10px;
+  border-radius: 12px;
+}
+
+.editBtn{
+  background-color: #8cdb66;
+  border : none;
+  padding : 10px;
+  border-radius: 12px;
+  transition-duration: 0.3s;
+  margin-left : 40px;
+  transition-duration: 0.3s;
+
+}
+
+.editBtn:hover{
+ transition-duration: 0.3s;
+ scale : 103%;
+
+}
+
+.edDelBtnContainer{
+  display: flex;
+  justify-content: space-between; 
+  margin-left : 100px;
+  align-items: center;
+}
+
+/*Updating data input field */
+.updateInput{
+  width: 100%;
+  height: 35px;
+  background: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0 20px 0 15px;
+  font-size: 16px;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  margin-bottom: 8px;
 }

@@ -1,9 +1,10 @@
 const router = require("express").Router();
 let Route = require("../models/Route");
+let Schedule = require("../models/Schedule");
 
 //adding new route to the db
 router.route("/addRoute").post(async (req, res) => {
-  const { routeName, routeNum, stopsSequence , distance, duration} = req.body;
+  const { routeName, routeNum, stopsSequence, distance, duration } = req.body;
 
   try {
     const existingRoute = await Route.findOne({
@@ -19,7 +20,7 @@ router.route("/addRoute").post(async (req, res) => {
       routeNum,
       stopsSequence,
       distance,
-      duration
+      duration,
     });
 
     await newRoute.save();
@@ -84,10 +85,53 @@ router.route("/searchroute/:routenum").get(async (req, res) => {
     }
 
     res.json(route);
-    
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error while retreiving route data" });
+  }
+});
+
+//Deleting route
+router.route("/deleteroute/:id").delete(async (req, res) => {
+  try {
+    const routeId = req.params.id;
+
+    console.log("Route to be deleted : " + routeId);
+
+    const referenced = await Schedule.findOne({ routeId: routeId  });
+
+    if (referenced) {
+      return res.status(400).json({
+        message: `Cannot delete : Route is used in a schedule ${referenced.data}`,
+      });
+    }
+
+    const deleteRoute = await Route.findByIdAndDelete(routeId);
+
+    if (!deleteRoute) {
+      return res.status(404).json({ message: "Route not found" });
+    }
+
+    console.log("Route deleted successfully");
+    res.json({ message: "Route deleted successfully" });
+  } catch (err) {
+    console.log("Error while deleting route : " + err);
+  }
+});
+
+//updating route
+router.route("/updateroute/:id").put(async (req, res) => {
+  
+  const routeId = req.params.id;
+  const {routeNum, duration, distance, routeName, stopsSequence} = req.body;
+
+  try{
+    const updatedRoute = await Route.findByIdAndUpdate(
+      routeId,
+      {}
+    )
+  }catch(err){
+    console.log("Error while updating route information : " + err);
   }
 });
 

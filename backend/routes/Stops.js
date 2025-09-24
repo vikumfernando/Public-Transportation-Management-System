@@ -4,8 +4,7 @@ const Route = require("../models/Route");
 
 //adding new bus stop to the data base
 router.route("/addStop").post(async (req, res) => {
-  const { stopName, lat, lon } =
-    req.body;
+  const { stopName, lat, lon } = req.body;
 
   try {
     const newStop = new BusStop({
@@ -15,6 +14,8 @@ router.route("/addStop").post(async (req, res) => {
     });
 
     await newStop.save();
+
+    res.status(201).json(newStop);
     res.json("New stop added succesfully");
   } catch (err) {
     console.log("Error occured while adding new stop " + err);
@@ -46,7 +47,6 @@ router.route("/searchstop/:stop").get(async (req, res) => {
       return res.status(404).json({ message: "Bus Stop not found" });
     }
     res.json(stop);
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error while retreiving bus stop data" });
@@ -66,7 +66,7 @@ router.route("/displayStop/:stopId").get(async (req, res) => {
 });
 
 //Deleting bus stops
-router.delete("/deletestop/:id", async (req, res) => {
+router.route("/deletestop/:id").delete(async (req, res) => {
   try {
     const stopId = req.params.id;
 
@@ -88,12 +88,32 @@ router.delete("/deletestop/:id", async (req, res) => {
 
     console.log("Bus stop deleted successfully");
     res.json({ message: "Stop deleted successfully" });
-
   } catch (err) {
     console.error("Error while deleting bus stop:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
+//updating bus stops
+router.route("/updatestop/:id").put(async (req, res) => {
+  const stopId = req.params.id;
+  const { stopName, lat, lon } = req.body;
+
+  try {
+    const updatedStop = await BusStop.findByIdAndUpdate(stopId, {
+      stopName,
+      lat,
+      lon,
+    });
+
+    if (!updatedStop) {
+      return res.status(404).json({ message: "Bus stop not found" });
+    }
+
+    res.status(200).json(updatedStop);
+  } catch (err) {
+    console.log("Error while updating bus stop : " + err);
+  }
+});
 
 module.exports = router;

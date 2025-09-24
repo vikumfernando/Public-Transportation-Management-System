@@ -57,7 +57,7 @@ function OffCanvas() {
               Schedule
             </a>
 
-            <a href="#" className="nav-link-custom">
+            <a href="/busespage" className="nav-link-custom">
               Buses
             </a>
             <a href="/users" className="nav-link-custom">

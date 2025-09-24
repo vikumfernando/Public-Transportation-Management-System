@@ -1,31 +1,29 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import "../styles/BusesPage.css";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-import OffCanvas from "./OffCanvas";
-
-import "../styles/SchedulesPage.css";
-
-function SchedulesPage() {
+function BusesPage() {
   const [buses, setBuses] = useState([]);
-  const [routeNum, setRouteNum] = useState("");
 
-  // For new schedule registering
+  const [searchQuery, setSearchQuery] = useState("");
+
   const [dropdownRoutes, setDropdownRoutes] = useState([]);
   const [scheduleRoute, setScheduleRoute] = useState("");
-  const [dateType, setDateType] = useState("weekday");
 
-  const [dropdownStops, setDropdownStops] = useState([]);
+  const [dropdownschedules, setDropdownschedules] = useState([]);
+  const [selectedSchedule, setSelectedSchedule] = useState("");
 
-  // Each stop has stopId + time object
-  const [stopsData, setStopsData] = useState([
-    { stopId: "", time: { hour: 8, minute: 0, period: "AM" } },
-  ]);
+  //For the new bus adding
+  const [vehicleNum, setVehicleNum] = useState("");
+  const [vehicleType, setVehicleType] = useState("");
+  const [avlSeats, setAvlSeats] = useState();
 
-  // Load buses, routes, and stops
+
   useEffect(() => {
+
     const loadBuses = async () => {
       try {
         const res = await axios.get("http://localhost:8070/Busses/loadBuses");
@@ -36,147 +34,78 @@ function SchedulesPage() {
     };
 
     const getRoutes = async () => {
-      try {
-        const res = await axios.get("http://localhost:8070/Routes/loadroutes");
-        setDropdownRoutes(res.data);
-      } catch (err) {
-        console.error("Error loading routes: ", err);
-      }
+          try {
+            const res = await axios.get("http://localhost:8070/Routes/loadroutes");
+            setDropdownRoutes(res.data);
+          } catch (err) {
+            console.error("Error loading routes: ", err);
+          }
     };
 
-    const getStops = async () => {
-      try {
-        const res = await axios.get("http://localhost:8070/Stops/loadStops");
-        setDropdownStops(res.data);
-      } catch (err) {
-        console.error("Error loading stops: ", err);
+    const loadSchedules = async () => {
+      try{
+        const res = await axios.get("http://localhost:8070/Schedules/loadschedules");
+        setDropdownschedules(res.data);
+      }catch(err){
+        console.error("Error while loading schedules : " + err);
       }
-    };
+    }
+
 
     loadBuses();
     getRoutes();
-    getStops();
+    loadSchedules();
   }, []);
 
-  // Search bus by route number
-  const searchBus = async (routeNum) => {
-    try {
-      const res = await axios.get(
-        `http://localhost:8070/Busses/loadBus/${routeNum}`
-      );
-      setBuses(res.data);
-    } catch (err) {
-      console.error("Bus data not found: ", err);
-    }
-  };
-
-  // Add/remove stops dynamically
-  const addStop = () => {
-    setStopsData((prev) => [
-      ...prev,
-      { stopId: "", time: { hour: 8, minute: 0, period: "AM" } },
-    ]);
-  };
-
-  const removeStop = (index) => {
-    setStopsData((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // Update stopId
-  const handleStopChange = (index, value) => {
-    const updated = [...stopsData];
-    updated[index].stopId = value;
-    setStopsData(updated);
-  };
-
-  // Update time with validation
-  const updateTime = (index, key, value) => {
-    const updated = [...stopsData];
-    let timeObj = { ...updated[index].time, [key]: value };
-
-    if (key === "hour") {
-      if (value < 1) timeObj.hour = 12;
-      if (value > 12) timeObj.hour = 1;
-    }
-    if (key === "minute") {
-      if (value < 0) timeObj.minute = 59;
-      if (value > 59) timeObj.minute = 0;
-    }
-
-    updated[index].time = timeObj;
-    setStopsData(updated);
-  };
-
-  // Convert 12-hour time to "HH.MM" string for backend
-  const formatTime = ({ hour, minute, period }) => {
-    let h =
-      period === "PM" && hour < 12
-        ? hour + 12
-        : period === "AM" && hour === 12
-        ? 0
-        : hour;
-    const mm = minute < 10 ? "0" + minute : minute;
-    return `${h}.${mm}`;
-  };
-
-  // Submit new schedule
-  const addSchedule = async (e) => {
-    e.preventDefault();
+  //deleting bus
+  const deleteBus = async (busId) => {
+    if (!window.confirm("Are you sure you want to remove this bus?")) return;
 
     try {
-      const stopSchedules = stopsData.map((s) => ({
-        stopId: s.stopId,
-        expectedArrival: formatTime(s.time),
-        expectedDeparture: formatTime(s.time),
-      }));
-
-      const res = await axios.post(
-        "http://localhost:8070/Schedules/addschedule",
-        {
-          routeId: scheduleRoute,
-          dayType: dateType,
-          stopSchedules,
-        }
+      const res = await axios.delete(
+        `http://localhost:8070/Busses/deletebus/${busId}`
       );
 
-      console.log("Schedule added:", res.data);
-      alert("Schedule added successfully!");
+      setBuses(buses.filter((bus) => bus._id !== busId));
     } catch (err) {
-      console.error(err);
-      alert("Error adding schedule");
+      if (err.response) {
+        alert(err.response.data.message);
+      }
+      console.error("Erro while removing bus " + err);
     }
   };
 
-  function handlePopup(status) {
-    const popup = document.getElementById("popupcontainer");
+  //searching bus in the admin table
+  async function searchBus(vehicleNum) {
+    const res = await axios.get(
+      `http://localhost:8070/Busses/searchBus/${vehicleNum}`
+    );
 
-    if (status == true) {
-      popup.classList.add("open");
+    if (res) {
+      setBuses([res.data]);
+      console.log("Searched Bus data : ", buses);
     } else {
-      popup.classList.remove("open");
+      console.log("Bus not found");
     }
   }
 
+  //Generating pdfs for the bus information
   const generatePdf = () => {
     const doc = new jsPDF();
 
     doc.setFontSize(18);
-    doc.text("Bus Schedules", 14, 22);
+    doc.text("Bus Information", 14, 22);
 
     const columns = [
       "Vehicle Number",
-      "Stop Name",
-      "Time of Arrival",
-      "Day Type",
+      "Vehicle Type",
+      "Num. of Seats",
+      "Current Latitude",
+      "Current Longtitude",
     ];
 
     const rows = buses.map((bus) => {
-      const stopsStr = bus.route.map((s) => s.stopName).join("\n");
-      const timesStr = bus.schedule.stopSchedules
-        .map((s) => s.expectedArrival)
-        .join("\n");
-
-      return [bus.vehicleNumber, stopsStr, timesStr, bus.schedule.dayType];
+      return [bus.vehicleNumber, bus.type, bus.seatCount, bus.lat, bus.lon];
     });
 
     autoTable(doc, {
@@ -188,25 +117,30 @@ function SchedulesPage() {
       theme: "grid",
     });
 
-    doc.save("schedules.pdf");
+    doc.save("BusData.pdf");
   };
 
   return (
     <div>
-      {/* Popup Form */}
+    {/*Form popup*/}
+
       <div className="popupContainer" id="popupcontainer">
         <div className="popupBox">
 
-          <form onSubmit={addSchedule}>
+          <form onSubmit={addBus}>
             <div className="formContainer">
 
               {/* Left side */}
-
               <div className="leftSide">
-                <h1 style={{ color: "white" }}>Add new Schedule</h1>
+                <h1 style={{ color: "white" }}>Add new Bus</h1>
 
                 <label className="topicLbl" style={{ marginTop: "20px" }}>
-                  Select Route
+                  Vehicle Number
+                </label>
+                <br/>
+                 
+                <label className="topicLbl" style={{ marginTop: "20px" }}>
+                  Select Route 
                 </label>
                 <br />
                 <select
@@ -223,17 +157,25 @@ function SchedulesPage() {
                   ))}
                 </select>
 
+
                 <label className="topicLbl" style={{ marginTop: "20px" }}>
-                  Select Day Type
+                  Select Schedule
                 </label>
+                <br />
                 <select
                   style={{ fontSize: "18px", marginTop: "12px" }}
                   className="dropdown-select"
-                  onChange={(e) => setDateType(e.target.value)}
+                  onChange={(e) => setScheduleRoute(e.target.value)}
+                  required
                 >
-                  <option value="weekday">Weekday</option>
-                  <option value="weekend">Weekend</option>
+                  <option value="">Select Route Number</option>
+                  {dropdownRoutes.map((route) => (
+                    <option key={route._id} value={route._id}>
+                      {route.routeNum} {route.routeName}
+                    </option>
+                  ))}
                 </select>
+
               </div>
 
               {/* Right side */}
@@ -384,41 +326,46 @@ function SchedulesPage() {
         </div>
       </div>
 
-      {/* Bus Table */}
-      <div className="tableContainer">
-        <div className="offCanvas" style={{ marginLeft: "-55px" }}>
-          <OffCanvas />
-        </div>
+      {/*Searching bar */}
+      <div className="search-container2">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            searchBus(searchQuery);
+          }}
+        >
+          <div className="search-container2">
+            <input
+              style={{ margin: "10px 0px 21px 30px", width: "15%" }}
+              id="routeInput"
+              type="text"
+              className="search-box2"
+              placeholder="Enter Vehicle Number..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              required
+            />
 
-        <div className="btnContainer">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              searchBus(routeNum);
-            }}
-          >
-            <div className="search-container3">
-              <input
-                id="routeInput"
-                type="text"
-                className="search-box2"
-                placeholder="Enter Route Number..."
-                onChange={(e) => setRouteNum(e.target.value)}
-                required
-              />
-              <button className="filter-button3">
-                <svg
-                  className="filter-icon2"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
-                </svg>
-              </button>
-            </div>
-          </form>
+            <button
+              style={{ marginTop: "10px", width: "65px" }}
+              className="filter-button2"
+            >
+              <svg
+                className="filter-icon2"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"></polygon>
+              </svg>
+            </button>
+          </div>
+        </form>
+
+      </div>
+
+        <div className="btnContainer" style = {{marginTop : "-10px"}}>
 
           <div className="pdfBtnContainer">
             <button
@@ -427,63 +374,99 @@ function SchedulesPage() {
               onClick={generatePdf}
             >
               <img
-               src = "/images/downloadicon.png"
-               style = {{width : "25px", height : "25px"}}/>
+                src="/images/downloadicon.png"
+                style={{ width: "25px", height: "25px" }}
+              />
             </button>
           </div>
 
           <div className="addBtnContainer">
             <button
-              style={{ backgroundColor: "#8cdb66", color: "white"}}
+              style={{ backgroundColor: "#8cdb66", color: "white" }}
               onClick={() => handlePopup(true)}
               className="addBtn"
             >
               <img
-               src = "/images/addBusIcon.png"
-               style = {{width : "25px", height : "25px"}}/>
+                src="/images/addBusIcon.png"
+                style={{ width: "25px", height: "25px" }}
+              />
             </button>
           </div>
         </div>
 
-        <table className="tableFormat">
-          <thead>
-            <tr>
-              <th>Vehicle Number</th>
-              <th>Stop Name</th>
-              <th>Time Of Arrival</th>
-              <th>Type</th>
-              <th>Edit</th>
-              <th>Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-            {buses.map((bus) => (
-              <tr key={bus._id}>
-                <td>{bus.vehicleNumber}</td>
-                <td>
-                  {bus.route.map((stop, i) => (
-                    <div key={i}>{stop.stopName}</div>
-                  ))}
-                </td>
-                <td>
-                  {bus.schedule.stopSchedules.map((s, i) => (
-                    <div key={i}>{s.expectedArrival}</div>
-                  ))}
-                </td>
-                <td>{bus.schedule.dayType}</td>
-                <td>
-                  <button>Edit</button>
-                </td>
-                <td>
-                  <button>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div class="table-container">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>
+                    Vehicle
+                    <br /> Number
+                  </th>
+                  <th>
+                    Vehicle <br />
+                    Type
+                  </th>
+                  <th>Seats</th>
+                  <th>
+                    Previous <br />
+                    Stop
+                  </th>
+                  <th>
+                    Next <br />
+                    Stop
+                  </th>
+                  <th>Cordinates</th>
+                  <th>Image</th>
+                  <th>Delete</th>
+                  <th>Edit</th>
+                </tr>
+              </thead>
+              <tbody id="vehicleTableBody">
+                {buses.map((bus) => (
+                  <tr key={bus._id}>
+                    <td>{bus.vehicleNumber}</td>
+                    <td>{bus.type}</td>
+                    <td>{bus.seatCount}</td>
+                    <td>{bus.previousStop}</td>
+                    <td>{bus.nextStop}</td>
+                    <td style={{ width: "75px" }}>
+                      <img
+                        className="locationIcon"
+                        src="/images/locationIcon.png"
+                      />
+                      {bus.lat},{bus.lon}
+                    </td>
+                    <td>
+                      <img className="busImageDiv" src={bus.busImage} />
+                    </td>
+                    <td>
+                      <button
+                        className="deleteBtn"
+                        onClick={() => deleteBus(bus._id)}
+                      >
+                        <img
+                          style={{ width: "25px", height: "25px" }}
+                          src="/images/trash.png"
+                        />
+                      </button>
+                    </td>
+                    <td>
+                      <button className="deleteBtn">
+                        <img
+                          style={{ width: "25px", height: "25px" }}
+                          src="/images/editicon.png"
+                        />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    </div>
   );
 }
 
-export default SchedulesPage;
+export default BusesPage;

@@ -38,7 +38,7 @@ function Header() {
         <nav className="navbar">
             <div className="nav-container">
                 <Link to="/" className="logo">
-                    <div className="logo-icon">TH</div>Brand Name
+                   <img style = {{width : "115px", height : "97px"}} src = "/images/siteLogo.png"/>
                 </Link>
 
                 <ul className= "nav-menu" id="navMenu">
