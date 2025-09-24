@@ -154,6 +154,31 @@ function App() {
             </div>
           }
           />
+
+          <Route path="/payment-dash" element={<div>
+              <Header /><Dashboard /> </div>} />
+
+          <Route path="/smart-cards" element={
+            <div>
+              <Header />
+              <SmartCardPage />
+              </div>} />
+
+          <Route path="/visa-cards" element={<div>
+              <Header /><VisaCardPage /></div>} />
+
+          <Route path="/topup" element={<div>
+              <Header /><TopupPage /></div>} />
+
+          <Route path="/recharge" element={<div>
+              <Header /><RechargePage /></div>} />
+
+          <Route path="/transactions" element={<div>
+              <Header /><TransactionsPage /></div>} />
+
+          <Route path="/refunds" element={<div>
+              <Header /><RefundPage /></div>}/>
+          
       </Routes>
     </Router>
   );
