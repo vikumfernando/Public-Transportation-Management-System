@@ -11,16 +11,6 @@ function SignIn() {
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const isValidEmail = (value) => /^(\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+)$/.test(value);
-
-    // Auto-dismiss general error after 3s
-    useEffect(() => {
-        if (errors.general) {
-            const t = setTimeout(() => setErrors(prev => ({ ...prev, general: '' })), 3000);
-            return () => clearTimeout(t);
-        }
-    }, [errors.general]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -38,26 +28,11 @@ function SignIn() {
         }
     };
 
-    const handleBlur = (e) => {
-        const { name, value } = e.target;
-        const newErrors = { ...errors };
-        if (name === 'email') {
-            if (!value.trim()) newErrors.email = 'Email is required';
-            else if (!isValidEmail(value)) newErrors.email = 'Please enter a valid email address';
-            else newErrors.email = '';
-        }
-        if (name === 'password') {
-            if (!value) newErrors.password = 'Password is required';
-            else newErrors.password = '';
-        }
-        setErrors(newErrors);
-    };
-
     const validateForm = () => {
         const newErrors = {};
 
         // Email validation
-        const emailRegex = /^(\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+)$/;
+        const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
         if (!formData.email.trim()) {
             newErrors.email = 'Email is required';
         } else if (!emailRegex.test(formData.email)) {
@@ -83,7 +58,7 @@ function SignIn() {
         setLoading(true);
 
         try {
-            const response = await axios.post('/auth/signin', formData, { timeout: 15000 });
+            const response = await axios.post('http://localhost:8070/auth/signin', formData);
             
             if (response.data.success) {
                 // Store user data in localStorage (you might want to use a more secure method)
@@ -93,10 +68,11 @@ function SignIn() {
                 navigate('/');
             }
         } catch (error) {
-            const message = error?.response?.data?.message
-                || (error?.code === 'ECONNABORTED' ? 'Request timed out. Please try again.'
-                : (error?.message?.includes('Network') ? 'Cannot reach server. Is the backend running?' : 'Login failed. Please try again.'));
-            setErrors({ general: message });
+            if (error.response && error.response.data) {
+                setErrors({ general: error.response.data.message });
+            } else {
+                setErrors({ general: 'Login failed. Please try again.' });
+            }
         } finally {
             setLoading(false);
         }
@@ -129,40 +105,26 @@ function SignIn() {
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
-                            onBlur={handleBlur}
                             className={errors.email ? 'error' : ''}
                             placeholder="Enter your email address"
                             autoComplete="email"
-                            required
                         />
-                        {/* inline error hidden per request */}
+                        {errors.email && <span className="error-message">{errors.email}</span>}
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="password">Password</label>
-                        <div className="password-input-wrapper">
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                id="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
-                                className={errors.password ? 'error' : ''}
-                                placeholder="Enter your password"
-                                autoComplete="current-password"
-                                required
-                            />
-                            <button
-                                type="button"
-                                className="password-toggle-btn"
-                                onClick={() => setShowPassword(!showPassword)}
-                                title={showPassword ? 'Hide password' : 'Show password'}
-                            >
-                                {showPassword ? 'Hide' : 'Show'}
-                            </button>
-                        </div>
-                        {/* inline error hidden per request */}
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            className={errors.password ? 'error' : ''}
+                            placeholder="Enter your password"
+                            autoComplete="current-password"
+                        />
+                        {errors.password && <span className="error-message">{errors.password}</span>}
                     </div>
 
                     <button

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/auth.css';
@@ -134,7 +134,6 @@ function SignUp() {
         }));
     };
 
-    const isValidEmail = (value) => /^(\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+)$/.test(value);
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -157,36 +156,6 @@ function SignUp() {
         }
     };
 
-    const handleBlur = (e) => {
-        const { name, value } = e.target;
-        const nextErrors = { ...errors };
-        if (name === 'firstName' && !value.trim()) nextErrors.firstName = 'First name is required';
-        if (name === 'lastName' && !value.trim()) nextErrors.lastName = 'Last name is required';
-        if (name === 'phone') {
-            const phoneRegex = /^\d{10}$/;
-            if (!value.trim()) nextErrors.phone = 'Phone number is required';
-            else if (!phoneRegex.test(value)) nextErrors.phone = 'Phone number must be exactly 10 digits';
-            else nextErrors.phone = '';
-        }
-        if (name === 'email') {
-            if (!value.trim()) nextErrors.email = 'Email is required';
-            else if (!isValidEmail(value)) nextErrors.email = 'Please enter a valid email address';
-            else nextErrors.email = '';
-        }
-        if (name === 'password') {
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-            if (!value) nextErrors.password = 'Password is required';
-            else if (!passwordRegex.test(value)) nextErrors.password = 'Password must contain at least 8 characters with uppercase, lowercase, number, and special character (@$!%*?&)';
-            else nextErrors.password = '';
-        }
-        if (name === 'confirmPassword') {
-            if (!value) nextErrors.confirmPassword = 'Please confirm your password';
-            else if (value !== formData.password) nextErrors.confirmPassword = 'Passwords do not match';
-            else nextErrors.confirmPassword = '';
-        }
-        setErrors(nextErrors);
-    };
-
     const validateForm = () => {
         const newErrors = {};
 
@@ -200,12 +169,12 @@ function SignUp() {
             newErrors.lastName = 'Last name is required';
         }
 
-        // Phone validation: exactly 10 digits
-        const phoneRegex = /^\d{10}$/;
+        // Phone validation
+        const phoneRegex = /^(\+\d{1,3}[- ]?)?\d{10}$/;
         if (!formData.phone.trim()) {
             newErrors.phone = 'Phone number is required';
         } else if (!phoneRegex.test(formData.phone)) {
-            newErrors.phone = 'Phone number must be exactly 10 digits';
+            newErrors.phone = 'Please enter a valid phone number';
         }
 
         // Email validation
@@ -221,7 +190,7 @@ function SignUp() {
         if (!formData.password) {
             newErrors.password = 'Password is required';
         } else if (!passwordRegex.test(formData.password)) {
-            newErrors.password = 'Password must contain at least 8 characters with uppercase, lowercase, number, and special character (@$!%*?&)';
+            newErrors.password = 'Password must contain at least 8 characters including uppercase, lowercase, number, and special character';
         }
 
         // Confirm Password validation
@@ -245,29 +214,22 @@ function SignUp() {
         setLoading(true);
 
         try {
-            const response = await axios.post('/auth/signup', formData, { timeout: 15000 });
+            const response = await axios.post('http://localhost:8070/auth/signup', formData);
             
             if (response.data.success) {
                 alert('Registration successful! Please sign in.');
                 navigate('/signin');
             }
         } catch (error) {
-            const message = error?.response?.data?.message
-                || (error?.code === 'ECONNABORTED' ? 'Request timed out. Please try again.'
-                : (error?.message?.includes('Network') ? 'Cannot reach server. Is the backend running?' : 'Registration failed. Please try again.'));
-            setErrors({ general: message });
+            if (error.response && error.response.data) {
+                setErrors({ general: error.response.data.message });
+            } else {
+                setErrors({ general: 'Registration failed. Please try again.' });
+            }
         } finally {
             setLoading(false);
         }
     };
-
-    // Auto-dismiss general error after 3s
-    useEffect(() => {
-        if (errors.general) {
-            const t = setTimeout(() => setErrors(prev => ({ ...prev, general: '' })), 3000);
-            return () => clearTimeout(t);
-        }
-    }, [errors.general]);
 
     return (
         <div className="auth-container">
@@ -297,12 +259,10 @@ function SignUp() {
                                 name="firstName"
                                 value={formData.firstName}
                                 onChange={handleChange}
-                                onBlur={handleBlur}
                                 className={errors.firstName ? 'error' : ''}
                                 placeholder="Enter your first name"
-                                required
                             />
-                            {/* inline error hidden per request */}
+                            {errors.firstName && <span className="error-message">{errors.firstName}</span>}
                         </div>
 
                         <div className="form-group">
@@ -313,45 +273,39 @@ function SignUp() {
                                 name="lastName"
                                 value={formData.lastName}
                                 onChange={handleChange}
-                                onBlur={handleBlur}
                                 className={errors.lastName ? 'error' : ''}
                                 placeholder="Enter your last name"
-                                required
                             />
-                            {/* inline error hidden per request */}
+                            {errors.lastName && <span className="error-message">{errors.lastName}</span>}
                         </div>
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="phone">Phone Number</label>
-                            <input
+                        <input
                             type="tel"
                             id="phone"
                             name="phone"
                             value={formData.phone}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
+                            onChange={handleChange}
                             className={errors.phone ? 'error' : ''}
                             placeholder="Enter your phone number"
-                                required
                         />
-                        {/* inline error hidden per request */}
+                        {errors.phone && <span className="error-message">{errors.phone}</span>}
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="email">Email</label>
-                            <input
+                        <input
                             type="email"
                             id="email"
                             name="email"
                             value={formData.email}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
+                            onChange={handleChange}
                             className={errors.email ? 'error' : ''}
                             placeholder="Enter your email address"
-                                required
                         />
-                        {/* inline error hidden per request */}
+                        {errors.email && <span className="error-message">{errors.email}</span>}
                     </div>
 
                     <div className="form-group">
@@ -364,10 +318,8 @@ function SignUp() {
                                     name="password"
                                     value={formData.password}
                                     onChange={handleChange}
-                                    onBlur={handleBlur}
                                     className={errors.password ? 'error' : ''}
                                     placeholder="Enter your password"
-                                    required
                                 />
                                 <button
                                     type="button"
@@ -412,7 +364,7 @@ function SignUp() {
                             </div>
                         )}
                         
-                        {/* inline error hidden per request */}
+                        {errors.password && <span className="error-message">{errors.password}</span>}
                     </div>
 
                     <div className="form-group">
@@ -424,10 +376,8 @@ function SignUp() {
                                 name="confirmPassword"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
-                                onBlur={handleBlur}
                                 className={errors.confirmPassword ? 'error' : ''}
                                 placeholder="Confirm your password"
-                                required
                             />
                             <button
                                 type="button"
@@ -438,7 +388,7 @@ function SignUp() {
                                 {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
                             </button>
                         </div>
-                        {/* inline error hidden per request */}
+                        {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
                     </div>
 
                     <button

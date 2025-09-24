@@ -118,7 +118,7 @@ router.post('/', async (req, res) => {
         if (!passwordRegex.test(password)) {
             return res.status(400).json({
                 success: false,
-                message: 'Password must contain at least 8 characters with uppercase, lowercase, number, and special character (@$!%*?&)'
+                message: 'Password must contain at least 8 characters including uppercase, lowercase, number, and special character'
             });
         }
 
@@ -235,7 +235,7 @@ router.put('/:id', async (req, res) => {
             if (!passwordRegex.test(password)) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Password must contain at least 8 characters with uppercase, lowercase, number, and special character (@$!%*?&)'
+                    message: 'Password must contain at least 8 characters including uppercase, lowercase, number, and special character'
                 });
             }
             const saltRounds = 10;
