@@ -8,6 +8,8 @@ import UserSchedule from "./components/RouteManagement/SchedulePage_user";
 
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
 
 
 //Admin components
@@ -18,6 +20,10 @@ import BusStopPage from "./components/RouteManagement/BusStopPage";
 import SchedulesPage from "./components/RouteManagement/SchedulesPage";
 
 import UserManagement from "./components/UserManagement";
+import UserCreate from "./components/UserCreate";
+import UserProfile from "./components/UserProfile";
+import UserEditProfile from "./components/UserEditProfile";
+import PassengerProfile from "./components/PassengerProfile";
 
 import BusesPage from "./components/RouteManagement/BusesPage";
 
@@ -109,6 +115,9 @@ function App() {
           element={<SignIn />}
           />
 
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+
           <Route
           path="/users"
           element={
@@ -116,6 +125,39 @@ function App() {
               <Header />
               <OffCanvas />
               <UserManagement />
+            </div>
+          }
+          />
+
+          <Route
+          path="/users/create"
+          element={
+            <div>
+              <Header />
+              <OffCanvas />
+              <UserCreate />
+            </div>
+          }
+          />
+
+          <Route
+          path="/users/view/:id"
+          element={
+            <div>
+              <Header />
+              <OffCanvas />
+              <UserProfile />
+            </div>
+          }
+          />
+
+          <Route
+          path="/users/edit/:id"
+          element={
+            <div>
+              <Header />
+              <OffCanvas />
+              <UserEditProfile />
             </div>
           }
           />
@@ -212,12 +254,19 @@ function App() {
               </div>
             } />
 
-          <Route path="/refunds" element={
+          <Route path="/refunds" element={<div>
+              <Header /><RefundPage /></div>}/>
+
+          <Route
+          path="/me"
+          element={
             <div>
               <Header />
-              <RefundPage />
-             </div>
-            } />
+              <PassengerProfile />
+            </div>
+          }
+          />
+          
       </Routes>
     </Router>
   );

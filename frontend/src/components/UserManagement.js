@@ -31,9 +31,23 @@ function UserManagement() {
         fetchUsers();
     }, [selectedRole]);
 
+    // Auto-dismiss alerts after 3s
+    useEffect(() => {
+        if (error) {
+            const t = setTimeout(() => setError(''), 3000);
+            return () => clearTimeout(t);
+        }
+    }, [error]);
+    useEffect(() => {
+        if (success) {
+            const t = setTimeout(() => setSuccess(''), 3000);
+            return () => clearTimeout(t);
+        }
+    }, [success]);
+
     const fetchUserStats = async () => {
         try {
-            const response = await axios.get('http://localhost:8070/users/stats');
+            const response = await axios.get('/users/stats');
             if (response.data.success) {
                 setUserStats(response.data.stats);
             }
@@ -46,8 +60,20 @@ function UserManagement() {
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const roleParam = selectedRole !== 'all' ? `?role=${selectedRole}` : '';
-            const response = await axios.get(`http://localhost:8070/users${roleParam}`);
+            let params = new URLSearchParams();
+            
+            if (selectedRole !== 'all') {
+                params.append('role', selectedRole);
+            }
+            
+            if (searchTerm.trim()) {
+                params.append('search', searchTerm.trim());
+            }
+            
+            const queryString = params.toString();
+            const url = queryString ? `/users?${queryString}` : '/users';
+            
+            const response = await axios.get(url);
             if (response.data.success) {
                 setUsers(response.data.users);
             }
@@ -100,7 +126,7 @@ function UserManagement() {
     const handleDeleteUser = async (userId) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             try {
-                const response = await axios.delete(`http://localhost:8070/users/${userId}`);
+                const response = await axios.delete(`/users/${userId}`);
                 if (response.data.success) {
                     setSuccess('User deleted successfully');
                     fetchUsers();
@@ -134,6 +160,8 @@ function UserManagement() {
             password: '',
             role: 'passenger'
         });
+    const handleEditUser = (userId) => {
+        navigate(`/users/edit/${userId}`);
     };
 
     const closeModals = () => {
@@ -428,6 +456,7 @@ function UserManagement() {
             )}
         </div>
     );
+}
 }
 
 export default UserManagement;
