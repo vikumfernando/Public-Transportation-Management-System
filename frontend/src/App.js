@@ -218,6 +218,16 @@ function App() {
               <RefundPage />
              </div>
             } />
+            
+             <Route
+          path="/me"
+          element={
+            <div>
+              <Header />
+              <PassengerProfile />
+            </div>
+          }
+          />
       </Routes>
     </Router>
   );
