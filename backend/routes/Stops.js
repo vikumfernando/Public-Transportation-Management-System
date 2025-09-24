@@ -1,10 +1,10 @@
 const router = require("express").Router();
 let BusStop = require("../models/BusStop");
+const Route = require("../models/Route");
 
 //adding new bus stop to the data base
 router.route("/addStop").post(async (req, res) => {
-  const { stopName, lat, lon } =
-    req.body;
+  const { stopName, lat, lon } = req.body;
 
   try {
     const newStop = new BusStop({
@@ -14,6 +14,8 @@ router.route("/addStop").post(async (req, res) => {
     });
 
     await newStop.save();
+
+    res.status(201).json(newStop);
     res.json("New stop added succesfully");
   } catch (err) {
     console.log("Error occured while adding new stop " + err);
@@ -45,14 +47,13 @@ router.route("/searchstop/:stop").get(async (req, res) => {
       return res.status(404).json({ message: "Bus Stop not found" });
     }
     res.json(stop);
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error while retreiving bus stop data" });
   }
 });
 
-//displaying the bus stops loaction on the map
+//displaying the bus stops location on the map
 router.route("/displayStop/:stopId").get(async (req, res) => {
   const stopId = req.params.stopId;
   const stop = await BusStop.findById(stopId);
@@ -61,6 +62,57 @@ router.route("/displayStop/:stopId").get(async (req, res) => {
     res.status(200).json(stop);
   } else {
     res.status(404).json("Stop not found");
+  }
+});
+
+//Deleting bus stops
+router.route("/deletestop/:id").delete(async (req, res) => {
+  try {
+    const stopId = req.params.id;
+
+    console.log("Stop to delete:", stopId);
+
+    const referenced = await Route.findOne({ stopsSequence: stopId });
+
+    if (referenced) {
+      return res.status(400).json({
+        message: `Cannot delete: Stop is used in route ${referenced.routeNum} (${referenced.routeName})`,
+      });
+    }
+
+    const deletedStop = await BusStop.findByIdAndDelete(stopId);
+
+    if (!deletedStop) {
+      return res.status(404).json({ message: "Stop not found" });
+    }
+
+    console.log("Bus stop deleted successfully");
+    res.json({ message: "Stop deleted successfully" });
+  } catch (err) {
+    console.error("Error while deleting bus stop:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+//updating bus stops
+router.route("/updatestop/:id").put(async (req, res) => {
+  const stopId = req.params.id;
+  const { stopName, lat, lon } = req.body;
+
+  try {
+    const updatedStop = await BusStop.findByIdAndUpdate(stopId, {
+      stopName,
+      lat,
+      lon,
+    });
+
+    if (!updatedStop) {
+      return res.status(404).json({ message: "Bus stop not found" });
+    }
+
+    res.status(200).json(updatedStop);
+  } catch (err) {
+    console.log("Error while updating bus stop : " + err);
   }
 });
 

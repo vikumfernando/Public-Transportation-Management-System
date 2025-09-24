@@ -1,6 +1,5 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const bodyparser = require("body-parser");
 const cors = require("cors");
 
 const { Server } = require("socket.io"); //new
@@ -12,8 +11,7 @@ require("dotenv").config();
 const PORT = process.env.PORT || 8070;
 
 app.use(cors());
-
-app.use(bodyparser.json());
+app.use(express.json());
 
 const server = http.createServer(app); //new
 
@@ -40,15 +38,17 @@ connection.once("open", () => {
 
 const busStopRouter = require("./routes/Stops.js");
 const busRouter = require("./routes/Busses.js");
-
 const routesRouter = require("./routes/Routes.js");
 const schedulesRouter = require("./routes/Schedules.js");
-
+const authRouter = require("./routes/auth.js");
+const usersRouter = require("./routes/users.js");
 
 app.use("/Stops", busStopRouter);
 app.use("/Busses", busRouter);
 app.use("/Routes", routesRouter);
 app.use("/Schedules", schedulesRouter);
+app.use("/auth", authRouter);
+app.use("/users", usersRouter);
 
 
 //changed from app to server

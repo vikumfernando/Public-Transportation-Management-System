@@ -53,15 +53,15 @@ function OffCanvas() {
             <a href="/routepage" className="nav-link-custom">
               Route
             </a>
-            <a href="#" className="nav-link-custom">
+            <a href="schedulepage" className="nav-link-custom">
               Schedule
             </a>
 
-            <a href="#" className="nav-link-custom">
+            <a href="/busespage" className="nav-link-custom">
               Buses
             </a>
-            <a href="#" className="nav-link-custom">
-              User
+            <a href="/users" className="nav-link-custom">
+              User Management
             </a>
           </div>
 

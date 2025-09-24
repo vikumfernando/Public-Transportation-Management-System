@@ -1,0 +1,261 @@
+.tableContainer {
+  overflow-x: auto;
+  margin: 20px 50px;
+}
+
+.tableFormat {
+  width: 100%;
+  font-size: 18px;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tableFormat th {
+  background-color: #f8f9fa;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.tableFormat td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: top;
+}
+
+.tableFormat tr:hover {
+  background-color: #f8f9fa;
+}
+
+.tableFormat tr:last-child td {
+  border-bottom: none;
+}
+
+.btnContainer{
+  width : 100%;
+  
+  margin-bottom: 20px;
+  margin-top: 20px;
+  display : inline-flex;
+
+}
+
+.search-container3{
+  width : 700px;
+  padding-left : 3px;
+}
+
+.filter-button3{
+  background: white;
+  border: none;
+  border-radius: 25px;
+  padding: 0 20px;
+  height: 50px;
+  font-size: 16px;
+  font-family: inherit;
+  color: rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  vertical-align: top;
+  width: 9%;
+  pointer-events: all;
+}
+.filter-button3:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(97, 237, 65, 0.15);
+}
+
+.filter-button3:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(97, 237, 65, 0.2);
+}
+
+.filter-icon2 {
+  width: 24px;
+  height: 24px;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+  margin-left: 1px;
+}
+
+.filter-button:hover .filter-icon {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+.addBtnContainer{
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-top: 15px;
+  
+}
+
+.addBtn{
+background: white;
+  border: none;
+  border-radius: 25px;
+  padding: 0 20px;
+  height: 50px;
+  font-size: 16px;
+  font-family: inherit;
+  color: rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  vertical-align: top;
+  width: 70px;
+  pointer-events: all;
+}
+
+.addBtn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(97, 237, 65, 0.15);
+}
+
+
+.pdfBtnContainer{
+  margin-left: auto;
+  margin-top: 15px;
+  padding-right: 5px;
+}
+
+.pdfBtn{
+background: white;
+  border: none;
+  border-radius: 25px;
+  padding: 0 20px;
+  height: 50px;
+  font-size: 16px;
+  font-family: inherit;
+  color: rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  vertical-align: top;
+  width: 70px;
+  pointer-events: all;
+}
+
+.pdfBtn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(97, 237, 65, 0.15);
+}
+
+/* For the pop up form to add new schedules */
+.popupContainer{
+  width : 95%;
+  height : auto;
+  position: fixed;
+  display : flex;
+  justify-content: center;
+  z-index: 1;
+  margin: 90px 40px 40px 40px;
+  right :-2000px;
+  transition: right 0.5s ease;
+}
+
+.popupContainer.open{
+  width : 95%;
+  height : auto;
+  position: fixed;
+  display : flex;
+  justify-content: center;
+  z-index: 1;
+  margin: 90px 40px 40px 40px;
+  right : 0;
+}
+
+.popupBox{
+  background-color:  #0b5648;
+  width : 100%;
+  height : auto;
+  border-radius: 25px;
+  padding : 30px 40px 30px 40px;
+  display : flex;
+}
+
+.topicLbl{
+  font-size: 30px;
+  font-weight: 500;
+  opacity: 0.9;
+  color : white;
+}
+
+.leftSide{
+  width : 57%;
+}
+
+.rightSide{
+  width: 50%;
+  margin-left: 150px;
+  margin-top: 70px;
+}
+
+.formContainer{
+  width : 100%;
+  display : flex;
+}
+
+/*For the time picker */
+.time-picker {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 18px;
+  margin-left: 64px;
+}
+
+.time-picker input[type="number"] {
+  width: 80px;
+  padding: 5px;
+  font-size: 18px;
+  text-align: center;
+  border-radius : 12px;
+  border : 1px solid #ccc;
+}
+
+/* Show spinner arrows */
+.time-picker input[type="number"]::-webkit-inner-spin-button,
+.time-picker input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+.time-picker select {
+  padding: 5px;
+  font-size: 16px;
+}
+
+.timeInput{
+  width: 54px;
+  margin-right: 5px;
+  height: 45px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: -10px;
+}
+
+.removeStop{
+  background : none;
+  border : none;
+}

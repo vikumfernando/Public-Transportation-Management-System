@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef} from "react";
-import "../styles/searchRoute.css";
+import "../styles/RoutesPage.css";
 import {
   GoogleMap,
   useJsApiLoader,
@@ -26,7 +26,7 @@ const mapOptions = {
 
 const containerStyle = {
   width: "100%",
-  height: "500px",
+  height: "700px",
 };
 
 const center = {
@@ -51,11 +51,11 @@ function RouteMap({ stops }) {
   const path = stops?.map((stop) => ({ lat: stop.lat, lng: stop.lon })) || [];
 
   return (
-    <div className="mapDiv">
+    <div className = "mapDiv2">
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}
-        zoom={16}
+        zoom={14}
         onLoad={onLoad}
         options={mapOptions}
       >
@@ -74,8 +74,8 @@ function RouteMap({ stops }) {
         {path.length > 1 && (
           <Polyline
             path={path}
-            option={{
-              strokeColor: "#29b944ff",
+            options={{
+              strokeColor: "black",
               strokeOpacity: 0.8,
               strokeWeight: 5,
             }}

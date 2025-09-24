@@ -1,10 +1,20 @@
 import '../styles/header.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Header() {
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const [user, setUser] = useState(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Check if user is logged in
+        const userData = localStorage.getItem('user');
+        if (userData) {
+            setUser(JSON.parse(userData));
+        }
+    }, []);
 
     const dropdownEnter = (dropdown) => {
         setActiveDropdown(dropdown);
@@ -18,11 +28,17 @@ function Header() {
         setActiveDropdown(null);
     };
 
+    const handleSignOut = () => {
+        localStorage.removeItem('user');
+        setUser(null);
+        navigate('/');
+    };
+
     return (
         <nav className="navbar">
             <div className="nav-container">
                 <Link to="/" className="logo">
-                    <div className="logo-icon">TH</div>Brand Name
+                   <img style = {{width : "115px", height : "97px"}} src = "/images/siteLogo.png"/>
                 </Link>
 
                 <ul className= "nav-menu" id="navMenu">
@@ -31,20 +47,23 @@ function Header() {
                         onMouseEnter={() => dropdownEnter('test1')}
                         onMouseLeave={dropdownLeave}
                     >
-                        <Link to="#" className="nav-link" onClick={closeMobileMenu}>Test 1 </Link>
+                        <Link to="#" className="nav-link" onClick={closeMobileMenu}>Location Service</Link>
                         
                         <div className={`dropdown-menu ${activeDropdown === 'test1' ? 'show' : ''}`}>
-                            <Link to="/route-planning" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 1
+                            <Link to="/" className="dropdown-item" onClick={closeMobileMenu}>
+                                Live Location
                             </Link>
-                            <Link to="/fleet-management" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 2
+                            
+                            <Link to="/busstops" className="dropdown-item" onClick={closeMobileMenu}>
+                                Bus Stops
                             </Link>
-                            <Link to="/real-time-tracking" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 3
+
+                            <Link to="/busroutes" className="dropdown-item" onClick={closeMobileMenu}>
+                                Bus Routes
                             </Link>
-                            <Link to="/analytics-dashboard" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 4
+                            
+                            <Link to="/userschedule" className="dropdown-item" onClick={closeMobileMenu}>
+                                Schedule 
                             </Link>
                         </div>
                     </li>
@@ -54,21 +73,24 @@ function Header() {
                         onMouseEnter={() => dropdownEnter('test2')}
                         onMouseLeave={dropdownLeave}
                     >
-                        <Link to="#" className="nav-link" onClick={closeMobileMenu}>
-                            Test 2
+                        <Link to="/payment-dash" className="nav-link" onClick={closeMobileMenu}>
+                            Payment Service
                         </Link>
                         <div className={`dropdown-menu ${activeDropdown === 'test2' ? 'show' : ''}`}>
-                            <Link to="/bus-transit" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 1
+                            <Link to="/smart-cards" className="dropdown-item" onClick={closeMobileMenu}>
+                                Add NFS
                             </Link>
-                            <Link to="/rail-systems" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub2 
+                            <Link to="/visa-cards" className="dropdown-item" onClick={closeMobileMenu}>
+                                Add VISA
                             </Link>
-                            <Link to="/multi-modal-transport" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 3
+                            <Link to="/topup" className="dropdown-item" onClick={closeMobileMenu}>
+                                Recharge
                             </Link>
-                            <Link to="/smart-cities" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 4
+                            <Link to="/transactions" className="dropdown-item" onClick={closeMobileMenu}>
+                                Transaction History
+                            </Link>
+                            <Link to="/refunds" className="dropdown-item" onClick={closeMobileMenu}>
+                                Refund
                             </Link>
                         </div>
                     </li>
@@ -79,11 +101,11 @@ function Header() {
                         onMouseLeave={dropdownLeave}
                     >
                         <Link to="#" className="nav-link" onClick={closeMobileMenu}>
-                            Test 3
+                            Booking Service
                         </Link>
                         <div className={`dropdown-menu ${activeDropdown === 'test3' ? 'show' : ''}`}>
                             <Link to="/documentation" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 1
+                                Seat Booking
                             </Link>
                             <Link to="/case-studies" className="dropdown-item" onClick={closeMobileMenu}>
                                 sub 2
@@ -123,12 +145,19 @@ function Header() {
                 </ul>
 
                 <div className="nav-actions">
-                    <button className="signout-btn" onClick={() => {
-                        console.log('Signing out...');
-                    }}>
-                        SIGN OUT
-                    </button>
-                    
+                    {user ? (
+                        <div className="user-menu">
+                            <span className="welcome-text">Welcome, {user.firstName}!</span>
+                            <button className="signout-btn" onClick={handleSignOut}>
+                                SIGN OUT
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="auth-buttons">
+                            <Link to="/signin" className="signin-btn">SIGN IN</Link>
+                            <Link to="/signup" className="signup-btn">SIGN UP</Link>
+                        </div>
+                    )}
                 </div>
             </div>
         </nav>
