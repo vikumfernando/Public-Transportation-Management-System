@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import "../styles/BusStopPage.css";
-import BusStopMap from "../components/BusStopMap";
+import "../../styles/BusStopPage.css";
+import BusStopMap from "./BusStopMap";
 
 function BusStopPageUser({ setStops }) {
   const [stops, setBusStop] = useState([]);

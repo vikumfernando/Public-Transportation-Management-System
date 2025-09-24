@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import "../styles/searchRoute.css";
-import "../styles/searchBox.css";
-import BusMap from "../components/BusMap";
+import "../../styles/searchRoute.css";
+import "../../styles/searchBox.css";
+import BusMap from "./BusMap";
 import { io } from "socket.io-client";
 
 <link
