@@ -62,17 +62,22 @@
     background: linear-gradient(90deg, var(--ptms-primary), var(--ptms-accent));
 }
 
-.auth-header {
-    text-align: center;
-    margin-bottom: 30px;
+.auth-card .brand .logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  display: grid;
+  place-items: center;
+  color: white;
+  font-weight: 800;
 }
 
-.auth-logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-    gap: 12px;
+.auth-illustration {
+  background: radial-gradient(80% 80% at 20% 10%, rgba(255,255,255,.12), rgba(255,255,255,0) 60%),
+              radial-gradient(60% 60% at 80% 50%, rgba(255,255,255,.1), rgba(255,255,255,0) 60%),
+              linear-gradient(180deg, #0ea5e9 0%, #6366f1 60%, #0ea5e9 100%);
+  color: white;
 }
 
 .auth-logo-icon {
@@ -112,29 +117,24 @@
     font-weight: 500;
 }
 
-.auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+.auth-btn-primary.btn {
+  background: linear-gradient(135deg, #4f46e5, #0ea5e9);
+  border: none;
 }
 
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+.auth-btn-primary.btn:hover, .auth-btn-primary.btn:focus {
+  filter: brightness(1.05);
 }
 
-@media (max-width: 480px) {
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
+.social-btn.btn {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #111827;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.form-hint {
+  font-size: .875rem;
+  color: #6b7280;
 }
 
 .form-group label {
