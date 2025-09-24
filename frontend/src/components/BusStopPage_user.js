@@ -32,7 +32,7 @@ function BusStopPageUser({ setStops }) {
     getStops();
   }, []);
 
-  //Loading bus stop location on click based on the given stop id
+  //Loading bus stop location on click, based on the given stop id
   async function loadStops(stopId) {
     const res = await axios.get(
       `http://localhost:8070/Stops/displayStop/${stopId}`

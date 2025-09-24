@@ -98,7 +98,10 @@ router.route("/deleteroute/:id").delete(async (req, res) => {
 
     console.log("Route to be deleted : " + routeId);
 
-    const referenced = await Schedule.findOne({ routeId: routeId  });
+    const referenced = await Schedule.findOne({ _id: routeId  });
+
+
+     console.log(referenced);
 
     if (referenced) {
       return res.status(400).json({

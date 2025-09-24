@@ -53,6 +53,7 @@ function RouteMap({ stops }) {
   return (
     <div className = "mapDiv2">
       <GoogleMap
+      key={JSON.stringify(stops)} 
         mapContainerStyle={containerStyle}
         center={center}
         zoom={14}
