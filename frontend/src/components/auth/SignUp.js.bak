@@ -1,0 +1,336 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { Form, Button, Alert, Container, Card, Row, Col, Spinner } from 'react-bootstrap';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+
+const SignUp = () => {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+  });
+  
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { register, loading, error, clearErrors, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/';
+
+  const { firstName, lastName, email, phone, password, confirmPassword } = formData;
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(redirectTo, { replace: true });
+    }
+  }, [isAuthenticated, navigate, redirectTo]);
+
+  // Clear errors on component mount
+  useEffect(() => {
+    clearErrors();
+    // eslint-disable-next-line
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error for the field being edited
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    }
+
+    if (!lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
+    }
+    
+    if (!email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!emailRegex.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    if (!phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!phoneRegex.test(phone)) {
+      newErrors.phone = 'Please enter a valid phone number with country code (e.g., +1234567890)';
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required';
+    } else if (!passwordRegex.test(password)) {
+      newErrors.password = 'Password must contain at least 8 characters, including uppercase, lowercase, number, and special character';
+    }
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm() || isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+      const result = await register({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        password,
+      });
+
+      if (result?.success) {
+        navigate(redirectTo, { replace: true });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Container className="py-5">
+      <Row className="justify-content-center">
+        <Col md={8} lg={8} xl={7}>
+          <Card className="shadow-sm border-0">
+            <Card.Body className="p-4 p-md-5">
+              <div className="text-center mb-4">
+                <h2 className="fw-bold mb-2">Create an Account</h2>
+                <p className="text-muted">Fill in your details to get started</p>
+              </div>
+              
+              {error && (
+                <Alert 
+                  variant="danger" 
+                  className="text-center"
+                  onClose={clearErrors}
+                  dismissible
+                >
+                  {error.message || 'An error occurred during registration'}
+                  {error.details && (
+                    <ul className="mb-0 mt-2">
+                      {Object.entries(error.details).map(([field, messages]) => (
+                        <li key={field}>
+                          {messages.map((message, i) => (
+                            <div key={i}>{message}</div>
+                          ))}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </Alert>
+              )}
+              
+              <Form onSubmit={handleSubmit} noValidate>
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3" controlId="firstName">
+                      <Form.Label>First Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="firstName"
+                        value={firstName}
+                        onChange={handleChange}
+                        isInvalid={!!errors.firstName}
+                        placeholder="Enter your first name"
+                        disabled={isSubmitting}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.firstName}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3" controlId="lastName">
+                      <Form.Label>Last Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="lastName"
+                        value={lastName}
+                        onChange={handleChange}
+                        isInvalid={!!errors.lastName}
+                        placeholder="Enter your last name"
+                        disabled={isSubmitting}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.lastName}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Form.Group className="mb-3" controlId="email">
+                  <Form.Label>Email address</Form.Label>
+                  <Form.Control
+                    type="email"
+                    name="email"
+                    value={email}
+                    onChange={handleChange}
+                    isInvalid={!!errors.email}
+                    placeholder="Enter your email"
+                    autoComplete="email"
+                    disabled={isSubmitting}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.email}
+                  </Form.Control.Feedback>
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="phone">
+                  <Form.Label>Phone Number</Form.Label>
+                  <div className="input-group">
+                    <span className="input-group-text">+</span>
+                    <Form.Control
+                      type="tel"
+                      name="phone"
+                      value={phone}
+                      onChange={handleChange}
+                      isInvalid={!!errors.phone}
+                      placeholder="1234567890"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <Form.Text className="text-muted">
+                    Include country code (e.g., 1 for US/Canada)
+                  </Form.Text>
+                  <Form.Control.Feedback type="invalid">
+                    {errors.phone}
+                  </Form.Control.Feedback>
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="password">
+                  <Form.Label>Password</Form.Label>
+                  <div className="input-group">
+                    <Form.Control
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={password}
+                      onChange={handleChange}
+                      isInvalid={!!errors.password}
+                      placeholder="Create a password"
+                      autoComplete="new-password"
+                      disabled={isSubmitting}
+                    />
+                    <Button
+                      variant="outline-secondary"
+                      onClick={() => setShowPassword(!showPassword)}
+                      type="button"
+                      disabled={isSubmitting}
+                      className="d-flex align-items-center"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </Button>
+                  </div>
+                  <Form.Text className="text-muted">
+                    Must be at least 8 characters with uppercase, lowercase, number, and special character
+                  </Form.Text>
+                  <Form.Control.Feedback type="invalid">
+                    {errors.password}
+                  </Form.Control.Feedback>
+                </Form.Group>
+
+                <Form.Group className="mb-4" controlId="confirmPassword">
+                  <Form.Label>Confirm Password</Form.Label>
+                  <div className="input-group">
+                    <Form.Control
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      value={confirmPassword}
+                      onChange={handleChange}
+                      isInvalid={!!errors.confirmPassword}
+                      placeholder="Confirm your password"
+                      autoComplete="new-password"
+                      disabled={isSubmitting}
+                    />
+                    <Button
+                      variant="outline-secondary"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      type="button"
+                      disabled={isSubmitting}
+                      className="d-flex align-items-center"
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </Button>
+                  </div>
+                  <Form.Control.Feedback type="invalid">
+                    {errors.confirmPassword}
+                  </Form.Control.Feedback>
+                </Form.Group>
+
+                <Button 
+                  variant="primary" 
+                  type="submit" 
+                  className="w-100 py-2 mb-3" 
+                  size="lg"
+                  disabled={isSubmitting || loading}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                        className="me-2"
+                      />
+                      Creating Account...
+                    </>
+                  ) : 'Sign Up'}
+                </Button>
+                
+                <div className="text-center mt-4">
+                  <p className="mb-0">
+                    Already have an account?{' '}
+                    <Link 
+                      to={
+                        redirectTo === '/' 
+                          ? '/login' 
+                          : `/login?redirect=${encodeURIComponent(redirectTo)}`
+                      }
+                      className="text-primary fw-semibold text-decoration-none"
+                    >
+                      Sign In
+                    </Link>
+                  </p>
+                </div>
+              </Form>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
+  );
+};
+
+export default SignUp;
