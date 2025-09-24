@@ -21,6 +21,15 @@ import UserManagement from "./components/UserManagement";
 
 import BusesPage from "./components/BusesPage";
 
+//Payment components
+import Dashboard from "./components/Dashboard";
+import SmartCardPage from "./components/SmartCardPage";
+import VisaCardPage from "./components/VisaCardPage";
+import TopupPage from "./components/TopupPage";
+import RechargePage from "./components/RechargePage";
+import TransactionsPage from "./components/TransactionsPage";
+import RefundPage from "./components/RefundPage";
+
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
@@ -154,6 +163,61 @@ function App() {
             </div>
           }
           />
+
+          <Route path="/" element={
+            <div>
+              <Header />
+              <Dashboard />
+            </div>
+          } />
+
+          <Route path="/dashboard" element={
+            <div>
+              <Header />
+              <Dashboard />
+            </div>} />
+
+          <Route path="/smart-cards" element={
+            <div>
+              <Header />
+              <SmartCardPage />
+             </div>
+            } />
+
+          <Route path="/visa-cards" element={
+            <div>
+              <Header />
+              <VisaCardPage />
+            </div>
+          } />
+
+          <Route path="/topup" element={
+            <div>
+              <Header />
+              <TopupPage />
+              </div>
+            } />
+
+          <Route path="/recharge" element={
+            <div>
+              <Header />
+              <RechargePage />
+              </div>
+            } />
+
+          <Route path="/transactions" element={
+            <div>
+              <Header />
+              <TransactionsPage />
+              </div>
+            } />
+
+          <Route path="/refunds" element={
+            <div>
+              <Header />
+              <RefundPage />
+             </div>
+            } />
       </Routes>
     </Router>
   );
