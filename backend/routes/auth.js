@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const User = require('../models/User');
-const { sendEmail } = require('../utils/mailer');
+const { sendEmail } = require('../../../../../Pictures/Public-Transportation-Management-System/backend/utils/mailer');
 
 const router = express.Router();
 

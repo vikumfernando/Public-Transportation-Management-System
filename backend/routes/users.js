@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const { sendEmail } = require('../../../../../Pictures/Public-Transportation-Management-System/backend/utils/mailer');
 
 const router = express.Router();
 
@@ -248,6 +249,25 @@ router.put('/:id', async (req, res) => {
             { new: true, runValidators: true }
         ).select('-password');
 
+        // Notify user if sensitive fields changed
+        try {
+            if (password) {
+                await sendEmail({
+                    to: updatedUser.email,
+                    subject: 'Your password was changed',
+                    html: `<p>Hi ${updatedUser.firstName},</p><p>Your password was recently changed by an administrator or via profile update. If this wasn't you, contact support immediately.</p>`
+                });
+            } else if (email && email !== user.email) {
+                await sendEmail({
+                    to: email,
+                    subject: 'Your email was updated',
+                    html: `<p>Hi ${updatedUser.firstName},</p><p>Your account email was changed to this address.</p>`
+                });
+            }
+        } catch (e) {
+            console.warn('Update notification email failed:', e?.message);
+        }
+
         res.status(200).json({
             success: true,
             message: 'User updated successfully',
@@ -287,6 +307,16 @@ router.delete('/:id', async (req, res) => {
         }
 
         await User.findByIdAndDelete(userId);
+
+        try {
+            await sendEmail({
+                to: user.email,
+                subject: 'Your account has been deleted',
+                html: `<p>Hi ${user.firstName},</p><p>Your account has been deleted. If this was a mistake, please contact support.</p>`
+            });
+        } catch (e) {
+            console.warn('Deletion email failed:', e?.message);
+        }
 
         res.status(200).json({
             success: true,
