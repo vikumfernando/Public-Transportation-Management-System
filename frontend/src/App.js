@@ -2,17 +2,25 @@ import Header from "./components/Header";
 import OffCanvas from "./components/OffCanvas";
 
 import SearchRoute from "./components/searchRoute";
+import UserBusStop from "./components/BusStopPage_user";
+import UserRoute from "./components/RoutePage_user";
+import UserSchedule from "./components/SchedulePage_user";
+
+import SignUp from "./components/SignUp";
+import SignIn from "./components/SignIn";
+
+
+//Admin components
 import AdminDashboard from "./components/AdminDashboard";
 
 import RoutesPage from "./components/RoutesPage";
 import BusStopPage from "./components/BusStopPage";
 import SchedulesPage from "./components/SchedulesPage";
 
-import SignUp from "./components/SignUp";
-import SignIn from "./components/SignIn";
 import UserManagement from "./components/UserManagement";
 
 import BusesPage from "./components/BusesPage";
+
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
@@ -111,6 +119,38 @@ function App() {
               <OffCanvas />
               <BusesPage />
 
+            </div>
+          }
+          />
+
+          <Route
+          path="/busstops"
+          element={
+            <div>
+              <Header />
+              <UserBusStop setStops={setStops} stops={stops} />
+
+            </div>
+          }
+          />
+
+          <Route
+          path="/busroutes"
+          element={
+            <div>
+              <Header />
+              <UserRoute/>
+
+            </div>
+          }
+          />
+
+          <Route
+          path="/userschedule"
+          element={
+            <div>
+              <Header />
+              <UserSchedule/>
             </div>
           }
           />

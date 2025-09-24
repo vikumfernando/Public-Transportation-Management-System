@@ -53,14 +53,17 @@ function Header() {
                             <Link to="/" className="dropdown-item" onClick={closeMobileMenu}>
                                 Live Location
                             </Link>
-                            <Link to="/fleet-management" className="dropdown-item" onClick={closeMobileMenu}>
+                            
+                            <Link to="/busstops" className="dropdown-item" onClick={closeMobileMenu}>
+                                Bus Stops
+                            </Link>
+                            
+                            <Link to="/busroutes" className="dropdown-item" onClick={closeMobileMenu}>
+                                Bus Routes
+                            </Link>
+                            
+                            <Link to="/userschedule" className="dropdown-item" onClick={closeMobileMenu}>
                                 Schedule 
-                            </Link>
-                            <Link to="/real-time-tracking" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 3
-                            </Link>
-                            <Link to="/analytics-dashboard" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 4
                             </Link>
                         </div>
                     </li>

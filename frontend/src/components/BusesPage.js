@@ -16,14 +16,8 @@ function BusesPage() {
   const [dropdownschedules, setDropdownschedules] = useState([]);
   const [selectedSchedule, setSelectedSchedule] = useState("");
 
-  //For the new bus adding
-  const [vehicleNum, setVehicleNum] = useState("");
-  const [vehicleType, setVehicleType] = useState("");
-  const [avlSeats, setAvlSeats] = useState();
-
 
   useEffect(() => {
-
     const loadBuses = async () => {
       try {
         const res = await axios.get("http://localhost:8070/Busses/loadBuses");
@@ -34,23 +28,24 @@ function BusesPage() {
     };
 
     const getRoutes = async () => {
-          try {
-            const res = await axios.get("http://localhost:8070/Routes/loadroutes");
-            setDropdownRoutes(res.data);
-          } catch (err) {
-            console.error("Error loading routes: ", err);
-          }
+      try {
+        const res = await axios.get("http://localhost:8070/Routes/loadroutes");
+        setDropdownRoutes(res.data);
+      } catch (err) {
+        console.error("Error loading routes: ", err);
+      }
     };
 
     const loadSchedules = async () => {
-      try{
-        const res = await axios.get("http://localhost:8070/Schedules/loadschedules");
+      try {
+        const res = await axios.get(
+          "http://localhost:8070/Schedules/loadschedules"
+        );
         setDropdownschedules(res.data);
-      }catch(err){
+      } catch (err) {
         console.error("Error while loading schedules : " + err);
       }
-    }
-
+    };
 
     loadBuses();
     getRoutes();
@@ -120,211 +115,11 @@ function BusesPage() {
     doc.save("BusData.pdf");
   };
 
+ 
+
   return (
     <div>
-    {/*Form popup*/}
-
-      <div className="popupContainer" id="popupcontainer">
-        <div className="popupBox">
-
-          <form onSubmit={addBus}>
-            <div className="formContainer">
-
-              {/* Left side */}
-              <div className="leftSide">
-                <h1 style={{ color: "white" }}>Add new Bus</h1>
-
-                <label className="topicLbl" style={{ marginTop: "20px" }}>
-                  Vehicle Number
-                </label>
-                <br/>
-                 
-                <label className="topicLbl" style={{ marginTop: "20px" }}>
-                  Select Route 
-                </label>
-                <br />
-                <select
-                  style={{ fontSize: "18px", marginTop: "12px" }}
-                  className="dropdown-select"
-                  onChange={(e) => setScheduleRoute(e.target.value)}
-                  required
-                >
-                  <option value="">Select Route Number</option>
-                  {dropdownRoutes.map((route) => (
-                    <option key={route._id} value={route._id}>
-                      {route.routeNum} {route.routeName}
-                    </option>
-                  ))}
-                </select>
-
-
-                <label className="topicLbl" style={{ marginTop: "20px" }}>
-                  Select Schedule
-                </label>
-                <br />
-                <select
-                  style={{ fontSize: "18px", marginTop: "12px" }}
-                  className="dropdown-select"
-                  onChange={(e) => setScheduleRoute(e.target.value)}
-                  required
-                >
-                  <option value="">Select Route Number</option>
-                  {dropdownRoutes.map((route) => (
-                    <option key={route._id} value={route._id}>
-                      {route.routeNum} {route.routeName}
-                    </option>
-                  ))}
-                </select>
-
-              </div>
-
-              {/* Right side */}
-
-              <div className="rightSide">
-                <button
-                  onClick={() => handlePopup(false)}
-                  className="closeBtn"
-                  type="button"
-                >
-                  <img
-                    className="closeImg"
-                    src="/images/closeBtn.png"
-                    alt="Submit btn image"
-                    style={{ marginBottom: "142px", marginLeft: "32px" }}
-                  />
-                </button>
-                <label
-                  className="topicLbl"
-                  style={{ marginTop: "20px", marginBottom: "12px" }}
-                >
-                  Select Halts & Times
-                </label>
-                {stopsData.map((s, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    <select
-                      className="dropdown-select"
-                      style={{
-                        fontSize: "16px",
-                        marginRight: "10px",
-                        width: "200px",
-                      }}
-                      value={s.stopId}
-                      onChange={(e) => handleStopChange(index, e.target.value)}
-                      required
-                    >
-                      <option value="">Select Stop</option>
-                      {dropdownStops.map((stop) => (
-                        <option key={stop._id} value={stop._id}>
-                          {stop.stopName}
-                        </option>
-                      ))}
-                    </select>
-
-                    <input
-                      className="timeInput"
-                      type="number"
-                      value={s.time.hour}
-                      onChange={(e) =>
-                        updateTime(index, "hour", parseInt(e.target.value) || 1)
-                      }
-                      min="1"
-                      max="12"
-                      style={{
-                        width: "60px",
-                        marginRight: "5px",
-                        marginLeft: "20px",
-                      }}
-                      required
-                    />
-                    <span
-                      style={{
-                        color: "white",
-                        fontWeight: "500",
-                        marginTop: "-15px",
-                      }}
-                    >
-                      :
-                    </span>
-                    <input
-                      className="timeInput"
-                      type="number"
-                      value={s.time.minute}
-                      onChange={(e) =>
-                        updateTime(
-                          index,
-                          "minute",
-                          parseInt(e.target.value) || 0
-                        )
-                      }
-                      min="0"
-                      max="59"
-                      style={{
-                        width: "60px",
-                        marginLeft: "5px",
-                        marginRight: "12px",
-                      }}
-                      required
-                    />
-                    <select
-                      className="dropdown-select"
-                      value={s.time.period}
-                      onChange={(e) =>
-                        updateTime(index, "period", e.target.value)
-                      }
-                      style={{ marginRight: "10px", width: "82px" }}
-                    >
-                      <option value="AM">AM</option>
-                      <option value="PM">PM</option>
-                    </select>
-
-                    <button
-                      className="removeStop"
-                      type="button"
-                      onClick={() => removeStop(index)}
-                    >
-                      <img
-                        style={{
-                          width: "40px",
-                          height: "50px",
-                          marginTop: "-15px",
-                        }}
-                        src="/images/removeIcon.png"
-                      />
-                    </button>
-                  </div>
-                ))}
-                <button
-                  style={{
-                    backgroundColor: "#8cdb66",
-                    color: "white",
-                    fontWeight4: "400",
-                  }}
-                  type="button"
-                  onClick={addStop}
-                  className="addButton"
-                >
-                  Add More
-                </button>
-              </div>
-            </div>
-            <br />
-            <button className="inputBtn" type="submit">
-              <img
-                className="submitImage"
-                src="/images/check.png"
-                alt="Submit btn image"
-              />
-            </button>
-          </form>
-        </div>
-      </div>
+      
 
       {/*Searching bar */}
       <div className="search-container2">
@@ -362,110 +157,108 @@ function BusesPage() {
             </button>
           </div>
         </form>
-
       </div>
 
-        <div className="btnContainer" style = {{marginTop : "-10px"}}>
-
-          <div className="pdfBtnContainer">
-            <button
-              style={{ backgroundColor: "#8cdb66", color: "white" }}
-              className="pdfBtn"
-              onClick={generatePdf}
-            >
-              <img
-                src="/images/downloadicon.png"
-                style={{ width: "25px", height: "25px" }}
-              />
-            </button>
-          </div>
-
-          <div className="addBtnContainer">
-            <button
-              style={{ backgroundColor: "#8cdb66", color: "white" }}
-              onClick={() => handlePopup(true)}
-              className="addBtn"
-            >
-              <img
-                src="/images/addBusIcon.png"
-                style={{ width: "25px", height: "25px" }}
-              />
-            </button>
-          </div>
+      <div className="btnContainer" style={{ marginTop: "-10px" }}>
+        <div className="pdfBtnContainer">
+          <button
+            style={{ backgroundColor: "#8cdb66", color: "white" }}
+            className="pdfBtn"
+            onClick={generatePdf}
+          >
+            <img
+              src="/images/downloadicon.png"
+              style={{ width: "25px", height: "25px" }}
+            />
+          </button>
         </div>
 
-        <div class="table-container">
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>
-                    Vehicle
-                    <br /> Number
-                  </th>
-                  <th>
-                    Vehicle <br />
-                    Type
-                  </th>
-                  <th>Seats</th>
-                  <th>
-                    Previous <br />
-                    Stop
-                  </th>
-                  <th>
-                    Next <br />
-                    Stop
-                  </th>
-                  <th>Cordinates</th>
-                  <th>Image</th>
-                  <th>Delete</th>
-                  <th>Edit</th>
-                </tr>
-              </thead>
-              <tbody id="vehicleTableBody">
-                {buses.map((bus) => (
-                  <tr key={bus._id}>
-                    <td>{bus.vehicleNumber}</td>
-                    <td>{bus.type}</td>
-                    <td>{bus.seatCount}</td>
-                    <td>{bus.previousStop}</td>
-                    <td>{bus.nextStop}</td>
-                    <td style={{ width: "75px" }}>
+        <div className="addBtnContainer">
+          <button
+            style={{ backgroundColor: "#8cdb66", color: "white" }}
+            //onClick={() => handlePopup(true)}
+            className="addBtn"
+          >
+            <img
+              src="/images/addBusIcon.png"
+              style={{ width: "25px", height: "25px" }}
+            />
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>
+                  Vehicle
+                  <br /> Number
+                </th>
+                <th>
+                  Vehicle <br />
+                  Type
+                </th>
+                <th>Seats</th>
+                <th>
+                  Previous <br />
+                  Stop
+                </th>
+                <th>
+                  Next <br />
+                  Stop
+                </th>
+                <th>Cordinates</th>
+                <th>Image</th>
+                <th>Delete</th>
+                <th>Edit</th>
+              </tr>
+            </thead>
+            <tbody id="vehicleTableBody">
+              {buses.map((bus) => (
+                <tr key={bus._id}>
+                  <td>{bus.vehicleNumber}</td>
+                  <td>{bus.type}</td>
+                  <td>{bus.seatCount}</td>
+                  <td>{bus.previousStop}</td>
+                  <td>{bus.nextStop}</td>
+                  <td style={{ width: "75px" }}>
+                    <img
+                      className="locationIcon"
+                      src="/images/locationIcon.png"
+                    />
+                    {bus.lat},{bus.lon}
+                  </td>
+                  <td>
+                    <img className="busImageDiv" src={bus.busImage} />
+                  </td>
+                  <td>
+                    <button
+                      className="deleteBtn"
+                      onClick={() => deleteBus(bus._id)}
+                    >
                       <img
-                        className="locationIcon"
-                        src="/images/locationIcon.png"
+                        style={{ width: "25px", height: "25px" }}
+                        src="/images/trash.png"
                       />
-                      {bus.lat},{bus.lon}
-                    </td>
-                    <td>
-                      <img className="busImageDiv" src={bus.busImage} />
-                    </td>
-                    <td>
-                      <button
-                        className="deleteBtn"
-                        onClick={() => deleteBus(bus._id)}
-                      >
-                        <img
-                          style={{ width: "25px", height: "25px" }}
-                          src="/images/trash.png"
-                        />
-                      </button>
-                    </td>
-                    <td>
-                      <button className="deleteBtn">
-                        <img
-                          style={{ width: "25px", height: "25px" }}
-                          src="/images/editicon.png"
-                        />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </button>
+                  </td>
+                  <td>
+                    <button className="deleteBtn">
+                      <img
+                        style={{ width: "25px", height: "25px" }}
+                        src="/images/editicon.png"
+                      />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
+    </div>
   );
 }
 
