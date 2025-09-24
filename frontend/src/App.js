@@ -25,6 +25,13 @@ import BusesPage from "./components/BusesPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 
+import Dashboard from "./components/Dashboard";
+import SmartCardPage from "./components/SmartCardPage";
+import VisaCardPage from "./components/VisaCardPage";
+import TopupPage from "./components/TopupPage";
+import RechargePage from "./components/RechargePage";
+import TransactionsPage from "./components/TransactionsPage";
+import RefundPage from "./components/RefundPage";
 function App() {
   const [busLocation, setBusLocation] = useState(null);
   const [stops, setStops] = useState([]);
