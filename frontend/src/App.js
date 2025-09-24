@@ -164,7 +164,7 @@ function App() {
           }
           />
 
-          <Route path="/" element={
+          <Route path="/payment" element={
             <div>
               <Header />
               <Dashboard />
