@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const crypto = require('crypto');
-const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -15,28 +12,34 @@ const userSchema = new mongoose.Schema({
         trim: true
     },
     phone: {
-      type: String,
-      required: [true, 'Phone number is required'],
-      validate: {
-        validator: function(v) {
-          return /^\d{10}$/.test(v);
-        },
-        message: 'Phone number must be exactly 10 digits'
-      },
-      unique: true,
-      index: true
+        type: String,
+        required: true,
+        trim: true,
+        validate: {
+            validator: function(v) {
+                // Phone number validation regex (supports various formats)
+                return /^(\+\d{1,3}[- ]?)?\d{10}$/.test(v);
+            },
+            message: 'Please enter a valid phone number'
+        }
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+        lowercase: true,
+        validate: {
+            validator: function(v) {
+                return /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v);
+            },
+            message: 'Please enter a valid email address'
+        }
     },
     password: {
-      type: String,
-      required: [true, 'Password is required'],
-      minlength: [8, 'Password must be at least 8 characters long'],
-      select: false,
-      validate: {
-        validator: function(v) {
-          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(v);
-        },
-        message: 'Password must contain at least 8 characters with uppercase, lowercase, number, and special character (@$!%*?&)'
-      }
+        type: String,
+        required: true,
+        minlength: 8
     },
     role: {
         type: String,

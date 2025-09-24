@@ -49,7 +49,7 @@ function UserManagement() {
 
     const fetchUserStats = async () => {
         try {
-            const response = await axios.get('/users/stats');
+            const response = await axios.get('http://localhost:8070/users/stats');
             if (response.data.success) {
                 setUserStats(response.data.stats);
             }
@@ -62,20 +62,8 @@ function UserManagement() {
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            let params = new URLSearchParams();
-            
-            if (selectedRole !== 'all') {
-                params.append('role', selectedRole);
-            }
-            
-            if (searchTerm.trim()) {
-                params.append('search', searchTerm.trim());
-            }
-            
-            const queryString = params.toString();
-            const url = queryString ? `/users?${queryString}` : '/users';
-            
-            const response = await axios.get(url);
+            const roleParam = selectedRole !== 'all' ? `?role=${selectedRole}` : '';
+            const response = await axios.get(`http://localhost:8070/users${roleParam}`);
             if (response.data.success) {
                 setUsers(response.data.users);
             }
@@ -128,7 +116,7 @@ function UserManagement() {
     const handleDeleteUser = async (userId) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             try {
-                const response = await axios.delete(`/users/${userId}`);
+                const response = await axios.delete(`http://localhost:8070/users/${userId}`);
                 if (response.data.success) {
                     setSuccess('User deleted successfully');
                     fetchUsers();
