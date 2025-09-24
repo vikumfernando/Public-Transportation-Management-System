@@ -21,6 +21,21 @@ const io = new Server(server, {
   cors: { origin: "*" } // new
 });
 
+// Initialize Stripe after loading environment variables with Sample Data check
+let stripe;
+try {
+  if (process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes('your_stripe_secret_key_here')) {
+    stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+    console.log('✅ Stripe initialized successfully');
+  } else {
+    console.log('💡 Stripe demo mode - system works without real payments');
+    stripe = null;
+  }
+} catch (error) {
+  console.log('⚠️ Stripe initialization failed:', error.message);
+  stripe = null;
+}
+
 app.set("io", io);
 
 mongoose.connect(URL, {
@@ -49,6 +64,7 @@ app.use("/Routes", routesRouter);
 app.use("/Schedules", schedulesRouter);
 app.use("/auth", authRouter);
 app.use("/users", usersRouter);
+
 
 
 //changed from app to server
