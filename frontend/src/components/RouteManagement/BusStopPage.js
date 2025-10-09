@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-import "../../styles/BusStopPage.css"
+import "../../styles/BusStopPage.css";
 import BusStopMap from "./BusStopMap";
 import OffCanvas from "../OffCanvas";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function BusStopPage({ setStops }) {
   const [stops, setBusStop] = useState([]);
@@ -76,6 +78,7 @@ function BusStopPage({ setStops }) {
   //adding new bus stops
   const addStop = async (e) => {
     e.preventDefault();
+    const sidebar = document.getElementById("sidebar");
     try {
       const res = await axios.post("http://localhost:8070/Stops/addStop", {
         stopName,
@@ -84,6 +87,20 @@ function BusStopPage({ setStops }) {
       });
 
       setBusStop([...stops, res.data]);
+
+      //resetting input fields
+      setStopName("");
+      setLattitude("");
+      setLongitude("");
+      document.getElementById("stopInput").value = "";
+      document.getElementById("latInput").value = "";
+      document.getElementById("lonInput").value = "";
+      sidebar.classList.remove("open");
+
+      toast.success(`Bus stop registered successfully`, {
+        position: "bottom-right",
+        autoClose: 4000,
+      });
     } catch (err) {
       console.error("Error while adding bus stop : " + err);
     }
@@ -121,11 +138,69 @@ function BusStopPage({ setStops }) {
 
       setBusStop(stops.map((stop) => (stop._id === stopId ? res.data : stop)));
       setEditingStopId(null);
-      
     } catch (err) {
       console.error("Error updating stop: ", err);
     }
   };
+
+  //Input validation
+  function validateStopName(stopName, id) {
+    const input = document.getElementById(id);
+    const isValid = /^[A-Za-z\s]+$/.test(stopName.trim());
+    const submitBtn = document.getElementById("inputBtn");
+
+    const warningMsg = document.getElementById("warningText");
+
+    if (isValid) {
+      input.classList.remove("invalid");
+      submitBtn.disabled = false;
+      input.classList.add("valid");
+      warningMsg.classList.remove("invalid");
+    } else {
+      console.log("Invalid value detected");
+      input.classList.add("invalid");
+      warningMsg.classList.add("invalid");
+      submitBtn.disabled = true;
+    }
+  }
+
+  //validating latitude and longitude
+  function validateLat(lat, id) {
+    const input = document.getElementById(id);
+    const isValid = /^-?\d+(\.\d+)?$/.test(lat.trim());
+    const submitBtn = document.getElementById("inputBtn");
+    const warningMsg = document.getElementById("warningText2");
+
+    if (isValid) {
+      input.classList.remove("invalid");
+      submitBtn.disabled = false;
+      input.classList.add("valid");
+      warningMsg.classList.remove("invalid");
+    } else {
+      console.log("Invalid value detected");
+      input.classList.add("invalid");
+      warningMsg.classList.add("invalid");
+      submitBtn.disabled = true;
+    }
+  }
+
+  function validateLon(lat, id) {
+    const input = document.getElementById(id);
+    const isValid = /^-?\d+(\.\d+)?$/.test(lat.trim());
+    const submitBtn = document.getElementById("inputBtn");
+    const warningMsg = document.getElementById("warningText3");
+
+    if (isValid) {
+      input.classList.remove("invalid");
+      submitBtn.disabled = false;
+      warningMsg.classList.remove("invalid");
+    } else {
+      console.log("Invalid value detected");
+      input.classList.add("invalid");
+      warningMsg.classList.add("invalid");
+      submitBtn.disabled = true;
+    }
+  }
 
   return (
     <div className="mainContainer">
@@ -172,65 +247,73 @@ function BusStopPage({ setStops }) {
             stops.map((stop, index) => (
               <div className="stopinfoDiv" key={index}>
                 {editingStopId === stop._id ? (
-                  
                   //Editing Part
                   <div>
                     <input
-                      className = "updateInput"
+                      className="updateInput"
                       value={editedStopName}
                       onChange={(e) => setEditedStopName(e.target.value)}
                     />
                     <input
-                      className = "updateInput"
+                      className="updateInput"
                       value={editedLat}
                       onChange={(e) => setEditedLat(e.target.value)}
                     />
                     <input
-                      className = "updateInput"
+                      className="updateInput"
                       value={editedLon}
                       onChange={(e) => setEditedLon(e.target.value)}
                     />
-                    <button className = "addButton" onClick={() => updateStop(stop._id)} style = {{marginRight : "8px", backgroundColor : "#8cdb66"}}>Save</button>
-                    <button className = "addButton" onClick={() => setEditingStopId(null)}>
+                    <button
+                      className="addButton"
+                      onClick={() => updateStop(stop._id)}
+                      style={{ marginRight: "8px", backgroundColor: "#8cdb66" }}
+                    >
+                      Save
+                    </button>
+                    <button
+                      className="addButton"
+                      onClick={() => setEditingStopId(null)}
+                    >
                       Cancel
                     </button>
                   </div>
                 ) : (
-                 
-                 //Displaying part
+                  //Displaying part
                   <div onClick={() => loadStops(stop._id)}>
                     <label className="stopName">{stop.stopName}</label>
                     <br />
                     <label className="stopInfo">Lat : {stop.lat}</label>
                     <br />
-                    <label className="stopInfo">Lon : {stop.lon}</label><br/>
+                    <label className="stopInfo">Lon : {stop.lon}</label>
+                    <br />
 
-                     <div className = "edDelBtnContainer">
-                    <button
-                    className="editBtn"
-                      onClick={() => {
-                        setEditingStopId(stop._id);
-                        setEditedStopName(stop.stopName);
-                        setEditedLat(stop.lat);
-                        setEditedLon(stop.lon);
-                      }}
-                    >
-                      <img 
-                      style={{ width: "25px", height: "25px" }}
-                      src = "/images/editicon.png"/>
-                    </button>
+                    <div className="edDelBtnContainer">
+                      <button
+                        className="editBtn"
+                        onClick={() => {
+                          setEditingStopId(stop._id);
+                          setEditedStopName(stop.stopName);
+                          setEditedLat(stop.lat);
+                          setEditedLon(stop.lon);
+                        }}
+                      >
+                        <img
+                          style={{ width: "25px", height: "25px" }}
+                          src="/images/editicon.png"
+                        />
+                      </button>
 
-                    <button
-                      className="deleteBtn"
-                      onClick={() => deleteStop(stop._id)}
-                    >
-                      <img
-                        style={{ width: "25px", height: "25px" }}
-                        src="/images/trash.png"
-                      />
-                    </button>
-                  </div>
-                  
+                      <button
+                        className="deleteBtn"
+                        onClick={() => deleteStop(stop._id)}
+                      >
+                        <img
+                          style={{ width: "25px", height: "25px" }}
+                          src="/images/trash.png"
+                        />
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -257,35 +340,71 @@ function BusStopPage({ setStops }) {
             <input
               className="inputField"
               type="text"
-              onChange={(e) => setStopName(e.target.value)}
+              id="stopInput"
+              onChange={(e) => {
+                setStopName(e.target.value);
+                validateStopName(e.target.value, e.target.id);
+              }}
               placeholder="Stop Name"
               required
             />
+
+            <label
+              className="warningText2"
+              id="warningText"
+              style={{ marginTop: "-10px" }}
+            >
+              ⚠️ Please enter a valid bus stop name
+            </label>
             <br />
 
             <label className="inputLabel">Latitude</label>
             <br />
+
             <input
+              id="latInput"
               className="inputField"
               type="text"
-              onChange={(e) => setLattitude(e.target.value)}
+              onChange={(e) => {
+                validateLat(e.target.value, e.target.id);
+                setLattitude(e.target.value);
+              }}
               placeholder="Latitude"
               required
             />
+            <label
+              className="warningText2"
+              id="warningText2"
+              style={{ marginTop: "-10px" }}
+            >
+              ⚠️ Please enter a valid value for latitude
+            </label>
             <br />
 
             <label className="inputLabel">Longitude</label>
             <br />
             <input
+              id="lonInput"
               className="inputField"
               type="text"
-              onChange={(e) => setLongitude(e.target.value)}
+              onChange={(e) => {
+                setLongitude(e.target.value);
+                validateLon(e.target.value, e.target.id);
+              }}
               placeholder="Longitude"
               required
             />
+
+            <label
+              className="warningText2"
+              id="warningText3"
+              style={{ marginTop: "-10px" }}
+            >
+              ⚠️ Please enter a valid value for longitude
+            </label>
             <br />
 
-            <button className="inputBtn" type="submit">
+            <button className="inputBtn" type="submit" id="inputBtn">
               <img
                 className="submitImage"
                 src="/images/check.png"

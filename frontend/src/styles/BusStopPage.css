@@ -245,6 +245,7 @@
 
 .sidebar.open {
   right: 20px; /* slide in */
+  height: auto;
 }
 
 .slideBtn {
@@ -278,6 +279,21 @@
   width: 100%;
   height: 50px;
   background: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0 20px 0 25px;
+  font-size: 16px;
+  outline: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+}
+
+.inputField.invalid {
+  width: 100%;
+  height: 50px;
+  background: #FFD8D8;
   border: none;
   border-radius: 12px;
   padding: 0 20px 0 25px;
@@ -400,4 +416,14 @@
   transition: all 0.3s ease;
   box-sizing: border-box;
   margin-bottom: 8px;
+}
+
+.warningText2{
+  color: red;
+  display: none;
+}
+
+.warningText2.invalid{
+  color: red;
+  display: block;
 }
