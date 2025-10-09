@@ -3,6 +3,8 @@ import axios from "axios";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import OffCanvas from "../OffCanvas";
 
@@ -108,7 +110,7 @@ function SchedulesPage() {
   };
 
   // HH:MM format
-  const formatTime = ({ hour, minute, period }) => {
+const formatTime = ({ hour, minute, period }) => {
   let h =
     period === "PM" && hour < 12
       ? hour + 12
@@ -116,8 +118,8 @@ function SchedulesPage() {
       ? 0
       : hour;
 
-  const hh = h < 10 ? "0" + h : h; 
-  const mm = minute < 10 ? "0" + minute : minute;
+  const hh = h.toString().padStart(2, "0");
+  const mm = minute.toString().padStart(2, "0");
 
   return `${hh}:${mm}`;
 };
@@ -143,10 +145,11 @@ function SchedulesPage() {
       );
 
       console.log("Schedule added:", res.data);
-      alert("Schedule added successfully!");
+      toast.success("Schedule added successfully!");
     } catch (err) {
       console.error(err);
       alert("Error adding schedule");
+      toast.error("Failed to add schedule");
     }
   };
 

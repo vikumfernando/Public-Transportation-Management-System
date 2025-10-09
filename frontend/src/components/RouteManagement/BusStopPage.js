@@ -103,6 +103,10 @@ function BusStopPage({ setStops }) {
       });
     } catch (err) {
       console.error("Error while adding bus stop : " + err);
+      toast.error("Failed to add the bus stop", {
+        position: "bottom-right",
+        autoClose: 4000,
+      });
     }
   };
 
@@ -116,11 +120,19 @@ function BusStopPage({ setStops }) {
       );
 
       setBusStop(stops.filter((stop) => stop._id !== stopId));
+      toast.success(`Bus stop deleted successfully`, {
+        position: "bottom-right",
+        autoClose: 4000,
+      });
     } catch (err) {
       if (err.response) {
         alert(err.response.data.message);
       }
       console.log("Error while deleting bus stop " + err);
+      toast.error("Failed to delete the bus stop", {
+        position: "bottom-right",
+        autoClose: 4000,
+      });
     }
   };
 
@@ -138,8 +150,16 @@ function BusStopPage({ setStops }) {
 
       setBusStop(stops.map((stop) => (stop._id === stopId ? res.data : stop)));
       setEditingStopId(null);
+      toast.success(`Bus stop updated successfully`, {
+        position: "bottom-right",
+        autoClose: 4000,
+      });
     } catch (err) {
       console.error("Error updating stop: ", err);
+      toast.error("Failed to update the bus stop", {
+        position: "bottom-right",
+        autoClose: 4000,
+      });
     }
   };
 

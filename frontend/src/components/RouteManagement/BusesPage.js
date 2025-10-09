@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "../../styles/BusesPage.css";
 
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -62,11 +66,13 @@ function BusesPage() {
       );
 
       setBuses(buses.filter((bus) => bus._id !== busId));
+      toast.success("Bus removed successfully");
     } catch (err) {
       if (err.response) {
         alert(err.response.data.message);
       }
       console.error("Erro while removing bus " + err);
+      toast.error("Failed to remove the bus");
     }
   };
 
