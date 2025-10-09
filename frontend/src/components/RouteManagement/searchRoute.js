@@ -4,6 +4,9 @@ import "../../styles/searchRoute.css";
 import "../../styles/searchBox.css";
 import BusMap from "./BusMap";
 import { io } from "socket.io-client";
+import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+
 
 <link
   href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
@@ -22,7 +25,6 @@ function SearchRoute({ setBusLocation, setStops, busLocation, stops }) {
       try {
         const res = await axios.get("http://localhost:8070/Busses/loadBuses");
         setDisplayInfo(res.data);
-
       } catch (err) {
         console.log("Error while fetching buses : " + err);
       }
@@ -33,6 +35,8 @@ function SearchRoute({ setBusLocation, setStops, busLocation, stops }) {
 
   // Socket.io Part
   useEffect(() => {
+
+
     const socket = io("http://localhost:8070");
 
     socket.on("connect", () => {
@@ -48,40 +52,43 @@ function SearchRoute({ setBusLocation, setStops, busLocation, stops }) {
       // Updating map location
       setBusLocation({ lat: data.lat, lng: data.lon });
 
-      changeBtnClr(data.busStatus);
 
-      // Update bus info in the list
-      setBusInfo((prev) =>
+      // Update bus info in the card
+      setDisplayInfo((prev) =>
         prev.map((bus) =>
           bus._id === data.busId
-            ? { ...bus, lat: data.lat, lon: data.lon }
+            ? {
+                ...bus,
+                lat: data.lat,
+                lon: data.lon,
+                busStatus : data.busStatus,
+                arrivedTime: data.arrivedTime,
+                expectedTime: data.expectedTime,
+                nextStop : data.nextStop,
+                previousStop : data.previousStop
+              }
             : bus
         )
       );
     });
+
+    socket.on("busDelay", (data) => {
+      toast.success(`Bus ${data.vehicleNumber} has arrived at ${data.busStop}`, { position: "bottom-right", autoClose: 8000});
+      toast.error(`Bus ${data.vehicleNumber} is running late by ${data.delay} minutes`, { position: "bottom-right", autoClose: 8000});
+      changeBtnClr("late");
+    
+    }); 
+    socket.on("busOntime", (data) => {
+      toast.success(`Bus ${data.vehicleNumber} has arrived at ${data.busStop}`, { position: "bottom-right", autoClose: 8000});
+      changeBtnClr("ontime");
+    });
+
 
     return () => {
       socket.disconnect();
     };
   }, [selectedBus]);
 
-  /* delete this
-  async function getBusId() {
-    try {
-      const res = await axios.get(
-        `http://localhost:8070/Busses/getId/${routeNum}`
-      );
-
-      const ids = res.data.busIds || res.data.busId || [];
-      setId(ids);
-      console.log("Bus IDs:", ids);
-      return ids;
-    } catch (err) {
-      console.log("Error while fetching bus Id " + err);
-      return [];
-    }
-  } 
-    */
 
   //updating current location of the bus
   async function fetchLocation(busId, e) {
@@ -131,11 +138,14 @@ function SearchRoute({ setBusLocation, setStops, busLocation, stops }) {
   //Button color change based on the arrival status
   function changeBtnClr(status) {
     const button = document.getElementById("statusBtn");
+    const label = document.getElementById("statusText");
 
-    if (status === "Late") {
+    if (status === "late") {
       button.classList.add("late");
+      label.innerText = "Late";
     } else {
       button.classList.remove("late");
+      label.innerText = "On Time";
     }
   }
 
@@ -215,6 +225,8 @@ function SearchRoute({ setBusLocation, setStops, busLocation, stops }) {
               Search
             </button>
           </div>
+
+          
         </form>
         <label className="warningText" id="warningText">
           ⚠️ Please enter a valid integer for the route number
@@ -227,7 +239,8 @@ function SearchRoute({ setBusLocation, setStops, busLocation, stops }) {
           </label>
         </div>
         {displayInfo.length > 0 &&
-          displayInfo.map((bus, index) => (
+          displayInfo.map((bus, index) => {
+return (
             <div
               onClick={() => fetchLocation(bus._id)}
               className="busInfoDiv"
@@ -236,7 +249,7 @@ function SearchRoute({ setBusLocation, setStops, busLocation, stops }) {
               <div className="topRow">
                 <p className="busId"> {bus.vehicleNumber}</p>
                 <div id="statusBtn" className="status-label">
-                  {bus.status}
+                  <p id ="statusText">{bus.status}</p>
                 </div>
               </div>
 
@@ -257,7 +270,7 @@ function SearchRoute({ setBusLocation, setStops, busLocation, stops }) {
                 </p>
 
                 <p>
-                  <strong>ETA:</strong> {bus.ETA}
+                  <strong>ETA:</strong> {bus.expectedTime}
                 </p>
               </div>
               <div className="busImage">
@@ -268,7 +281,8 @@ function SearchRoute({ setBusLocation, setStops, busLocation, stops }) {
                 />
               </div>
             </div>
-          ))}
+          );
+          })}
       </div>
 
       <div className="rightDiv">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "../../styles/BusStopPage.css";
+import "../../styles/searchRoute.css";
 import BusStopMap from "./BusStopMap";
 
 function BusStopPageUser({ setStops }) {
@@ -49,6 +50,9 @@ function BusStopPageUser({ setStops }) {
 
   //Bus stop searching
   async function searchStop(stopName) {
+
+    validStopName(stopName);
+
     const res = await axios.get(
       `http://localhost:8070/Stops/searchstop/${stopName}`
     );
@@ -56,21 +60,51 @@ function BusStopPageUser({ setStops }) {
     if (res) {
       setBusStop(res.data);
       console.log("Search stop data : ", stops);
+      display404(false);
     } else {
+      
       console.log("Bus stop not found : For the user side displaying");
+      display404(true);
+    }
+  }
+
+
+  //Input validation
+  function validStopName(stopName) {
+    const input = document.getElementById("stopInput");
+    const warning = document.getElementById("warningText");
+
+    const isValid = /^[A-Za-z\s]+$/.test(stopName.trim());
+
+
+    if (isValid) {
+      input.classList.remove("invalid");
+      warning.style.display = "none";
+    } else {
+      console.log("Invalid value detected");
+      input.classList.add("invalid");
+      warning.style.display = "block";
+    }
+  }
+
+  function display404(result) {
+    const empty = document.getElementById("notFound");
+
+    if (result === true) {
+      empty.style.display = "block";
+    } else {
+      empty.style.display = "none";
     }
   }
 
   return (
     <div className="mainContainer">
-
       <div className="mapContainer">
         <BusStopMap stops={selectedStop} />
       </div>
 
       <div className="overlay">
-       
-        <div className="stopCards" style = {{marginLeft : "22px"}}>
+        <div className="stopCards" style={{ marginLeft: "22px" }}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -79,7 +113,7 @@ function BusStopPageUser({ setStops }) {
           >
             <div className="search-container2">
               <input
-                id="routeInput"
+                id="stopInput"
                 type="text"
                 className="search-box2"
                 placeholder="Enter Stop Name..."
@@ -101,6 +135,18 @@ function BusStopPageUser({ setStops }) {
               </button>
             </div>
           </form>
+
+          <label className="warningText" id="warningText" style = {{marginTop: "10px"}}>
+            ⚠️ Please enter a valid bus stop name
+          </label>
+
+          <div id="notFound" className="notfoundDiv">
+            <label className="notfoundCode">404</label>
+            <label className="notfoundMsg">
+              Oops! Looks like no buses are running for this route{" "}
+            </label>
+          </div>
+
           {stops.length > 0 &&
             stops.map((stop, index) => (
               <div className="stopinfoDiv" key={index}>
@@ -115,7 +161,6 @@ function BusStopPageUser({ setStops }) {
               </div>
             ))}
         </div>
-        
       </div>
     </div>
   );

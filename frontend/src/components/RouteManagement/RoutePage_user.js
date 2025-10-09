@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "../../styles/RoutesPage.css";
 import "../../styles/BusStopPage.css";
+
+import "../../styles/searchRoute.css";
 import RouteMap from "./RouteMap";
 
 function RoutePageUser() {
@@ -56,6 +58,8 @@ function RoutePageUser() {
 
   //Route searching
   async function searchRoute(routeNum) {
+
+    validRouteNum(routeNum);
     try {
       const res = await axios.get(
         `http://localhost:8070/Routes/searchroute/${routeNum}`
@@ -73,7 +77,24 @@ function RoutePageUser() {
     }
   }
 
-  
+
+  //Input validation
+  function validRouteNum(routeNumber) {
+    const input = document.getElementById("routeInput");
+    const warning = document.getElementById("warningText");
+
+    const num = Number(routeNumber);
+    const result = Number.isInteger(num);
+
+    if (result === true) {
+      input.classList.remove("invalid");
+      warning.style.display = "none";
+    } else {
+      console.log("Invalid value detected");
+      input.classList.add("invalid");
+      warning.style.display = "block";
+    }
+  }
 
   return (
     <div className="mainContainer2">
@@ -81,9 +102,7 @@ function RoutePageUser() {
         <RouteMap className="mapDiv2" stops={stops} />
       </div>
       <div className="overlay2">
-        
-
-        <div className="routeCardsDiv" style = {{marginTop : "90px"}}>
+        <div className="routeCardsDiv" style={{ marginTop: "90px" }}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -115,6 +134,11 @@ function RoutePageUser() {
             </div>
           </form>
 
+          <label className="warningText" id="warningText">
+            ⚠️ Please enter a valid integer for the route number
+          </label>
+
+
           {routes.length > 0 &&
             routes.map((route, index) => (
               <div
@@ -124,7 +148,6 @@ function RoutePageUser() {
                 }`}
                 onClick={() => loadRoute(route.routeNum)}
               >
-                
                 <div className="routeNumDiv">
                   <label className="routeNum2">Route {route.routeNum}</label>
                   <br />
@@ -143,7 +166,7 @@ function RoutePageUser() {
                   />
                   <label className="routeSumText">{route.distance} Km</label>
                 </div>
-                
+
                 <div
                   id="stopList"
                   className={`stopList ${
@@ -157,12 +180,10 @@ function RoutePageUser() {
                       <li key={stopIndex}>{stop.stopName}</li>
                     ))}
                   </ul>
-
                 </div>
               </div>
             ))}
         </div>
-        
       </div>
     </div>
   );

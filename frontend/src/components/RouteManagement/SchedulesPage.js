@@ -107,17 +107,20 @@ function SchedulesPage() {
     setStopsData(updated);
   };
 
-  // Convert 12-hour time to "HH.MM" string for backend
+  // HH:MM format
   const formatTime = ({ hour, minute, period }) => {
-    let h =
-      period === "PM" && hour < 12
-        ? hour + 12
-        : period === "AM" && hour === 12
-        ? 0
-        : hour;
-    const mm = minute < 10 ? "0" + minute : minute;
-    return `${h}.${mm}`;
-  };
+  let h =
+    period === "PM" && hour < 12
+      ? hour + 12
+      : period === "AM" && hour === 12
+      ? 0
+      : hour;
+
+  const hh = h < 10 ? "0" + h : h; 
+  const mm = minute < 10 ? "0" + minute : minute;
+
+  return `${hh}:${mm}`;
+};
 
   // Submit new schedule
   const addSchedule = async (e) => {

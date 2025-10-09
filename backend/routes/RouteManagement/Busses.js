@@ -46,10 +46,15 @@ router.route("/addBus").post(async (req, res) => {
 //longtitude and latitude needs to be taken from the gps module - !! Important !!
 router.route("/updateLocation").put(async (req, res) => {
   let destinationReached = false;
+  
+  //creating event to pass
+  const io = req.app.get("io");
+
 
   //Lat and Lon taken from the GPS module
   const { busId, lat, lon } = req.body;
 
+  //Testing cordinates
   console.log("Bus ID :" + busId);
 
   const bus = await Bus.findById(busId)
@@ -69,17 +74,36 @@ router.route("/updateLocation").put(async (req, res) => {
     console.log("\nBus data found");
   }
 
-  const arrivedTime = new Date().toLocaleTimeString([], {
+  /*const arrivedTime = new Date().toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-  });
+  }); */
 
-  const busStatus = bus.status;
+  //Just for testing
+  const arrivedTime = "10:00";
+
+  console.log("Arrived time : " + arrivedTime);
+
+  const nextStop =
+    bus.nextStopIndex < bus.route.stopsSequence.length
+      ? bus.route.stopsSequence[bus.nextStopIndex].stopName
+      : "Destination reached";
+  
+  const previousStop =
+    bus.nextStopIndex > 0
+      ? bus.route.stopsSequence[bus.nextStopIndex - 1].stopName
+      : "Not started";
 
   const expectedTime =
     bus.schedule.stopSchedules[bus.nextStopIndex].expectedArrival;
   console.log("Expected time : " + expectedTime);
+
+  // Convert both to Date objects
+  const arrivedDate = new Date(`1970-01-01T${arrivedTime}:00Z`);
+  const expectedDate = new Date(`1970-01-01T${expectedTime}:00Z`);
+
+  const busStatus = bus.status;
 
   //updating the active status of the bus if the bus is in the initial bus stop
   if (arrivedTime == expectedTime) {
@@ -110,12 +134,18 @@ router.route("/updateLocation").put(async (req, res) => {
     }
 
     //checking whether the bus arrived on time
-    if (arrivedTime > expectedTime) {
+    if (arrivedDate > expectedDate) {
       console.log("Bus is late");
       bus.status = "Late";
+      
+      const delay = Math.floor((new Date(`1970-01-01T${arrivedTime}Z`) - new Date(`1970-01-01T${expectedTime}Z`)) / 60000);
+      io.emit("busDelay", { vehicleNumber : bus.vehicleNumber, delay, busStop : bus.route.stopsSequence[bus.nextStopIndex].stopName});
+
     } else {
       console.log("Bus On time");
       bus.status = "Ontime";
+
+      io.emit("busOntime", { vehicleNumber : bus.vehicleNumber, busStop : bus.route.stopsSequence[bus.nextStopIndex].stopName});
     }
 
     //resetting bus information
@@ -135,36 +165,10 @@ router.route("/updateLocation").put(async (req, res) => {
 
   await bus.save();
 
-  //creating event to pass
-  const io = req.app.get("io");
-  io.emit("busLocationUpdate", { busId, lat, lon, busStatus });
+  io.emit("busLocationUpdate", { busId, lat, busStatus, lon, nextStop, previousStop, arrivedTime, expectedTime });
   res.sendStatus(200);
 });
 
-//Useless now
-/*
-router.route("/getId/:routeNumber").get(async (req, res) => {
-  const { routeNumber } = req.params;
-  try {
-    const buses = await Bus.find({
-      activeStatus: "On duty",
-    }).populate("route");
-
-    const routeBuses = buses.filter(
-      (bus) => bus.route && bus.route.routeNum === parseInt(routeNumber)
-    );
-
-    if (routeBuses.length === 0)
-      return res
-        .status(404)
-        .json({ message: "No active buses found for this route" });
-
-    const busIds = routeBuses.map((bus) => bus._id);
-    res.json({ busIds, count: busIds.length });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-}); */
 
 //Loading all bus information
 router.route("/loadBuses").get(async (req, res) => {

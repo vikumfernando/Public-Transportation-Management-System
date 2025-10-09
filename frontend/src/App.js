@@ -1,3 +1,6 @@
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+
 import Header from "./components/Header";
 import OffCanvas from "./components/OffCanvas";
 
@@ -30,6 +33,8 @@ import RechargePage from "./components/RechargePage";
 import TransactionsPage from "./components/TransactionsPage";
 import RefundPage from "./components/RefundPage";
 
+import PassengerProfile from "./components/PassengerProfile";
+
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
@@ -39,8 +44,13 @@ function App() {
   const [stops, setStops] = useState([]);
 
   return (
+
+    
     <Router>
+      
+      <ToastContainer position="top-right" autoClose={4000} />
       <Routes>
+
         <Route
           path="/"
           element={

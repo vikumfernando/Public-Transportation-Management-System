@@ -122,7 +122,7 @@ function Header() {
                         onMouseLeave={dropdownLeave}
                     >
                         <Link to="#" className="nav-link" onClick={closeMobileMenu}>
-                            Test 4
+                            Profile
                         </Link>
                         <div className={`dropdown-menu ${activeDropdown === 'test4' ? 'show' : ''}`}>
                             <Link to="/about-us" className="dropdown-item" onClick={closeMobileMenu}>

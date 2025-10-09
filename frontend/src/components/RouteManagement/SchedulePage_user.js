@@ -4,6 +4,7 @@ import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import "../../styles/SchedulesPage.css";
+import "../../styles/searchRoute.css";
 
 function SchedulesPageUser() {
   const [buses, setBuses] = useState([]);
@@ -57,6 +58,8 @@ function SchedulesPageUser() {
 
   // Search bus by route number
   const searchBus = async (routeNum) => {
+    validRouteNum(routeNum);
+
     try {
       const res = await axios.get(
         `http://localhost:8070/Busses/loadBus/${routeNum}`
@@ -68,36 +71,7 @@ function SchedulesPageUser() {
   };
 
 
-  // Update time with validation
-  const updateTime = (index, key, value) => {
-    const updated = [...stopsData];
-    let timeObj = { ...updated[index].time, [key]: value };
-
-    if (key === "hour") {
-      if (value < 1) timeObj.hour = 12;
-      if (value > 12) timeObj.hour = 1;
-    }
-    if (key === "minute") {
-      if (value < 0) timeObj.minute = 59;
-      if (value > 59) timeObj.minute = 0;
-    }
-
-    updated[index].time = timeObj;
-    setStopsData(updated);
-  };
-
-  // Convert 12-hour time to HH.MM string for backend
-  const formatTime = ({ hour, minute, period }) => {
-    let h =
-      period === "PM" && hour < 12
-        ? hour + 12
-        : period === "AM" && hour === 12
-        ? 0
-        : hour;
-    const mm = minute < 10 ? "0" + minute : minute;
-    return `${h}.${mm}`;
-  };
-
+  // Generate PDF of the bus schedules
   const generatePdf = () => {
     const doc = new jsPDF();
 
@@ -131,6 +105,24 @@ function SchedulesPageUser() {
 
     doc.save("schedules.pdf");
   };
+
+  //Input validation
+  function validRouteNum(routeNumber) {
+    const input = document.getElementById("routeInput");
+    const warning = document.getElementById("warningText");
+
+    const num = Number(routeNumber);
+    const result = Number.isInteger(num);
+
+    if (result === true) {
+      input.classList.remove("invalid");
+      warning.style.display = "none";
+    } else {
+      console.log("Invalid value detected");
+      input.classList.add("invalid");
+      warning.style.display = "block";
+    }
+  }
 
   return (
     <div>
@@ -166,7 +158,13 @@ function SchedulesPageUser() {
                 </svg>
               </button>
             </div>
+
+            <label className="warningText" id="warningText" style={{marginTop: "10px"}}>
+          ⚠️ Please enter a valid integer for the route number
+        </label>
           </form>
+
+          
 
           <div className="pdfBtnContainer">
             <button

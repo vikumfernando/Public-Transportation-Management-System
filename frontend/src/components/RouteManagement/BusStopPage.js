@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import "../../styles/BusStopPage.css";
+
+import "../../styles/BusStopPage.css"
 import BusStopMap from "./BusStopMap";
 import OffCanvas from "../OffCanvas";
 
