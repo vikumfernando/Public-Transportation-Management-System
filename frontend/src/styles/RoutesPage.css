@@ -152,15 +152,16 @@
 .sidebar2 {
   top : 0;
   width: 600px;
-  height: 550px;
+  height: 580px;
   position: fixed;
   right: -650px;
   background: #0b5648;
   pointer-events: auto;
   padding: 20px 30px 35px 24px;
-  border-radius: 12px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   margin-left: auto;
-  margin-top: 140px;
+  margin-top: 130px;
   margin-right: 12px;
   z-index: 1000;
   transition: right 0.5s ease;
@@ -187,6 +188,10 @@
   margin-bottom: 20px;
 }
 
+.inputField2.invalid {
+  background-color: #FFD8D8;
+}
+
 .inputField2:focus {
   transform: translateY(-2px);
 }
@@ -211,6 +216,7 @@
   display: flex;
   align-items: center;
 }
+
 
 .inputBtn:hover {
   scale: 103%;

@@ -154,6 +154,7 @@ function BusStopPage({ setStops }) {
     if (isValid) {
       input.classList.remove("invalid");
       submitBtn.disabled = false;
+      submitBtn.style.cursor = "pointer";
       input.classList.add("valid");
       warningMsg.classList.remove("invalid");
     } else {
@@ -161,6 +162,7 @@ function BusStopPage({ setStops }) {
       input.classList.add("invalid");
       warningMsg.classList.add("invalid");
       submitBtn.disabled = true;
+      submitBtn.style.cursor = "not-allowed";
     }
   }
 
@@ -174,6 +176,7 @@ function BusStopPage({ setStops }) {
     if (isValid) {
       input.classList.remove("invalid");
       submitBtn.disabled = false;
+      submitBtn.style.cursor = "pointer";
       input.classList.add("valid");
       warningMsg.classList.remove("invalid");
     } else {
@@ -181,6 +184,8 @@ function BusStopPage({ setStops }) {
       input.classList.add("invalid");
       warningMsg.classList.add("invalid");
       submitBtn.disabled = true;
+      
+      submitBtn.style.cursor = "not-allowed";
     }
   }
 
@@ -194,13 +199,14 @@ function BusStopPage({ setStops }) {
       input.classList.remove("invalid");
       submitBtn.disabled = false;
       warningMsg.classList.remove("invalid");
+      submitBtn.style.cursor = "pointer";
     } else {
       console.log("Invalid value detected");
       input.classList.add("invalid");
       warningMsg.classList.add("invalid");
       submitBtn.disabled = true;
-    }
-  }
+      submitBtn.style.cursor = "not-allowed";
+  }}
 
   return (
     <div className="mainContainer">

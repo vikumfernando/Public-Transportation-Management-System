@@ -4,6 +4,8 @@ import "../../styles/RoutesPage.css";
 import "../../styles/BusStopPage.css";
 import OffCanvas from "../OffCanvas";
 import RouteMap from "./RouteMap";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function RoutePage() {
   const [routes, setRoutes] = useState([]);
@@ -92,6 +94,13 @@ function RoutePage() {
         duration,
         stopsSequence: selectedStops,
       });
+
+      toast.success(`Bus route registered successfully`, {
+        position: "bottom-right",
+        autoClose: 4000,
+      });
+
+      
     } catch (err) {
       console.error(err);
     }
@@ -99,7 +108,6 @@ function RoutePage() {
 
   //Deleting route
   const deleteRoute = async (routeId, e) => {
-    
     e.preventDefault();
     if (!window.confirm("Are you sure you want to delete this route")) return;
 
@@ -109,7 +117,6 @@ function RoutePage() {
       );
 
       setRoutes(routes.filter((route) => route._id !== routeId));
-
     } catch (err) {
       if (err.response) {
         alert(err.response.data.message);
@@ -134,6 +141,39 @@ function RoutePage() {
     updatedStops[index] = stopId;
     setSelectedStops(updatedStops);
   };
+
+  function validateNumerical(id, value) {
+    const inputField = document.getElementById(id);
+    const submitBtn = document.getElementById("submitBtn");
+
+    const isValid = /^-?\d+(\.\d+)?$/.test(value.trim());
+
+    if (!isValid) {
+      inputField.classList.add("invalid");
+      submitBtn.disabled = true;
+      submitBtn.style.cursor = "not-allowed";
+    } else {
+      inputField.classList.remove("invalid");
+      submitBtn.disabled = false;
+      submitBtn.style.cursor = "pointer";
+    }
+  }
+
+  function validateString(id, value) {
+    const inputField = document.getElementById(id);
+    const submitBtn = document.getElementById("submitBtn");
+    const isValid = /^[a-zA-Z\s-]+$/.test(value.trim());
+
+    if (!isValid) {
+      inputField.classList.add("invalid");
+      submitBtn.disabled = true;
+      submitBtn.style.cursor = "not-allowed";
+    } else {
+      inputField.classList.remove("invalid");
+      submitBtn.disabled = false;
+      submitBtn.style.cursor = "pointer";
+    }
+  }
 
   return (
     <div className="mainContainer2">
@@ -186,7 +226,6 @@ function RoutePage() {
                 }`}
                 onClick={() => loadRoute(route.routeNum)}
               >
-                
                 <div className="routeNumDiv">
                   <label className="routeNum2">Route {route.routeNum}</label>
                   <br />
@@ -205,7 +244,7 @@ function RoutePage() {
                   />
                   <label className="routeSumText">{route.distance} Km</label>
                 </div>
-                
+
                 <div
                   id="stopList"
                   className={`stopList ${
@@ -221,7 +260,9 @@ function RoutePage() {
                   </ul>
 
                   <div className="">
-                    <button onClick = {(e) =>deleteRoute(route._id, e)}>Delete</button>
+                    <button onClick={(e) => deleteRoute(route._id, e)}>
+                      Delete
+                    </button>
                     <button>Edit</button>
                   </div>
                 </div>
@@ -250,9 +291,13 @@ function RoutePage() {
                 <label className="inputLabel">Route Number</label>
                 <br />
                 <input
+                  id="routeNumInput"
                   className="inputField2"
                   type="text"
-                  onChange={(e) => setRouteNum(e.target.value)}
+                  onChange={(e) => {
+                    validateNumerical(e.target.id, e.target.value);
+                    setRouteNum(e.target.value);
+                  }}
                   placeholder="Route Number"
                   required
                 />
@@ -262,9 +307,13 @@ function RoutePage() {
                 <label className="inputLabel">Route Name</label>
                 <br />
                 <input
+                  id="routeNameInput"
                   className="inputField2"
                   type="text"
-                  onChange={(e) => setRouteName(e.target.value)}
+                  onChange={(e) => {
+                    validateString(e.target.id, e.target.value);
+                    setRouteName(e.target.value);
+                  }}
                   placeholder="Start - Destination"
                   required
                 />
@@ -277,9 +326,13 @@ function RoutePage() {
                 <label className="inputLabel">Distance</label>
                 <br />
                 <input
+                  id="distanceInput"
                   className="inputField2"
                   type="text"
-                  onChange={(e) => setRouteDistance(e.target.value)}
+                  onChange={(e) => {
+                    validateNumerical(e.target.id, e.target.value);
+                    setRouteDistance(e.target.value);
+                  }}
                   placeholder="Distance (in Km)"
                   required
                 />
@@ -288,9 +341,13 @@ function RoutePage() {
                 <label className="inputLabel">Duration</label>
                 <br />
                 <input
+                  id="durationInput"
                   className="inputField2"
                   type="text"
-                  onChange={(e) => setRouteDuration(e.target.value)}
+                  onChange={(e) => {
+                    validateNumerical(e.target.id, e.target.value);
+                    setRouteDuration(e.target.value);
+                  }}
                   placeholder="Duration (in Hrs)"
                   required
                 />
@@ -299,9 +356,6 @@ function RoutePage() {
             </div>
 
             <label className="inputLabel">Add Stops</label>
-
-            {/*Implement the bus stop adding part here */}
-            {/*Bus stop list on the left, dropdown boxes on the right with all the bus stops available */}
 
             <div className="newStopsDiv">
               {selectedStops.map((stopId, index) => (
@@ -347,7 +401,7 @@ function RoutePage() {
               </button>
             </div>
 
-            <button className="inputBtn" type="submit">
+            <button id = "submitBtn" className="inputBtn" type="submit">
               <img
                 className="submitImage"
                 src="/images/check.png"
