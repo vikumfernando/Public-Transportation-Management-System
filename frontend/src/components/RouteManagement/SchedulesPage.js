@@ -4,9 +4,9 @@ import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-import OffCanvas from "./OffCanvas";
+import OffCanvas from "../OffCanvas";
 
-import "../styles/SchedulesPage.css";
+import "../../styles/SchedulesPage.css";
 
 function SchedulesPage() {
   const [buses, setBuses] = useState([]);

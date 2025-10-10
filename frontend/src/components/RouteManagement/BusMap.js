@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from "react";
 import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api";
-import "../styles/searchRoute.css";
+import "../../styles/searchRoute.css";
 
 const mapOptions = {
   disableDefaultUI: true, //Hiding HUD

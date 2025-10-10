@@ -1,6 +1,6 @@
 const router = require("express").Router();
-let Schedule = require("../models/Schedule");
-let Bus = require("../models/Bus");
+let Schedule = require("../../models/RouteManagement/Schedule");
+let Bus = require("../../models/RouteManagement/Bus");
 
 //adding schedules
 router.route("/addschedule").post(async (req, res) => {

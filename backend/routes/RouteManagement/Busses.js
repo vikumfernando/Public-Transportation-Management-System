@@ -1,7 +1,7 @@
 const router = require("express").Router();
-let Bus = require("../models/Bus");
-const calcDistance = require("../distanceCalculation");
-const Route = require("../models/Route");
+let Bus = require("../../models/RouteManagement/Bus");
+const calcDistance = require("../../distanceCalculation");
+const Route = require("../../models/RouteManagement/Route");
 
 //adding new bus to the data base
 router.route("/addBus").post(async (req, res) => {

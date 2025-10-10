@@ -1,6 +1,6 @@
 const router = require("express").Router();
-let Route = require("../models/Route");
-let Schedule = require("../models/Schedule");
+let Route = require("../../models/RouteManagement/Route");
+let Schedule = require("../../models/RouteManagement/Schedule");
 
 //adding new route to the db
 router.route("/addRoute").post(async (req, res) => {
@@ -98,7 +98,10 @@ router.route("/deleteroute/:id").delete(async (req, res) => {
 
     console.log("Route to be deleted : " + routeId);
 
-    const referenced = await Schedule.findOne({ routeId: routeId  });
+    const referenced = await Schedule.findOne({ _id: routeId  });
+
+
+     console.log(referenced);
 
     if (referenced) {
       return res.status(400).json({

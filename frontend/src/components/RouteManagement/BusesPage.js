@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import "../styles/BusesPage.css";
+import "../../styles/BusesPage.css";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";

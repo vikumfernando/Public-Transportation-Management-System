@@ -3,7 +3,7 @@ import axios from "axios";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import "../styles/SchedulesPage.css";
+import "../../styles/SchedulesPage.css";
 
 function SchedulesPageUser() {
   const [buses, setBuses] = useState([]);

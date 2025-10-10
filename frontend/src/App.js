@@ -1,10 +1,10 @@
 import Header from "./components/Header";
 import OffCanvas from "./components/OffCanvas";
 
-import SearchRoute from "./components/searchRoute";
-import UserBusStop from "./components/BusStopPage_user";
-import UserRoute from "./components/RoutePage_user";
-import UserSchedule from "./components/SchedulePage_user";
+import SearchRoute from "./components/RouteManagement/searchRoute";
+import UserBusStop from "./components/RouteManagement/BusStopPage_user";
+import UserRoute from "./components/RouteManagement/RoutePage_user";
+import UserSchedule from "./components/RouteManagement/SchedulePage_user";
 
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
@@ -13,13 +13,13 @@ import SignIn from "./components/SignIn";
 //Admin components
 import AdminDashboard from "./components/AdminDashboard";
 
-import RoutesPage from "./components/RoutesPage";
-import BusStopPage from "./components/BusStopPage";
-import SchedulesPage from "./components/SchedulesPage";
+import RoutesPage from "./components/RouteManagement/RoutesPage";
+import BusStopPage from "./components/RouteManagement/BusStopPage";
+import SchedulesPage from "./components/RouteManagement/SchedulesPage";
 
 import UserManagement from "./components/UserManagement";
 
-import BusesPage from "./components/BusesPage";
+import BusesPage from "./components/RouteManagement/BusesPage";
 
 //Payment components
 import Dashboard from "./components/Dashboard";

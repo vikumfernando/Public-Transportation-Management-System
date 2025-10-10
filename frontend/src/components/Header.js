@@ -47,7 +47,7 @@ function Header() {
                         onMouseEnter={() => dropdownEnter('test1')}
                         onMouseLeave={dropdownLeave}
                     >
-                        <Link to="#" className="nav-link" onClick={closeMobileMenu}>Location Service</Link>
+                        <Link to="/" className="nav-link" onClick={closeMobileMenu}>Location Service</Link>
                         
                         <div className={`dropdown-menu ${activeDropdown === 'test1' ? 'show' : ''}`}>
                             <Link to="/" className="dropdown-item" onClick={closeMobileMenu}>
@@ -73,21 +73,21 @@ function Header() {
                         onMouseEnter={() => dropdownEnter('test2')}
                         onMouseLeave={dropdownLeave}
                     >
-                        <Link to="#" className="nav-link" onClick={closeMobileMenu}>
+                        <Link to="/payment" className="nav-link" onClick={closeMobileMenu}>
                             Payment
                         </Link>
                         <div className={`dropdown-menu ${activeDropdown === 'test2' ? 'show' : ''}`}>
-                            <Link to="/bus-transit" className="dropdown-item" onClick={closeMobileMenu}>
-                                My Wallet
+                            <Link to="/smart-cards" className="dropdown-item" onClick={closeMobileMenu}>
+                                NFC Card 
                             </Link>
-                            <Link to="/rail-systems" className="dropdown-item" onClick={closeMobileMenu}>
-                                NFC Card Service
+                            <Link to="/visa-cards" className="dropdown-item" onClick={closeMobileMenu}>
+                                VISA Card
                             </Link>
-                            <Link to="/multi-modal-transport" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 3
+                            <Link to="/recharge" className="dropdown-item" onClick={closeMobileMenu}>
+                                Recharge Account
                             </Link>
-                            <Link to="/smart-cities" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 4
+                            <Link to="/transactions" className="dropdown-item" onClick={closeMobileMenu}>
+                                Transaction History
                             </Link>
                         </div>
                     </li>

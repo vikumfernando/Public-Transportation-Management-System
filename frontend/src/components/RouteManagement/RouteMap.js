@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useRef} from "react";
-import "../styles/searchRoute.css";
+import "../../styles/RoutesPage.css";
 import {
   GoogleMap,
   useJsApiLoader,
   Marker,
+  Polyline,
 } from "@react-google-maps/api";
 
 //To remove unwanted tags and names from the map
 const mapOptions = {
-  disableDefaultUI: true, 
+  disableDefaultUI: true, //Hiding HUD
   styles: [
     {
       featureType: "poi",
@@ -25,7 +26,7 @@ const mapOptions = {
 
 const containerStyle = {
   width: "100%",
-  height: "650px",
+  height: "700px",
 };
 
 const center = {
@@ -33,7 +34,7 @@ const center = {
   lng: 79.8612,
 };
 
-function BusStopMap({ stops, pickedPosition, onPickPosition }) {
+function RouteMap({ stops }) {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyAJGs8eo5fJNIyJb60H3br0F-1-twWT2MY",
   });
@@ -44,58 +45,46 @@ function BusStopMap({ stops, pickedPosition, onPickPosition }) {
     mapRef.current = map;
   }, []);
 
-  useEffect(() => {
-    if(!isLoaded || !mapRef.current) {
-        return;
-    }
-
-    if (stops && !Array.isArray(stops)){
-        mapRef.current.panTo({lat : stops.lat, lng : stops.lon});
-    }
-
-  }, [isLoaded, stops])
 
   if (!isLoaded) return <div>Loading Map...</div>;
 
+  const path = stops?.map((stop) => ({ lat: stop.lat, lng: stop.lon })) || [];
 
   return (
-    <div className="mapDiv">
+    <div className = "mapDiv2">
       <GoogleMap
+      key={JSON.stringify(stops)} 
         mapContainerStyle={containerStyle}
         center={center}
-        zoom={16}
+        zoom={14}
         onLoad={onLoad}
         options={mapOptions}
-        onClick={(e) => {
-          if (onPickPosition && e && e.latLng) {
-            const lat = e.latLng.lat();
-            const lng = e.latLng.lng();
-            onPickPosition({ lat, lon: lng });
-          }
-        }}
       >
-        {stops && !Array.isArray(stops) && (
+        {/* Stop Markers */}
+        {stops?.map((stop, index) => (
           <Marker
-            position={{ lat: stops.lat, lng: stops.lon }}
+            key={index}
+            position={{ lat: stop.lat, lng: stop.lon }}
+            label={stop.stopName}
             icon={{
-              url: process.env.PUBLIC_URL + "/images/busStopIcon.png",
-              scaledSize: new window.google.maps.Size(30, 30),
+              url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+            }}
+          />
+        ))}
+
+        {path.length > 1 && (
+          <Polyline
+            path={path}
+            options={{
+              strokeColor: "black",
+              strokeOpacity: 0.8,
+              strokeWeight: 5,
             }}
           />
         )}
-
-        {pickedPosition && !stops && (
-          <Marker
-            position={{ lat: pickedPosition.lat, lng: pickedPosition.lon }}
-            icon={{
-              url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
-            }}
-          />
-        )}
-
       </GoogleMap>
     </div>
   );
 }
 
-export default BusStopMap;
+export default RouteMap;

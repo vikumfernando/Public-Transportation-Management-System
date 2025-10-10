@@ -91,14 +91,6 @@ export const api = {
     return response.json();
   },
 
-  addRoute: async (routeData) => {
-    const response = await fetch(`${API_BASE_URL}/routes`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(routeData),
-    });
-    return response.json();
-  },
 
   // Fare Calculation
   calculateFare: async (routeId, distance) => {

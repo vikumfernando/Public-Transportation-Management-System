@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import "../styles/RoutesPage.css";
-import "../styles/BusStopPage.css";
-import RouteMap from "../components/RouteMap";
+import "../../styles/RoutesPage.css";
+import "../../styles/BusStopPage.css";
+import RouteMap from "./RouteMap";
 
 function RoutePageUser() {
   const [routes, setRoutes] = useState([]);

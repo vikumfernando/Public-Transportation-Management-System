@@ -52,15 +52,22 @@ connection.once("open", () => {
 
 //Add routes here later
 
-const busStopRouter = require("./routes/Stops.js");
-const busRouter = require("./routes/Busses.js");
-const routesRouter = require("./routes/Routes.js");
-const schedulesRouter = require("./routes/Schedules.js");
+const busStopRouter = require("./routes/RouteManagement/Stops.js");
+const busRouter = require("./routes/RouteManagement/Busses.js");
+const routesRouter = require("./routes/RouteManagement/Routes.js");
+const schedulesRouter = require("./routes/RouteManagement/Schedules.js");
 const authRouter = require("./routes/auth.js");
 const usersRouter = require("./routes/users.js");
 
 //const User = mongoose.model('User', userSchema);
+<<<<<<< HEAD
 
+=======
+const SmartCard = mongoose.model('SmartCard', smartCardSchema);
+const VisaCard = mongoose.model('VisaCard', visaCardSchema);
+//const Route = mongoose.model('Route', routeSchema);
+const Transaction = mongoose.model('Transaction', transactionSchema);
+>>>>>>> 8e40df1d54a25b9a906e1eef34d6f4d09cd74a55
 
 app.use("/Stops", busStopRouter);
 app.use("/Busses", busRouter);
