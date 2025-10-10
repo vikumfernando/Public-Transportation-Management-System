@@ -1,1 +1,18 @@
- 
+/* Basic styling to match the soft green card look */
+.user-view-page { padding: 24px; background:
+  linear-gradient(135deg, rgba(240, 237, 232, 0.85) 0%, rgba(255, 255, 255, 0.9) 100%), var(--ptms-bg, #f0f4f1);
+  min-height: 100vh; }
+.view-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.back-button { background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.4); padding: 8px 12px; border-radius: 10px; cursor: pointer; backdrop-filter: blur(10px) saturate(140%); -webkit-backdrop-filter: blur(10px) saturate(140%); }
+.profile-card { background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.35); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 10px 30px rgba(11, 86, 72, 0.25); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); }
+.avatar { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #0B5648, #8CDB66); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.info h3 { margin: 0; }
+.role-badge { padding: 6px 10px; border-radius: 999px; background: #e6f4ea; color: #0b5648; margin-left: auto; font-weight: 600; text-transform: capitalize; }
+.details-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-top: 16px; }
+.detail { background: rgba(255,255,255,0.75); border: 1px solid rgba(255,255,255,0.45); border-radius: 12px; padding: 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.detail label { display: block; font-size: 12px; font-weight: 700; color: #0b5648; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px; }
+.actions { margin-top: 16px; display: flex; justify-content: flex-end; }
+.edit-btn { background: linear-gradient(135deg, #0B5648, #8CDB66); color: #fff; border: none; padding: 10px 14px; border-radius: 10px; cursor: pointer; box-shadow: 0 8px 25px rgba(11, 86, 72, 0.35); }
+.loading { padding: 24px; }
+.alert { padding: 12px 14px; border-radius: 10px; }
+.alert-error { background: #fde8e8; color: #9b1c1c; } 

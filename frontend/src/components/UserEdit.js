@@ -1,1 +1,122 @@
- 
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
+import '../styles/UserEdit.css';
+
+function UserEdit() {
+	const navigate = useNavigate();
+	const { id } = useParams();
+	const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', role: '', password: '' });
+	const [loading, setLoading] = useState(true);
+	const [saving, setSaving] = useState(false);
+	const [error, setError] = useState('');
+	const [success, setSuccess] = useState('');
+
+	useEffect(() => {
+		const load = async () => {
+			try {
+				const res = await axios.get(`http://localhost:8070/users/${id}`);
+				if (res.data.success) setForm({ ...res.data.user, password: '' });
+			} catch (e) {
+				setError(e?.response?.data?.message || 'Failed to load user');
+			} finally {
+				setLoading(false);
+			}
+		};
+		load();
+	}, [id]);
+
+	const handleChange = (e) => {
+		const { name, value } = e.target;
+		setForm(prev => ({ ...prev, [name]: value }));
+		if (error) setError('');
+	};
+
+	const validate = () => {
+		if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim() || !form.phone.trim()) {
+			setError('Please fill in all required fields');
+			return false;
+		}
+		const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+		if (!emailRegex.test(form.email)) { setError('Please enter a valid email'); return false; }
+		const phoneRegex = /^\d{10}$/;
+		if (!phoneRegex.test(form.phone)) { setError('Phone must be 10 digits'); return false; }
+		return true;
+	};
+
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		if (!validate()) return;
+		try {
+			setSaving(true);
+			const payload = { firstName: form.firstName, lastName: form.lastName, email: form.email, phone: form.phone, role: form.role };
+			if (form.password) payload.password = form.password;
+			const res = await axios.put(`http://localhost:8070/users/${id}`, payload);
+			if (res.data.success) {
+				setSuccess('User updated successfully');
+				setTimeout(() => navigate(`/users/${id}`), 800);
+			}
+		} catch (e) {
+			setError(e?.response?.data?.message || 'Failed to update user');
+		} finally {
+			setSaving(false);
+		}
+	};
+
+	if (loading) return <div className="user-edit-page"><div className="loading">Loading...</div></div>;
+
+	return (
+		<div className="user-edit-page">
+			<div className="edit-header">
+				<button className="back-button" onClick={() => navigate('/users')}>← Back to Users</button>
+				<div>
+					<h1>Edit User</h1>
+					<p>Update user details. Role cannot be changed here.</p>
+				</div>
+			</div>
+
+			{error && <div className="alert alert-error">{error}</div>}
+			{success && <div className="alert alert-success">{success}</div>}
+
+			<form onSubmit={handleSubmit} className="edit-form">
+				<div className="form-row">
+					<div className="form-group">
+						<label>First Name</label>
+						<input name="firstName" value={form.firstName} onChange={handleChange} required />
+					</div>
+					<div className="form-group">
+						<label>Last Name</label>
+						<input name="lastName" value={form.lastName} onChange={handleChange} required />
+					</div>
+				</div>
+				<div className="form-group">
+					<label>Email</label>
+					<input type="email" name="email" value={form.email} onChange={handleChange} required />
+				</div>
+				<div className="form-group">
+					<label>Phone</label>
+					<input type="tel" name="phone" value={form.phone} onChange={handleChange} required />
+				</div>
+				<div className="form-group">
+					<label>Role</label>
+					<select name="role" value={form.role} onChange={handleChange}>
+						<option value="passenger">Passenger</option>
+						<option value="driver">Driver</option>
+						<option value="admin">Admin</option>
+					</select>
+					<small className="form-hint">Admins can change user type here.</small>
+				</div>
+				<div className="form-group">
+					<label>New Password (optional)</label>
+					<input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Leave blank to keep current" />
+				</div>
+				<div className="form-actions">
+					<button type="button" className="cancel-btn" onClick={() => navigate(`/users/${id}`)} disabled={saving}>Cancel</button>
+					<button type="submit" className="save-btn" disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</button>
+				</div>
+			</form>
+		</div>
+	);
+}
+
+export default UserEdit; 

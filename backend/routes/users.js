@@ -188,7 +188,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT /users/:id - Update user
+// PUT /users/:id - Update user (role change is not allowed via this route)
 router.put('/:id', async (req, res) => {
     try {
         const { firstName, lastName, phone, email, role, password } = req.body;
@@ -204,7 +204,7 @@ router.put('/:id', async (req, res) => {
         }
 
         // Validate role if provided
-        if (role && !['passenger', 'driver', 'admin'].includes(role)) {
+        if (typeof role !== 'undefined' && !['passenger', 'driver', 'admin'].includes(role)) {
             return res.status(400).json({
                 success: false,
                 message: 'Invalid role specified'
@@ -228,7 +228,7 @@ router.put('/:id', async (req, res) => {
         if (lastName) updateData.lastName = lastName;
         if (phone) updateData.phone = phone;
         if (email) updateData.email = email;
-        if (role) updateData.role = role;
+        if (typeof role !== 'undefined') updateData.role = role;
 
         // Handle password update if provided
         if (password) {

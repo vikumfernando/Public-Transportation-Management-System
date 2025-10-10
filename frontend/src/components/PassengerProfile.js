@@ -41,7 +41,7 @@ function PassengerProfile() {
     const fetchSelf = async (id) => {
         try {
             setLoading(true);
-            const res = await axios.get(`/users/${id}`);
+            const res = await axios.get(`http://localhost:8070/users/${id}`);
             if (res.data?.success) {
                 const user = res.data.user;
                 setFormData({
@@ -108,7 +108,7 @@ function PassengerProfile() {
                 phone: formData.phone
             };
             if (formData.password) payload.password = formData.password;
-            const res = await axios.put(`/users/${userId}`, payload);
+            const res = await axios.put(`http://localhost:8070/users/${userId}`, payload);
             if (res.data?.success) {
                 setSuccess("Profile updated successfully");
                 // Update localStorage copy
@@ -125,7 +125,7 @@ function PassengerProfile() {
     const handleDelete = async () => {
         if (!window.confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
         try {
-            await axios.delete(`/users/${userId}`);
+            await axios.delete(`http://localhost:8070/users/${userId}`);
             // Clear session and redirect to sign in
             localStorage.removeItem("user");
             navigate("/signin");

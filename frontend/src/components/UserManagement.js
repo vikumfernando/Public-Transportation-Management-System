@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/UserManagement.css";
 
 function UserManagement() {
+    const navigate = useNavigate();
     const [userStats, setUserStats] = useState({
         passengers: 0,
         drivers: 0,
@@ -14,7 +16,9 @@ function UserManagement() {
     const [selectedRole, setSelectedRole] = useState('all');
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showViewModal, setShowViewModal] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
+    const [viewingUser, setViewingUser] = useState(null);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -62,7 +66,14 @@ function UserManagement() {
     const handleCreateUser = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8070/users', formData);
+            const response = await axios.post('http://localhost:8070/users', {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                email: formData.email,
+                phone: formData.phone,
+                password: formData.password,
+                role: formData.role
+            });
             if (response.data.success) {
                 setSuccess('User created successfully');
                 setShowCreateModal(false);
@@ -82,6 +93,8 @@ function UserManagement() {
             if (!updateData.password) {
                 delete updateData.password; // Don't update password if not provided
             }
+            // Role cannot be changed from edit screen
+            delete updateData.role;
             
             const response = await axios.put(`http://localhost:8070/users/${editingUser._id}`, updateData);
             if (response.data.success) {
@@ -125,6 +138,11 @@ function UserManagement() {
         setShowEditModal(true);
     };
 
+    const handleViewUser = (user) => {
+        // Navigate to dedicated view page
+        navigate(`/users/${user._id}`);
+    };
+
     const resetForm = () => {
         setFormData({
             firstName: '',
@@ -139,7 +157,9 @@ function UserManagement() {
     const closeModals = () => {
         setShowCreateModal(false);
         setShowEditModal(false);
+        setShowViewModal(false);
         setEditingUser(null);
+        setViewingUser(null);
         resetForm();
         setError('');
     };
@@ -201,7 +221,7 @@ function UserManagement() {
                     </select>
                 </div>
                 <button 
-                    onClick={() => setShowCreateModal(true)}
+                    onClick={() => navigate('/users/create')}
                     className="create-user-btn"
                 >
                     Create New User
@@ -245,7 +265,13 @@ function UserManagement() {
                                     <td>
                                         <div className="action-buttons">
                                             <button 
-                                                onClick={() => handleEditUser(user)}
+                                                onClick={() => handleViewUser(user)}
+                                                className="view-btn"
+                                            >
+                                                View
+                                            </button>
+                                            <button 
+                                                onClick={() => navigate(`/users/${user._id}/edit`)}
                                                 className="edit-btn"
                                             >
                                                 Edit
@@ -346,6 +372,8 @@ function UserManagement() {
                 </div>
             )}
 
+            {/* View modal removed in favor of dedicated page */}
+
             {/* Edit User Modal */}
             {showEditModal && (
                 <div className="modal-overlay">
@@ -404,15 +432,12 @@ function UserManagement() {
                             </div>
                             <div className="form-group">
                                 <label>Role</label>
-                                <select
-                                    value={formData.role}
-                                    onChange={(e) => setFormData({...formData, role: e.target.value})}
-                                    required
-                                >
+                                <select value={formData.role} disabled>
                                     <option value="passenger">Passenger</option>
                                     <option value="driver">Driver</option>
                                     <option value="admin">Admin</option>
                                 </select>
+                                <small className="form-hint">Role cannot be changed from Edit. Use Create New User to assign a different role.</small>
                             </div>
                             <div className="form-actions">
                                 <button type="button" onClick={closeModals} className="cancel-btn">

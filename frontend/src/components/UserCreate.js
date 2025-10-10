@@ -87,14 +87,14 @@ function UserCreate() {
                 role: formData.role
             };
 
-            const response = await axios.post('/users', createData);
+            const response = await axios.post('http://localhost:8070/users', createData, { timeout: 15000 });
             
             if (response.data.success) {
                 setSuccess('User created successfully!');
                 // Redirect to user management after 2 seconds
                 setTimeout(() => {
                     navigate('/users');
-                }, 2000);
+                }, 800);
             }
         } catch (error) {
             console.error('Create user error:', error);
