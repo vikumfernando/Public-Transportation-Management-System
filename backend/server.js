@@ -68,13 +68,13 @@ const cardsRouter = require("./routes/cards.js");
 const paymentsRouter = require("./routes/Payments.js");
 const transactionRouter = require("./routes/transaction.js");
 const revenueRouter = require("./routes/revenue.js");
-
+/*
 //const User = mongoose.model('User', userSchema);
 const SmartCard = mongoose.model('SmartCard', smartCardSchema);
 const VisaCard = mongoose.model('VisaCard', visaCardSchema);
 //const Route = mongoose.model('Route', routeSchema);
 const Transaction = mongoose.model('Transaction', transactionSchema);
-
+*/
 app.use("/Stops", busStopRouter);
 app.use("/Busses", busRouter);
 app.use("/Routes", routesRouter);
