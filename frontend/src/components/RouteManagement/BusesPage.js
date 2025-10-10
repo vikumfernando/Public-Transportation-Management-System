@@ -321,7 +321,7 @@ function BusesPage() {
         >
           <div className="search-container2">
             <input
-              style={{ margin: "10px 0px 21px 30px", width: "15%" }}
+              style={{ margin: "10px 0px 21px 30px", width: "75%" }}
               id="routeInput"
               type="text"
               className="search-box2"

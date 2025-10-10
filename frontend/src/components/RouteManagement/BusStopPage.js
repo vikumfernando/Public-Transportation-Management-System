@@ -82,7 +82,7 @@ function BusStopPage({ setStops }) {
     try {
       const res = await axios.post("http://localhost:8070/Stops/addStop", {
         stopName,
-        lat: parseFloat(latitude),
+        lat: parseFloat(latitude), 
         lon: parseFloat(longitude),
       });
 

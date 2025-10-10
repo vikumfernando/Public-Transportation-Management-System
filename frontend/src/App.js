@@ -1,5 +1,5 @@
 import { ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
 import Header from "./components/Header";
 import OffCanvas from "./components/OffCanvas";
@@ -11,7 +11,7 @@ import UserSchedule from "./components/RouteManagement/SchedulePage_user";
 
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
-
+//import LandingPage from "./components/landingPage";
 
 //Admin components
 import AdminDashboard from "./components/AdminDashboard";
@@ -35,7 +35,6 @@ import RefundPage from "./components/RefundPage";
 
 import PassengerProfile from "./components/PassengerProfile";
 
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import SearchPage from "./components/SearchPage";
@@ -48,11 +47,20 @@ function App() {
 
   return (
 
-
+    
     <Router>
-
       <ToastContainer position="top-right" autoClose={4000} />
       <Routes>
+
+       { /*
+        <Route
+          path="/home"
+          element={
+            <div>
+              <LandingPage />
+            </div>
+          }
+        /> */}
 
         <Route
           path="/"
@@ -101,26 +109,19 @@ function App() {
           }
         />
 
-        <Route path="/schedulepage" element={
-          <div>
-            <Header />
-            <SchedulesPage />
-
-
-
-          </div>
-        }>
-        </Route>
-
         <Route
-          path="/signup"
-          element={<SignUp />}
-        />
+          path="/schedulepage"
+          element={
+            <div>
+              <Header />
+              <SchedulesPage />
+            </div>
+          }
+        ></Route>
 
-        <Route
-          path="/signin"
-          element={<SignIn />}
-        />
+        <Route path="/signup" element={<SignUp />} />
+
+        <Route path="/signin" element={<SignIn />} />
 
         <Route
           path="/users"
@@ -140,7 +141,6 @@ function App() {
               <Header />
               <OffCanvas />
               <BusesPage />
-
             </div>
           }
         />
@@ -151,7 +151,6 @@ function App() {
             <div>
               <Header />
               <UserBusStop setStops={setStops} stops={stops} />
-
             </div>
           }
         />
@@ -162,7 +161,6 @@ function App() {
             <div>
               <Header />
               <UserRoute />
-
             </div>
           }
         />
@@ -177,81 +175,115 @@ function App() {
           }
         />
 
-        <Route path="/payment" element={
-          <div>
-            <Header />
-            <Dashboard />
-          </div>
-        } />
+        <Route
+          path="/payment"
+          element={
+            <div>
+              <Header />
+              <Dashboard />
+            </div>
+          }
+        />
 
-        <Route path="/dashboard" element={
-          <div>
-            <Header />
-            <Dashboard />
-          </div>} />
+        <Route
+          path="/dashboard"
+          element={
+            <div>
+              <Header />
+              <Dashboard />
+            </div>
+          }
+        />
 
-        <Route path="/smart-cards" element={
-          <div>
-            <Header />
-            <SmartCardPage />
-          </div>
-        } />
+        <Route
+          path="/smart-cards"
+          element={
+            <div>
+              <Header />
+              <SmartCardPage />
+            </div>
+          }
+        />
 
-        <Route path="/visa-cards" element={
-          <div>
-            <Header />
-            <VisaCardPage />
-          </div>
-        } />
+        <Route
+          path="/visa-cards"
+          element={
+            <div>
+              <Header />
+              <VisaCardPage />
+            </div>
+          }
+        />
 
-        <Route path="/topup" element={
-          <div>
-            <Header />
-            <TopupPage />
-          </div>
-        } />
+        <Route
+          path="/topup"
+          element={
+            <div>
+              <Header />
+              <TopupPage />
+            </div>
+          }
+        />
 
-        <Route path="/recharge" element={
-          <div>
-            <Header />
-            <RechargePage />
-          </div>
-        } />
+        <Route
+          path="/recharge"
+          element={
+            <div>
+              <Header />
+              <RechargePage />
+            </div>
+          }
+        />
 
-        <Route path="/transactions" element={
-          <div>
-            <Header />
-            <TransactionsPage />
-          </div>
-        } />
+        <Route
+          path="/transactions"
+          element={
+            <div>
+              <Header />
+              <TransactionsPage />
+            </div>
+          }
+        />
 
-        <Route path="/refunds" element={
-          <div>
-            <Header />
-            <RefundPage />
-          </div>
-        } />
+        <Route
+          path="/refunds"
+          element={
+            <div>
+              <Header />
+              <RefundPage />
+            </div>
+          }
+        />
 
-        <Route path="/booking/search" element={
-          <div>
-            <Header />
-            <SearchPage />
-          </div>
-        } />
+        <Route
+          path="/booking/search"
+          element={
+            <div>
+              <Header />
+              <SearchPage />
+            </div>
+          }
+        />
 
-        <Route path="/bus-details/:busId" element={
-          <div>
-            <Header />
-            <BusDetailsPage />
-          </div>
-        } />
+        <Route
+          path="/bus-details/:busId"
+          element={
+            <div>
+              <Header />
+              <BusDetailsPage />
+            </div>
+          }
+        />
 
-        <Route path="/booking/seat-layout/:busId" element={
-          <div>
-            <Header />
-            <SeatLayoutPage />
-          </div>
-        } />
+        <Route
+          path="/booking/seat-layout/:busId"
+          element={
+            <div>
+              <Header />
+              <SeatLayoutPage />
+            </div>
+          }
+        />
 
         <Route
           path="/me"

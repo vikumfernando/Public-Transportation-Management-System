@@ -148,7 +148,7 @@ const SearchPage = () => {
                 </div>
             </div>
 
-            <div className="search-container">
+            <div className="search-container8">
                 <form className="search-form" onSubmit={handleSearch}>
                     <div className="form-row">
                         <div className="form-group" style={{ position: 'relative' }}>
