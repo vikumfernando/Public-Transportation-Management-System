@@ -252,7 +252,8 @@ function BusStopPage({ setStops }) {
                 className="search-box2"
                 placeholder="Enter Stop Name..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {validateStopName(e.target.value, e.target.id);
+                  setSearchQuery(e.target.value)}}
                 required
               />
 

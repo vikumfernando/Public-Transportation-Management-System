@@ -107,8 +107,7 @@ function RoutePage() {
   };
 
   //Deleting route
-  const deleteRoute = async (routeId, e) => {
-    e.preventDefault();
+  const deleteRoute = async (routeId) => {
     if (!window.confirm("Are you sure you want to delete this route")) return;
 
     try {
@@ -199,7 +198,8 @@ function RoutePage() {
                 className="search-box2"
                 placeholder="Enter Route Number..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {validateNumerical(e.target.id, e.target.value);
+                  setSearchQuery(e.target.value)}}
                 required
               />
 
@@ -259,12 +259,29 @@ function RoutePage() {
                     ))}
                   </ul>
 
-                  <div className="">
-                    <button onClick={(e) => deleteRoute(route._id, e)}>
-                      Delete
-                    </button>
-                    <button>Edit</button>
-                  </div>
+                  <div className="edDelBtnContainer" style = {{marginTop: "-30px"}}>
+                      <button
+                        className="editBtn"
+                        style = {{marginLeft: "160px"}}
+                        onClick={() => {
+                        }}
+                      >
+                        <img
+                          style={{ width: "25px", height: "25px" }}
+                          src="/images/editicon.png"
+                        />
+                      </button>
+
+                      <button
+                        className="deleteBtn"
+                        onClick={() =>  deleteRoute(route._id)}
+                      >
+                        <img
+                          style={{ width: "25px", height: "25px" }}
+                          src="/images/trash.png"
+                        />
+                      </button>
+                    </div>
                 </div>
               </div>
             ))}

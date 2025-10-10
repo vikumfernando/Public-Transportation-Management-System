@@ -164,38 +164,48 @@ const formatTime = ({ hour, minute, period }) => {
   }
 
   const generatePdf = () => {
-    const doc = new jsPDF();
+  const doc = new jsPDF();
 
-    doc.setFontSize(18);
-    doc.text("Bus Schedules", 14, 22);
+  const logoImg = "/images/siteLogo.png"; 
+  const imgProps = doc.getImageProperties(logoImg);
 
-    const columns = [
-      "Vehicle Number",
-      "Stop Name",
-      "Time of Arrival",
-      "Day Type",
-    ];
+  doc.addImage(
+    logoImg,
+    "PNG",        
+    14,           // x 
+    10,           // y
+    30,           // width
+    (imgProps.height * 30) / imgProps.width // height
+  );
 
-    const rows = buses.map((bus) => {
-      const stopsStr = bus.route.map((s) => s.stopName).join("\n");
-      const timesStr = bus.schedule.stopSchedules
-        .map((s) => s.expectedArrival)
-        .join("\n");
+  doc.setFontSize(10);
+  doc.text("Company: ECO Transit", 14, 45);
+  doc.text("Phone: +94 77 344 2341", 14, 50);
+  doc.text("Email: ecotransit@gmail.com", 14, 55);
 
-      return [bus.vehicleNumber, stopsStr, timesStr, bus.schedule.dayType];
-    });
+  const columns = ["Vehicle Number", "Stop Name", "Time of Arrival", "Day Type"];
 
-    autoTable(doc, {
-      head: [columns],
-      body: rows,
-      startY: 30,
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [100, 100, 100] },
-      theme: "grid",
-    });
+  const rows = buses.map((bus) => {
+    const stopsStr = bus.route.map((s) => s.stopName).join("\n");
+    const timesStr = bus.schedule.stopSchedules
+      .map((s) => s.expectedArrival)
+      .join("\n");
 
-    doc.save("schedules.pdf");
-  };
+    return [bus.vehicleNumber, stopsStr, timesStr, bus.schedule.dayType];
+  });
+
+  autoTable(doc, {
+    head: [columns],
+    body: rows,
+    startY: 65, 
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [100, 100, 100] },
+    theme: "grid",
+  });
+
+  doc.save("schedules.pdf");
+};
+
 
   return (
     <div>
@@ -477,11 +487,31 @@ const formatTime = ({ hour, minute, period }) => {
                   ))}
                 </td>
                 <td>{bus.schedule.dayType}</td>
-                <td>
-                  <button>Edit</button>
+                <td style ={{width : "10%"}}>
+                  <button
+                        className="editBtn"
+                        style = {{marginTop: "25px", marginLeft : "0px"}}
+                        onClick={() => {
+                        }}
+                      >
+                        <img
+                          style={{ width: "25px", height: "25px" }}
+                          src="/images/editicon.png"
+                        />
+                      </button>
                 </td>
-                <td>
-                  <button>Delete</button>
+                <td  style ={{width : "10%"}}>
+                  <button
+                        className="deleteBtn"
+                        style = {{marginTop: "25px", marginLeft : "0px"}}
+                        onClick={() => {
+                        }}
+                      >
+                        <img
+                          style={{ width: "25px", height: "25px" }}
+                          src="/images/trash.png"
+                        />
+                      </button>
                 </td>
               </tr>
             ))}
