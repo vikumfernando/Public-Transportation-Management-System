@@ -1,16 +1,16 @@
 const Transaction = require('../models/Transaction');
 const SmartCard = require('../models/SmartCard');
 const User = require('../models/User');
-const { sendReceipt } = require('../utils/mailer');
+// 
 const { computeFareCents } = require('../utils/fareCalculator');
 
 // Get user transactions
 const getUserTransactions = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    // No authentication - return all transactions for demo
     const { page = 1, limit = 20, type } = req.query;
 
-    let query = { user: userId };
+    let query = {};
     if (type) {
       query.type = type;
     }
@@ -50,10 +50,11 @@ const getUserTransactions = async (req, res) => {
 const createTransaction = async (req, res) => {
   try {
     const { cardId, type, amountCents, busId, startStopId, endStopId, distanceMeters } = req.body;
-    const userId = req.user.userId;
+    // No authentication - use demo user ID
+    const userId = "507f1f77bcf86cd799439011";
 
     // Find card
-    const card = await SmartCard.findOne({ cardId, owner: userId });
+    const card = await SmartCard.findOne({ cardId });
     if (!card) {
       return res.status(404).json({ message: 'Card not found' });
     }
@@ -110,9 +111,8 @@ const createTransaction = async (req, res) => {
 const getTransactionById = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.userId;
-
-    const transaction = await Transaction.findOne({ _id: id, user: userId })
+    // No authentication - return transaction without user check
+    const transaction = await Transaction.findOne({ _id: id })
       .populate('card', 'cardId');
 
     if (!transaction) {
@@ -143,7 +143,7 @@ const getTransactionById = async (req, res) => {
 // Get transaction statistics
 const getTransactionStats = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    // No authentication - return stats for all transactions
     const { period = '30d' } = req.query;
 
     let dateFilter = {};
@@ -162,7 +162,7 @@ const getTransactionStats = async (req, res) => {
     }
 
     const stats = await Transaction.aggregate([
-      { $match: { user: userId, ...dateFilter } },
+      { $match: { ...dateFilter } },
       {
         $group: {
           _id: null,
@@ -324,10 +324,10 @@ const handleNFCTap = async (req, res) => {
           </div>
         `;
         
-        await sendReceipt(user.email, 'Transit Receipt', receiptHtml);
+        // Email functionality removed - receipts available via PDF download
       } catch (emailError) {
-        console.error('Failed to send receipt:', emailError);
-        // Don't fail the transaction if email fails
+        console.error('Email functionality removed:', emailError);
+        // Email functionality removed - system works without email
       }
 
       res.json({
