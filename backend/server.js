@@ -46,7 +46,7 @@ mongoose.connect(URL, {
 const connection = mongoose.connection;
 
 connection.once("open", () => {
-    console.log("MongoDB connection established successfully");
+  console.log("MongoDB connection established successfully");
 })
 
 
@@ -112,6 +112,9 @@ const routesRouter = require("./routes/RouteManagement/Routes.js");
 const schedulesRouter = require("./routes/RouteManagement/Schedules.js");
 const authRouter = require("./routes/auth.js");
 const usersRouter = require("./routes/users.js");
+const seatBooking = require("./routes/Bookings.js");
+const busDetailsRoutes = require("./routes/BusDetails.js");
+const searchRoutes = require("./routes/BusSeach.js");
 
 //const User = mongoose.model('User', userSchema);
 const SmartCard = mongoose.model('SmartCard', smartCardSchema);
@@ -125,6 +128,9 @@ app.use("/Routes", routesRouter);
 app.use("/Schedules", schedulesRouter);
 app.use("/auth", authRouter);
 app.use("/users", usersRouter);
+app.use("/Bookings", seatBooking);
+app.use("/BusSearch", searchRoutes);
+app.use("/BusDetails", busDetailsRoutes);
 
 app.get("/", (req, res) => {
   res.json({
@@ -132,7 +138,7 @@ app.get("/", (req, res) => {
     status: "running",
     features: [
       "NFC Smart Cards",
-      "Visa Cards", 
+      "Visa Cards",
       "Digital Receipts",
       "Fare Calculation",
       "Revenue Management",
@@ -225,11 +231,11 @@ app.put("/api/visa-cards/:id", async (req, res) => {
       { cardNumber, cardHolderName, expiryDate, cvv, balance },
       { new: true, runValidators: true }
     );
-    
+
     if (!card) {
       return res.status(404).json({ error: "Visa card not found" });
     }
-    
+
     res.json(card);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -240,11 +246,11 @@ app.put("/api/visa-cards/:id", async (req, res) => {
 app.delete("/api/visa-cards/:id", async (req, res) => {
   try {
     const card = await VisaCard.findByIdAndDelete(req.params.id);
-    
+
     if (!card) {
       return res.status(404).json({ error: "Visa card not found" });
     }
-    
+
     res.json({ message: "Visa card deleted successfully", card });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -266,11 +272,11 @@ app.get("/api/routes/number/:routeNumber", async (req, res) => {
   try {
     const routeNumber = parseInt(req.params.routeNumber);
     const route = await Route.findOne({ routeNum: routeNumber });
-    
+
     if (!route) {
       return res.status(404).json({ error: 'Route not found' });
     }
-    
+
     res.json(route);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -282,11 +288,11 @@ app.post("/api/calculate-fare", async (req, res) => {
   try {
     const { routeId, distance } = req.body;
     const route = await Route.findById(routeId);
-    
+
     if (!route) {
       return res.status(404).json({ error: "Route not found" });
     }
-    
+
     const fare = route.baseFare + (distance * route.farePerKm);
     res.json({ fare, route });
   } catch (error) {
@@ -298,10 +304,10 @@ app.post("/api/calculate-fare", async (req, res) => {
 app.post("/api/payments", async (req, res) => {
   try {
     const { cardNumber, amount, userId, routeId, distance } = req.body;
-    
+
     // Determine card type and find card
     let card, cardType;
-    
+
     if (cardNumber.length > 12) {
       // Visa card
       cardType = 'Visa';
@@ -311,19 +317,19 @@ app.post("/api/payments", async (req, res) => {
       cardType = 'NFC';
       card = await SmartCard.findOne({ cardNumber, isActive: true });
     }
-    
+
     if (!card) {
       return res.status(404).json({ error: "Card not found" });
     }
-    
+
     if (card.balance < amount) {
       return res.status(400).json({ error: "Insufficient balance" });
     }
-    
+
     // Update card balance
     card.balance -= amount;
     await card.save();
-    
+
     // Create transaction
     const transaction = new Transaction({
       userId,
@@ -335,14 +341,14 @@ app.post("/api/payments", async (req, res) => {
       distance,
       fare: amount
     });
-    
+
     await transaction.save();
-    
-    
-    
-    res.json({ 
-      success: true, 
-      newBalance: card.balance, 
+
+
+
+    res.json({
+      success: true,
+      newBalance: card.balance,
       transaction,
       receiptSent: transaction.receiptSent
     });
@@ -360,7 +366,7 @@ app.get("/api/transactions/:userId", async (req, res) => {
       // Return all transactions for demo user
       query = {};
     }
-    
+
     const transactions = await Transaction.find(query)
       .populate('routeId')
       .sort({ timestamp: -1 });
@@ -374,7 +380,7 @@ app.get("/api/transactions/:userId", async (req, res) => {
 app.post("/api/topup", async (req, res) => {
   try {
     const { cardNumber, amount, userId } = req.body;
-    
+
     let card, cardType;
     if (cardNumber.length > 12) {
       cardType = 'Visa';
@@ -383,14 +389,14 @@ app.post("/api/topup", async (req, res) => {
       cardType = 'NFC';
       card = await SmartCard.findOne({ cardNumber, isActive: true });
     }
-    
+
     if (!card) {
       return res.status(404).json({ error: "Card not found" });
     }
-    
+
     card.balance += amount;
     await card.save();
-    
+
     const transaction = new Transaction({
       userId,
       cardNumber,
@@ -398,9 +404,9 @@ app.post("/api/topup", async (req, res) => {
       amount,
       transactionType: 'topup'
     });
-    
+
     await transaction.save();
-    
+
     res.json({ success: true, newBalance: card.balance, transaction });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -411,23 +417,23 @@ app.post("/api/topup", async (req, res) => {
 app.post('/api/stripe/create-payment-intent', async (req, res) => {
   try {
     const { amount, currency = 'lkr', visaCardId, nfcCardId } = req.body;
-    
+
     // Check if Visa card exists and has sufficient balance
     const visaCard = await VisaCard.findOne({ cardNumber: visaCardId });
     if (!visaCard) {
       return res.status(404).json({ error: 'Visa card not found' });
     }
-    
+
     if (visaCard.balance < amount) {
       return res.status(400).json({ error: `Insufficient balance. Available: Rs. ${visaCard.balance.toFixed(2)}` });
     }
-    
+
     // Check if NFC card exists
     const nfcCard = await SmartCard.findOne({ cardNumber: nfcCardId });
     if (!nfcCard) {
       return res.status(404).json({ error: 'NFC card not found' });
     }
-    
+
     // Demo mode - simulate Stripe response
     const mockPaymentIntent = {
       id: 'pi_demo_' + Date.now(),
@@ -450,30 +456,30 @@ app.post('/api/stripe/create-payment-intent', async (req, res) => {
 app.post('/api/stripe/confirm-payment', async (req, res) => {
   try {
     const { paymentIntentId, visaCardId, nfcCardId, userId, amount } = req.body;
-    
+
     // Demo mode - simulate successful payment
     const isDemoMode = paymentIntentId.startsWith('pi_demo_');
-    
+
     if (isDemoMode || true) { // Always succeed in demo mode
       // Get cards from database
       const visaCard = await VisaCard.findOne({ cardNumber: visaCardId });
       const nfcCard = await SmartCard.findOne({ cardNumber: nfcCardId });
-      
+
       if (!visaCard) {
         return res.status(404).json({ error: 'Visa card not found' });
       }
-      
+
       if (!nfcCard) {
         return res.status(404).json({ error: 'NFC card not found' });
       }
-      
+
       // Transfer money: deduct from Visa, add to NFC
       visaCard.balance -= amount;
       nfcCard.balance += amount;
-      
+
       await visaCard.save();
       await nfcCard.save();
-      
+
       // Create transaction record
       const transaction = new Transaction({
         userId: "507f1f77bcf86cd799439011", // Demo user ID for testing
@@ -486,9 +492,9 @@ app.post('/api/stripe/confirm-payment', async (req, res) => {
         sourceCard: visaCardId
       });
       await transaction.save();
-      
+
       // Email functionality removed - receipts available via PDF download
-      
+
       res.json({
         success: true,
         message: 'Recharge successful',
@@ -519,7 +525,7 @@ app.get('/api/debug/cards', async (req, res) => {
       VisaCard.find({}),
       SmartCard.find({})
     ]);
-    
+
     res.json({
       visaCards: visaCards.map(card => ({
         _id: card._id,
@@ -546,19 +552,19 @@ app.get('/api/debug/cards', async (req, res) => {
 app.post('/api/cards/update-balance', async (req, res) => {
   try {
     const { cardNumber, amount } = req.body;
-    
+
     // Determine if it's a Visa card or Smart card
     const Card = cardNumber.startsWith('4') ? VisaCard : SmartCard;
     const card = await Card.findOne({ cardNumber });
-    
+
     if (!card) {
       return res.status(404).json({ error: 'Card not found' });
     }
-    
+
     // Update balance
     card.balance += amount;
     await card.save();
-    
+
     res.json({
       success: true,
       card: card,
@@ -575,18 +581,18 @@ app.post('/api/cards/update-balance', async (req, res) => {
 // Create transaction record
 app.post('/api/transactions', async (req, res) => {
   try {
-    const { 
-      cardNumber, 
-      amount, 
-      transactionType, 
-      status, 
-      paymentMethod, 
+    const {
+      cardNumber,
+      amount,
+      transactionType,
+      status,
+      paymentMethod,
       sourceCard,
       fromLocation,
       toLocation,
       distance
     } = req.body;
-    
+
     console.log('📝 Recording transaction:', {
       cardNumber,
       amount,
@@ -595,7 +601,7 @@ app.post('/api/transactions', async (req, res) => {
       toLocation,
       distance
     });
-    
+
     const transaction = new Transaction({
       userId: "507f1f77bcf86cd799439011", // Demo user ID for testing
       cardNumber,
@@ -609,10 +615,10 @@ app.post('/api/transactions', async (req, res) => {
       distance,
       timestamp: new Date()
     });
-    
+
     await transaction.save();
     console.log('✅ Transaction saved with ID:', transaction._id);
-    
+
     res.json({
       success: true,
       transaction: transaction,
