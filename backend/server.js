@@ -50,60 +50,6 @@ connection.once("open", () => {
 })
 
 
-
-// Smart Card Schema (NFC)
-const smartCardSchema = new mongoose.Schema({
-  cardNumber: { type: String, required: true, unique: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  balance: { type: Number, default: 0 },
-  isActive: { type: Boolean, default: true },
-  cardType: { type: String, default: 'NFC', enum: ['NFC', 'RFID'] },
-  createdAt: { type: Date, default: Date.now }
-});
-
-// Visa Card Schema
-const visaCardSchema = new mongoose.Schema({
-  cardNumber: { type: String, required: true, unique: true },
-  cardHolderName: { type: String, required: true },
-  expiryDate: { type: String, required: true },
-  cvv: { type: String, required: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  balance: { type: Number, default: 0 },
-  isActive: { type: Boolean, default: true },
-  cardType: { type: String, default: 'Visa' },
-  createdAt: { type: Date, default: Date.now }
-});
-
-// Route Schema
-const routeSchema = new mongoose.Schema({
-  routeName: { type: String, required: true },
-  startLocation: { type: String, required: true },
-  endLocation: { type: String, required: true },
-  distance: { type: Number, required: true }, // in km
-  baseFare: { type: Number, required: true },
-  farePerKm: { type: Number, required: true },
-  isActive: { type: Boolean, default: true }
-});
-
-// Transaction Schema
-const transactionSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  cardNumber: { type: String, required: true },
-  cardType: { type: String, required: false, enum: ['NFC', 'RFID', 'Visa'], default: 'NFC' },
-  amount: { type: Number, required: true },
-  transactionType: { type: String, required: true, enum: ['payment', 'topup', 'refund', 'transport_payment'] },
-  routeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Route' },
-  distance: { type: Number },
-  fare: { type: Number },
-  status: { type: String, default: 'completed', enum: ['pending', 'completed', 'failed', 'refunded'] },
-  timestamp: { type: Date, default: Date.now },
-  // For transport payments
-  fromLocation: { type: String },
-  toLocation: { type: String },
-  paymentMethod: { type: String, default: 'nfc_card' },
-  sourceCard: { type: String }
-});
-
 //Add routes here later
 
 const busStopRouter = require("./routes/Stops.js");
@@ -114,10 +60,7 @@ const authRouter = require("./routes/auth.js");
 const usersRouter = require("./routes/users.js");
 
 //const User = mongoose.model('User', userSchema);
-const SmartCard = mongoose.model('SmartCard', smartCardSchema);
-const VisaCard = mongoose.model('VisaCard', visaCardSchema);
-const Route = mongoose.model('Route', routeSchema);
-const Transaction = mongoose.model('Transaction', transactionSchema);
+
 
 app.use("/Stops", busStopRouter);
 app.use("/Busses", busRouter);
