@@ -8,7 +8,7 @@ function landingPage() {
         <div className="logo">
           <Link to="/home" className="logo">
                    <img style = {{width : "115px", height : "97px"}} src = "/images/siteLogo.png"/>
-            </Link>
+          </Link>
         </div>
         <nav>
             <button className="cta-button">Sign In</button>
@@ -18,10 +18,10 @@ function landingPage() {
 
       <section className="hero">
         <div className="hero-content">
-          <h1>
+          <p style = {{fontSize : "60px", fontWeight : "700"}}className = "makeClass">
             Making Public Transportation{" "}
             <span className="hero-highlight">Better. Together.</span>
-          </h1>
+          </p>
           <p>
             Experience a smarter, faster, and more reliable way to travel. Our
             IoT-powered public transportation system provides real-time bus
@@ -29,7 +29,12 @@ function landingPage() {
             — all in one platform. Stay informed, save time, and travel with
             confidence.
           </p>
-          <button className="cta-button">Get Started</button>
+
+          <Link to="/" className="">
+                  <button className="cta-button">Get Started</button>
+          </Link>
+          
+
         </div>
         <div className="hero-image">
           <img

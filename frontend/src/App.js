@@ -11,17 +11,15 @@ import UserSchedule from "./components/RouteManagement/SchedulePage_user";
 
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
-//import LandingPage from "./components/landingPage";
+import LandingPage from "./components/landingPage";
 
 //Admin components
 import AdminDashboard from "./components/AdminDashboard";
-
 import RoutesPage from "./components/RouteManagement/RoutesPage";
 import BusStopPage from "./components/RouteManagement/BusStopPage";
 import SchedulesPage from "./components/RouteManagement/SchedulesPage";
 
 import UserManagement from "./components/UserManagement";
-
 import BusesPage from "./components/RouteManagement/BusesPage";
 
 //Payment components
@@ -46,11 +44,18 @@ function App() {
   const [stops, setStops] = useState([]);
 
   return (
-
-    
     <Router>
       <ToastContainer position="top-right" autoClose={4000} />
+
       <Routes>
+        <Route
+          path="/home"
+          element={
+            <div>
+              <LandingPage/>
+            </div>
+          }
+        />
 
        { /*
         <Route

@@ -51,7 +51,6 @@ connection.once("open", () => {
 
 
 
-
 //Add routes here later
 
 const busStopRouter = require("./routes/RouteManagement/Stops.js");
