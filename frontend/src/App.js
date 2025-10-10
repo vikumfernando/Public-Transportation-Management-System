@@ -38,6 +38,9 @@ import PassengerProfile from "./components/PassengerProfile";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useState } from "react";
+import SearchPage from "./components/SearchPage";
+import BusDetailsPage from "./components/Busdetails";
+import SeatLayoutPage from "./components/SeatLayout";
 
 function App() {
   const [busLocation, setBusLocation] = useState(null);
@@ -45,9 +48,9 @@ function App() {
 
   return (
 
-    
+
     <Router>
-      
+
       <ToastContainer position="top-right" autoClose={4000} />
       <Routes>
 
@@ -105,21 +108,21 @@ function App() {
 
 
 
-         </div>
+          </div>
         }>
         </Route>
 
-          <Route
+        <Route
           path="/signup"
           element={<SignUp />}
-          />
+        />
 
-          <Route
+        <Route
           path="/signin"
           element={<SignIn />}
-          />
+        />
 
-          <Route
+        <Route
           path="/users"
           element={
             <div>
@@ -128,9 +131,9 @@ function App() {
               <UserManagement />
             </div>
           }
-          />
+        />
 
-          <Route
+        <Route
           path="/busespage"
           element={
             <div>
@@ -140,9 +143,9 @@ function App() {
 
             </div>
           }
-          />
+        />
 
-          <Route
+        <Route
           path="/busstops"
           element={
             <div>
@@ -151,85 +154,106 @@ function App() {
 
             </div>
           }
-          />
+        />
 
-          <Route
+        <Route
           path="/busroutes"
           element={
             <div>
               <Header />
-              <UserRoute/>
+              <UserRoute />
 
             </div>
           }
-          />
+        />
 
-          <Route
+        <Route
           path="/userschedule"
           element={
             <div>
               <Header />
-              <UserSchedule/>
+              <UserSchedule />
             </div>
           }
-          />
+        />
 
-          <Route path="/payment" element={
-            <div>
-              <Header />
-              <Dashboard />
-            </div>
-          } />
+        <Route path="/payment" element={
+          <div>
+            <Header />
+            <Dashboard />
+          </div>
+        } />
 
-          <Route path="/dashboard" element={
-            <div>
-              <Header />
-              <Dashboard />
-            </div>} />
+        <Route path="/dashboard" element={
+          <div>
+            <Header />
+            <Dashboard />
+          </div>} />
 
-          <Route path="/smart-cards" element={
-            <div>
-              <Header />
-              <SmartCardPage />
-             </div>
-            } />
+        <Route path="/smart-cards" element={
+          <div>
+            <Header />
+            <SmartCardPage />
+          </div>
+        } />
 
-          <Route path="/visa-cards" element={
-            <div>
-              <Header />
-              <VisaCardPage />
-            </div>
-          } />
+        <Route path="/visa-cards" element={
+          <div>
+            <Header />
+            <VisaCardPage />
+          </div>
+        } />
 
-          <Route path="/topup" element={
-            <div>
-              <Header />
-              <TopupPage />
-              </div>
-            } />
+        <Route path="/topup" element={
+          <div>
+            <Header />
+            <TopupPage />
+          </div>
+        } />
 
-          <Route path="/recharge" element={
-            <div>
-              <Header />
-              <RechargePage />
-              </div>
-            } />
+        <Route path="/recharge" element={
+          <div>
+            <Header />
+            <RechargePage />
+          </div>
+        } />
 
-          <Route path="/transactions" element={
-            <div>
-              <Header />
-              <TransactionsPage />
-              </div>
-            } />
+        <Route path="/transactions" element={
+          <div>
+            <Header />
+            <TransactionsPage />
+          </div>
+        } />
 
-          <Route path="/refunds" element={
-            <div>
-              <Header />
-              <RefundPage />
-             </div>
-            } />
-            
-             <Route
+        <Route path="/refunds" element={
+          <div>
+            <Header />
+            <RefundPage />
+          </div>
+        } />
+
+        <Route path="/booking/search" element={
+          <div>
+            <Header />
+            <SearchPage />
+          </div>
+        } />
+
+        <Route path="/bus-details/:busId" element={
+          <div>
+            <Header />
+            <BusDetailsPage />
+          </div>
+        } />
+
+        <Route path="/booking/seat-layout/:busId" element={
+          <div>
+            <Header />
+            <SeatLayoutPage />
+          </div>
+        } />
+
+        <Route
           path="/me"
           element={
             <div>
@@ -237,7 +261,7 @@ function App() {
               <PassengerProfile />
             </div>
           }
-          />
+        />
       </Routes>
     </Router>
   );
