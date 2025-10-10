@@ -6,13 +6,20 @@ function landingPage() {
     <>
       <header>
         <div className="logo">
-          <Link to="/home" className="logo">
+          <Link to="/" className="logo">
                    <img style = {{width : "115px", height : "97px"}} src = "/images/siteLogo.png"/>
           </Link>
         </div>
         <nav>
-            <button className="cta-button">Sign In</button>
-          <button className="cta-button">Sign UP</button>
+            
+            <Link to="/signin" className="">
+                  <button className="cta-button">Sign In</button>
+          </Link>
+
+          <Link to="/signup" className="">
+                  <button className="cta-button">Sign UP</button>
+          </Link>
+          
         </nav>
       </header>
 
@@ -30,7 +37,7 @@ function landingPage() {
             confidence.
           </p>
 
-          <Link to="/" className="">
+          <Link to="/signin" className="">
                   <button className="cta-button">Get Started</button>
           </Link>
           

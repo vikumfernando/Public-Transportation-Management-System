@@ -49,7 +49,7 @@ function App() {
 
       <Routes>
         <Route
-          path="/home"
+          path="/"
           element={
             <div>
               <LandingPage/>
@@ -57,18 +57,9 @@ function App() {
           }
         />
 
-       { /*
-        <Route
-          path="/home"
-          element={
-            <div>
-              <LandingPage />
-            </div>
-          }
-        /> */}
 
         <Route
-          path="/"
+          path="/location"
           element={
             <div>
               <Header />
