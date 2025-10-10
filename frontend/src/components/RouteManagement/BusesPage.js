@@ -435,7 +435,7 @@ function BusesPage() {
                     </button>
                   </td>
                   <td>
-                    <button className="deleteBtn">
+                    <button className="editBtn">
                       <img
                         style={{ width: "25px", height: "25px" }}
                         src="/images/editicon.png"

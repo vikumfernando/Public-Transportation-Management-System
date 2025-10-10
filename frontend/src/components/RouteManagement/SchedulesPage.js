@@ -153,6 +153,27 @@ const formatTime = ({ hour, minute, period }) => {
     }
   };
 
+  const deleteSchedule = async (scheduleId) => {
+    if (!window.confirm("Are you sure you want to delete this schedule?")) {
+      return;
+    }
+    try{
+      const res = await axios.delete(`http://localhost:8070/Schedules/deleteSchedule/${scheduleId}`);
+      
+      toast.error(`Schedule removed successfully`, {
+        position: "bottom-right",
+        autoClose: 4000,
+      });
+      
+    }catch(err){
+      toast.error("Schedule assigned to a Bus", {
+        position: "bottom-right",
+        autoClose: 4000,
+      });
+      console.error("Error deleting schedule: ", err);
+    }
+  }
+
   function handlePopup(status) {
     const popup = document.getElementById("popupcontainer");
 
@@ -504,7 +525,7 @@ const formatTime = ({ hour, minute, period }) => {
                   <button
                         className="deleteBtn"
                         style = {{marginTop: "25px", marginLeft : "0px"}}
-                        onClick={() => {
+                        onClick={() => { deleteSchedule(bus.schedule._id);
                         }}
                       >
                         <img
