@@ -97,22 +97,14 @@ function Header() {
                         onMouseEnter={() => dropdownEnter('test3')}
                         onMouseLeave={dropdownLeave}
                     >
-                        <Link to="#" className="nav-link" onClick={closeMobileMenu}>
+                        <Link to="/booking/search" className="nav-link" onClick={closeMobileMenu}>
                             Booking Service
                         </Link>
                         <div className={`dropdown-menu ${activeDropdown === 'test3' ? 'show' : ''}`}>
-                            <Link to="/documentation" className="dropdown-item" onClick={closeMobileMenu}>
+                            <Link to="/booking/search" className="dropdown-item" onClick={closeMobileMenu}>
                                 Seat Booking
                             </Link>
-                            <Link to="/case-studies" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 2
-                            </Link>
-                            <Link to="/blog" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 3
-                            </Link>
-                            <Link to="/support" className="dropdown-item" onClick={closeMobileMenu}>
-                                sub 4
-                            </Link>
+                            
                         </div>
                     </li>
 
