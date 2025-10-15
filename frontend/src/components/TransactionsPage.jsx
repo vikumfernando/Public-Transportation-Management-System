@@ -92,10 +92,10 @@ function TransactionsPage() {
     // Footer
     doc.setFontSize(10);
     doc.text('Thank you for using TransportPay!', 20, 200);
-    doc.text('This is a digital receipt.', 20, 207);
+    doc.text('This is a digital receipt for your transaction.', 20, 207);
     
     // Save the PDF
-    doc.save(`receipt-${transaction._id}.pdf`);
+    doc.save(`Transaction.pdf`);
   };
 
   if (loading) {
