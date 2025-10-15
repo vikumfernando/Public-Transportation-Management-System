@@ -81,7 +81,7 @@ router.route("/updateLocation").put(async (req, res) => {
   }); */
 
   //Just for testing
-  const arrivedTime = "10:00";
+  const arrivedTime = "08:50";
 
   console.log("Arrived time : " + arrivedTime);
 

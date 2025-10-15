@@ -1,5 +1,5 @@
 import "../styles/landingPage.css";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 function landingPage() {
   console.log("Landing Page Rendered");
   return (
@@ -7,25 +7,29 @@ function landingPage() {
       <header>
         <div className="logo">
           <Link to="/" className="logo">
-                   <img style = {{width : "115px", height : "97px"}} src = "/images/siteLogo.png"/>
+            <img
+              style={{ width: "115px", height: "97px" }}
+              src="/images/siteLogo.png"
+            />
           </Link>
         </div>
         <nav>
-            
-            <Link to="/signin" className="">
-                  <button className="cta-button">Sign In</button>
+          <Link to="/signin" className="">
+            <button className="cta-button">Sign In</button>
           </Link>
 
           <Link to="/signup" className="">
-                  <button className="cta-button">Sign UP</button>
+            <button className="cta-button">Sign UP</button>
           </Link>
-          
         </nav>
       </header>
 
       <section className="hero">
         <div className="hero-content">
-          <p style = {{fontSize : "60px", fontWeight : "700"}}className = "makeClass">
+          <p
+            style={{ fontSize: "60px", fontWeight: "700" }}
+            className="makeClass"
+          >
             Making Public Transportation{" "}
             <span className="hero-highlight">Better. Together.</span>
           </p>
@@ -38,10 +42,8 @@ function landingPage() {
           </p>
 
           <Link to="/signin" className="">
-                  <button className="cta-button">Get Started</button>
+            <button className="cta-button">Get Started</button>
           </Link>
-          
-
         </div>
         <div className="hero-image">
           <img
@@ -96,8 +98,10 @@ function landingPage() {
           <div className="feature-content">
             <h1>Platform</h1>
             <p>
-              Our holistic, cloud-native transportation network platform is
-              fast, user-friendly, easy to scale, and fully customizable.
+              Our reliable seat booking feature ensures a smooth and hassle-free
+              experience for every passenger. It’s fast, secure, and designed to
+              prevent double bookings — offering real-time seat availability,
+              instant confirmations, and flexible options for travelers.
             </p>
             <button className="cta-button">Learn More</button>
           </div>
@@ -168,8 +172,8 @@ function landingPage() {
       <section className="cta-section">
         <h2>Ready to travel smarter?</h2>
         <p>
-          Track your bus in real time, plan your route with precision, <br/>and enjoy
-          a seamless travel experience powered by IoT and innovation.
+          Track your bus in real time, plan your route with precision, <br />
+          and enjoy a seamless travel experience powered by IoT and innovation.
         </p>
         <a href="#" className="cta-button-white">
           Get Started Today

@@ -157,6 +157,14 @@ function Header() {
               >
                 Seat Booking
               </Link>
+
+              <Link
+                to="/booking/mybookings"
+                className="dropdown-item"
+                onClick={closeMobileMenu}
+              >
+                My Bookings
+              </Link>
             </div>
           </li>
         </ul>

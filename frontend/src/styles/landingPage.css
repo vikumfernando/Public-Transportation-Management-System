@@ -148,11 +148,11 @@ font-weight: 500;
 }
 
 .stats {
-  padding: 5rem 5%;
+  padding: 5rem 9%;
   background: white;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 3rem;
+  gap: 16rem;
   text-align: center;
 }
 
