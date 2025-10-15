@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
-//import '../styles/combined.css';
+import styles from '../styles/combined.module.css';
 
 function Dashboard() {
-  const [user, setUser] = useState(null);
+  //const [user, setUser] = useState(null);
   const [smartCards, setSmartCards] = useState([]);
   const [visaCards, setVisaCards] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [totalTransactionCount, setTotalTransactionCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,7 +32,8 @@ function Dashboard() {
       
       setSmartCards(smartCardsData);
       setVisaCards(visaCardsData);
-      setTransactions(transactionsData.slice(0, 5)); // Recent 5 transactions
+      setTransactions(transactionsData.slice(0, 5)); // Recent 5 transactions for display
+      setTotalTransactionCount(transactionsData.length); // Total count for stats
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -41,245 +43,281 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        backgroundColor: '#F0EBE8',
-        padding: '2rem'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '4rem',
-            height: '4rem',
-            border: '4px solid #8CDB66',
-            borderTop: '4px solid #0B5648',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 1.5rem auto'
-          }}></div>
-          <div style={{
-            fontSize: '1.5rem',
-            fontWeight: '600',
-            marginBottom: '0.5rem',
-            color: '#0B5648'
-          }}>Loading your dashboard...</div>
-          <div style={{
-            fontSize: '1.125rem',
-            color: '#8CDB66'
-          }}>Please wait while we prepare everything for you</div>
-        </div>
+      <div className={styles.dashboardLoadingState}>
+        <div className={styles.dashboardLoadingSpinner}></div>
+        <div className={styles.dashboardLoadingText}>Loading your dashboard...</div>
       </div>
     );
   }
 
-  const totalBalance = [...smartCards, ...visaCards].reduce((sum, card) => sum + card.balance, 0);
+  const totalBalance = smartCards.reduce((sum, card) => sum + card.balance, 0);
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#F0EBE8',
-      padding: '1rem'
-    }}>
-
-      {/* Hero Section */}
-      <div className="dashboard-hero">
-        <div className="dashboard-floating-icons">
-          <div className="dashboard-floating-icon">💳</div>
-          <div className="dashboard-floating-icon">📱</div>
-          <div className="dashboard-floating-icon">🚌</div>
-          <div className="dashboard-floating-icon">💳</div>
+    <div className={styles.dashboardMainContainer}>
+      {/* Enhanced Hero Section */}
+      <div className={styles.dashboardHero}>
+        <div className={styles.dashboardHeroBackground}>
+          <div className={styles.dashboardHeroPattern}></div>
         </div>
-        <div className="dashboard-hero-content">
-          <h1 className="dashboard-hero-title">
-            Welcome to TransportPay
-          </h1>
-          <p className="dashboard-hero-subtitle">
-            Your smart transportation companion for seamless travel
-          </p>
-          <div className="flex justify-center space-x-4">
-            <div className="animate-pulse bg-white rounded-full p-4 shadow-lg hover-lift">
-              <span className="text-2xl">💳</span>
-            </div>
-            <div className="animate-pulse bg-white rounded-full p-4 shadow-lg hover-lift" style={{animationDelay: '0.2s'}}>
-              <span className="text-2xl">📱</span>
-            </div>
-            <div className="animate-pulse bg-white rounded-full p-4 shadow-lg hover-lift" style={{animationDelay: '0.4s'}}>
-              <span className="text-2xl">🚌</span>
+        <div className={styles.dashboardFloatingIcons}>
+          <div className={styles.dashboardFloatingIcon} style={{animationDelay: '0s'}}>💳</div>
+          <div className={styles.dashboardFloatingIcon} style={{animationDelay: '1s'}}>📱</div>
+          <div className={styles.dashboardFloatingIcon} style={{animationDelay: '2s'}}>🚌</div>
+          <div className={styles.dashboardFloatingIcon} style={{animationDelay: '3s'}}>🚀</div>
+        </div>
+        <div className={styles.dashboardHeroContent}>
+          <div className={styles.dashboardHeroWelcome}>
+            <h1 className={styles.dashboardHeroTitle}>
+              Welcome to <span className={styles.dashboardHeroTitleAccent}>TransportPay</span>
+            </h1>
+            <p className={styles.dashboardHeroSubtitle}>
+              Your smart transportation companion for seamless travel
+            </p>
+            <div className={styles.dashboardHeroStats}>
+              <div className={styles.dashboardHeroStat}>
+                <div className={styles.dashboardHeroStatIcon}>💰</div>
+                <div className={styles.dashboardHeroStatText}>
+                  <div className={styles.dashboardHeroStatValue}>Rs. {totalBalance.toFixed(2)}</div>
+                  <div className={styles.dashboardHeroStatLabel}>NFC Balance</div>
+                </div>
+              </div>
+              <div className={styles.dashboardHeroStat}>
+                <div className={styles.dashboardHeroStatIcon}>📊</div>
+                <div className={styles.dashboardHeroStatText}>
+                  <div className={styles.dashboardHeroStatValue}>{totalTransactionCount}</div>
+                  <div className={styles.dashboardHeroStatLabel}>Transactions</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <h2 className="text-3xl font-bold mb-8" style={{color: '#0B5648'}}>Your Dashboard</h2>
-        
-        {/* Stats Cards */}
-      <div className="stats-grid">
-        <div className="stat-card hover-lift" style={{borderColor: '#8CDB66'}}>
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center hover-glow" style={{backgroundColor: '#8CDB66'}}>
-                <span className="text-white text-xl font-bold">💰</span>
+      <div className={styles.dashboardMainContent}>
+        {/* Enhanced Stats Cards */}
+        <div className={styles.dashboardStatsGrid}>
+          <div className={`${styles.dashboardStatCard} ${styles.dashboardStatCardPrimary}`}>
+            <div className={styles.dashboardStatCardIcon}>
+              <div className={styles.dashboardStatIconWrapper}>
+                💰
               </div>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium" style={{color: '#0B5648'}}>Total Balance</p>
-              <p className="text-2xl font-bold" style={{color: '#0B5648'}}>Rs. {totalBalance.toFixed(2)}</p>
+            <div className={styles.dashboardStatCardContent}>
+              <div className={styles.dashboardStatTitle}>NFC Balance</div>
+              <div className={styles.dashboardStatValue}>Rs. {totalBalance.toFixed(2)}</div>
+              <div className={styles.dashboardStatTrend}>
+                <span className={styles.dashboardStatTrendIcon}>📈</span>
+                <span className={styles.dashboardStatTrendText}>+12.5% this month</span>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.dashboardStatCard}>
+            <div className={styles.dashboardStatCardIcon}>
+              <div className={styles.dashboardStatIconWrapper}>
+                📱
+              </div>
+            </div>
+            <div className={styles.dashboardStatCardContent}>
+              <div className={styles.dashboardStatTitle}>Smart Cards</div>
+              <div className={styles.dashboardStatValue}>{smartCards.length}</div>
+              <div className={styles.dashboardStatSubtext}>NFC Cards</div>
+            </div>
+          </div>
+
+          <div className={styles.dashboardStatCard}>
+            <div className={styles.dashboardStatCardIcon}>
+              <div className={styles.dashboardStatIconWrapper}>
+                💳
+              </div>
+            </div>
+            <div className={styles.dashboardStatCardContent}>
+              <div className={styles.dashboardStatTitle}>Visa Cards</div>
+              <div className={styles.dashboardStatValue}>{visaCards.length}</div>
+              <div className={styles.dashboardStatSubtext}>Bank Cards</div>
+            </div>
+          </div>
+
+          <div className={styles.dashboardStatCard}>
+            <div className={styles.dashboardStatCardIcon}>
+              <div className={styles.dashboardStatIconWrapper}>
+                📊
+              </div>
+            </div>
+            <div className={styles.dashboardStatCardContent}>
+              <div className={styles.dashboardStatTitle}>Transactions</div>
+              <div className={styles.dashboardStatValue}>{totalTransactionCount}</div>
+              <div className={styles.dashboardStatSubtext}>Total Count</div>
             </div>
           </div>
         </div>
 
-        <div className="stat-card hover-lift" style={{borderColor: '#0B5648'}}>
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center hover-glow" style={{backgroundColor: '#0B5648'}}>
-                <span className="text-white text-xl font-bold">📱</span>
+        {/* Enhanced Cards Section */}
+        <div className={styles.dashboardCardsGrid}>
+          {/* Enhanced Smart Cards */}
+          <div className={styles.dashboardCardSection}>
+            <div className={styles.dashboardCardSectionHeader}>
+              <div className={styles.dashboardCardSectionTitleWrapper}>
+                <div className={styles.dashboardCardSectionIcon}>📱</div>
+                <div>
+                  <h2 className={styles.dashboardCardSectionTitle}>Smart Cards (NFC)</h2>
+                  <p className={styles.dashboardCardSectionSubtitle}>Your contactless payment cards</p>
+                </div>
               </div>
+              <div className={styles.dashboardCardSectionCount}>{smartCards.length}</div>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium" style={{color: '#0B5648'}}>Smart Cards</p>
-              <p className="text-2xl font-bold" style={{color: '#0B5648'}}>{smartCards.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="stat-card hover-lift" style={{borderColor: '#8CDB66'}}>
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center hover-glow" style={{backgroundColor: '#8CDB66'}}>
-                <span className="text-white text-xl font-bold">💳</span>
+            {smartCards.length === 0 ? (
+              <div className={styles.dashboardEmptyState}>
+                <div className={styles.dashboardEmptyStateIcon}>📱</div>
+                <div className={styles.dashboardEmptyStateTitle}>No smart cards found</div>
+                <div className={styles.dashboardEmptyStateText}>Add your first NFC card to get started</div>
+                <button className={styles.dashboardEmptyStateButton}>Add Card</button>
               </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium" style={{color: '#0B5648'}}>Visa Cards</p>
-              <p className="text-2xl font-bold" style={{color: '#0B5648'}}>{visaCards.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="stat-card hover-lift" style={{borderColor: '#0B5648'}}>
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center hover-glow" style={{backgroundColor: '#0B5648'}}>
-                <span className="text-white text-xl font-bold">📊</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium" style={{color: '#0B5648'}}>Transactions</p>
-              <p className="text-2xl font-bold" style={{color: '#0B5648'}}>{transactions.length}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Cards Section */}
-      <div className="cards-grid">
-        {/* Smart Cards */}
-        <div className="card-section hover-lift">
-          <h2 className="text-xl font-semibold mb-4" style={{color: '#0B5648'}}>📱 Smart Cards (NFC)</h2>
-          {smartCards.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-state-icon">📱</div>
-              <div className="empty-state-title">No smart cards found</div>
-              <div className="empty-state-text">Add your first NFC card to get started</div>
-            </div>
-          ) : (
-            <div className="card-list">
-              {smartCards.map((card, index) => (
-                <div key={card._id} className="card-item">
-                  <div className="card-info">
-                    <div className="card-icon">📱</div>
-                    <div className="card-details">
-                      <div className="card-name">Card #{card.cardNumber}</div>
-                      <div className="card-number">{card.cardType}</div>
+            ) : (
+              <div className={styles.dashboardCardList}>
+                {smartCards.map((card, index) => (
+                  <div key={card._id} className={styles.dashboardCardItem}>
+                    <div className={styles.dashboardCardItemLeft}>
+                      <div className={styles.dashboardCardIcon}>📱</div>
+                      <div className={styles.dashboardCardDetails}>
+                        <div className={styles.dashboardCardName}>Card #{card.cardNumber}</div>
+                        <div className={styles.dashboardCardNumber}>{card.cardType}</div>
+                      </div>
+                    </div>
+                    <div className={styles.dashboardCardItemRight}>
+                      <div className={styles.dashboardCardBalance}>Rs. {card.balance.toFixed(2)}</div>
+                      <div className={styles.dashboardCardStatus}>Active</div>
                     </div>
                   </div>
-                  <div className="card-balance">Rs. {card.balance.toFixed(2)}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Visa Cards */}
-        <div className="card-section hover-lift">
-          <h2 className="text-xl font-semibold mb-4" style={{color: '#0B5648'}}>💳 Visa Cards</h2>
-          {visaCards.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-state-icon">💳</div>
-              <div className="empty-state-title">No visa cards found</div>
-              <div className="empty-state-text">Add your first Visa card to get started</div>
-            </div>
-          ) : (
-            <div className="card-list">
-              {visaCards.map((card, index) => (
-                <div key={card._id} className="card-item">
-                  <div className="card-info">
-                    <div className="card-icon">💳</div>
-                    <div className="card-details">
-                      <div className="card-name">**** **** **** {card.cardNumber.slice(-4)}</div>
-                      <div className="card-number">{card.cardHolderName}</div>
-                    </div>
-                  </div>
-                  <div className="card-balance">{card.bank || 'Bank Not Set'}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Recent Transactions */}
-      <div className="mt-8 card-section hover-lift">
-        <h2 className="text-xl font-semibold mb-4" style={{color: '#0B5648'}}>📊 Recent Transactions</h2>
-        {transactions.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-state-icon">📊</div>
-            <div className="empty-state-title">No transactions yet</div>
-            <div className="empty-state-text">Your transaction history will appear here</div>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="transactions-table">
-              <thead>
-                <tr>
-                  <th>Card</th>
-                  <th>Amount</th>
-                  <th>Type</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.map((transaction, index) => (
-                  <tr key={transaction._id}>
-                    <td>
-                      {transaction.cardNumber.length > 12 
-                        ? '**** **** **** ' + transaction.cardNumber.slice(-4)
-                        : 'Card #' + transaction.cardNumber
-                      }
-                    </td>
-                    <td className="transaction-amount negative">
-                      -Rs. {transaction.amount.toFixed(2)}
-                    </td>
-                    <td>
-                      {transaction.transactionType === 'transport_payment' ? '🚌 Transport Payment' : transaction.transactionType}
-                    </td>
-                    <td>
-                      {new Date(transaction.timestamp).toLocaleDateString()}
-                    </td>
-                  </tr>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+
+          {/* Enhanced Visa Cards */}
+          <div className={styles.dashboardCardSection}>
+            <div className={styles.dashboardCardSectionHeader}>
+              <div className={styles.dashboardCardSectionTitleWrapper}>
+                <div className={styles.dashboardCardSectionIcon}>💳</div>
+                <div>
+                  <h2 className={styles.dashboardCardSectionTitle}>Visa Cards</h2>
+                  <p className={styles.dashboardCardSectionSubtitle}>Your bank-issued payment cards</p>
+                </div>
+              </div>
+              <div className={styles.dashboardCardSectionCount}>{visaCards.length}</div>
+            </div>
+            {visaCards.length === 0 ? (
+              <div className={styles.dashboardEmptyState}>
+                <div className={styles.dashboardEmptyStateIcon}>💳</div>
+                <div className={styles.dashboardEmptyStateTitle}>No visa cards found</div>
+                <div className={styles.dashboardEmptyStateText}>Add your first Visa card to get started</div>
+                <button className={styles.dashboardEmptyStateButton}>Add Card</button>
+              </div>
+            ) : (
+              <div className={styles.dashboardCardList}>
+                {visaCards.map((card, index) => (
+                  <div key={card._id} className={styles.dashboardCardItem}>
+                    <div className={styles.dashboardCardItemLeft}>
+                      <div className={styles.dashboardCardIcon}>💳</div>
+                      <div className={styles.dashboardCardDetails}>
+                        <div className={styles.dashboardCardName}>**** **** **** {card.cardNumber.slice(-4)}</div>
+                        <div className={styles.dashboardCardNumber}>{card.cardHolderName}</div>
+                      </div>
+                    </div>
+                    <div className={styles.dashboardCardItemRight}>
+                      <div className={styles.dashboardCardBalance}>{card.bank || 'Bank Not Set'}</div>
+                      <div className={styles.dashboardCardStatus}>Active</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Enhanced Recent Transactions */}
+        <div className={styles.dashboardCardSection}>
+          <div className={styles.dashboardCardSectionHeader}>
+            <div className={styles.dashboardCardSectionTitleWrapper}>
+              <div className={styles.dashboardCardSectionIcon}>📊</div>
+              <div>
+                <h2 className={styles.dashboardCardSectionTitle}>Recent Transactions</h2>
+                <p className={styles.dashboardCardSectionSubtitle}>Your latest payment activities</p>
+              </div>
+            </div>
+            <div className={styles.dashboardCardSectionCount}>{totalTransactionCount}</div>
+          </div>
+          {totalTransactionCount === 0 ? (
+            <div className={styles.dashboardEmptyState}>
+              <div className={styles.dashboardEmptyStateIcon}>📊</div>
+              <div className={styles.dashboardEmptyStateTitle}>No transactions yet</div>
+              <div className={styles.dashboardEmptyStateText}>Your transaction history will appear here</div>
+            </div>
+          ) : (
+            <div className={styles.transactionsContainer}>
+              <div className={styles.transactionsTableWrapper}>
+                <table className={styles.transactionsTable}>
+                  <thead>
+                    <tr>
+                      <th>Card</th>
+                      <th>Amount</th>
+                      <th>Type</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactions.map((transaction, index) => (
+                      <tr key={transaction._id} className={styles.transactionRow}>
+                        <td>
+                          <div className={styles.transactionCardInfo}>
+                            <div className={styles.transactionCardIcon}>
+                              {transaction.cardNumber.length > 12 ? '💳' : '📱'}
+                            </div>
+                            <div className={styles.transactionCardDetails}>
+                              <div className={styles.transactionCardNumber}>
+                                {transaction.cardNumber.length > 12 
+                                  ? '**** **** **** ' + transaction.cardNumber.slice(-4)
+                                  : 'Card #' + transaction.cardNumber
+                                }
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className={styles.transactionAmount}>
+                            -Rs. {transaction.amount.toFixed(2)}
+                          </div>
+                        </td>
+                        <td>
+                          <div className={styles.transactionType}>
+                            <span className={styles.transactionTypeIcon}>🚌</span>
+                            <span className={styles.transactionTypeText}>
+                              {transaction.transactionType === 'transport_payment' ? 'Transport Payment' : transaction.transactionType}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className={styles.transactionDate}>
+                            {new Date(transaction.timestamp).toLocaleDateString()}
+                          </div>
+                        </td>
+                        <td>
+                          <div className={styles.transactionStatus}>
+                            <span className={styles.transactionStatusBadge}>Completed</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
-
 
 export default Dashboard;
