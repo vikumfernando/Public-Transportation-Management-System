@@ -76,17 +76,23 @@ function TransactionsPage() {
     // Add transport payment details if available
     if (transaction.transactionType === 'transport_payment') {
       if (transaction.fromLocation && transaction.toLocation) {
-        doc.text(`Route: ${transaction.fromLocation} → ${transaction.toLocation}`, 20, 155);
+        doc.text(`Route: ${transaction.fromLocation} to ${transaction.toLocation}`, 20, 155);
       }
-      if (transaction.distance) {
-        doc.text(`Distance: ${transaction.distance} km`, 20, 165);
+      if (transaction.meta && transaction.meta.bus && transaction.meta.bus.vehicleNumber) {
+        doc.text(`Bus: ${transaction.meta.bus.vehicleNumber}`, 20, 165);
+      }
+      if (transaction.meta && transaction.meta.seatNumbers && transaction.meta.seatNumbers.length > 0) {
+        doc.text(`Seats: ${transaction.meta.seatNumbers.join(', ')}`, 20, 175);
+      }
+      if (transaction.meta && transaction.meta.travelDate) {
+        doc.text(`Travel Date: ${new Date(transaction.meta.travelDate).toLocaleDateString()}`, 20, 185);
       }
     }
     
     // Footer
     doc.setFontSize(10);
-    doc.text('Thank you for using TransportPay!', 20, 180);
-    doc.text('This is a digital receipt.', 20, 187);
+    doc.text('Thank you for using TransportPay!', 20, 200);
+    doc.text('This is a digital receipt.', 20, 207);
     
     // Save the PDF
     doc.save(`receipt-${transaction._id}.pdf`);
@@ -548,6 +554,7 @@ function TransactionsPage() {
                     <th style={{padding: '1rem', textAlign: 'left', fontSize: '0.875rem', fontWeight: '600', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Card</th>
                     <th style={{padding: '1rem', textAlign: 'left', fontSize: '0.875rem', fontWeight: '600', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Amount</th>
                     <th style={{padding: '1rem', textAlign: 'left', fontSize: '0.875rem', fontWeight: '600', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Type</th>
+                    <th style={{padding: '1rem', textAlign: 'left', fontSize: '0.875rem', fontWeight: '600', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Route</th>
                     <th style={{padding: '1rem', textAlign: 'left', fontSize: '0.875rem', fontWeight: '600', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Status</th>
                     <th style={{padding: '1rem', textAlign: 'left', fontSize: '0.875rem', fontWeight: '600', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Date</th>
                     <th style={{padding: '1rem', textAlign: 'left', fontSize: '0.875rem', fontWeight: '600', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Actions</th>
@@ -619,6 +626,18 @@ function TransactionsPage() {
                              transaction.transactionType === 'topup' ? 'Top-up' : 'Refund'}
                           </span>
                         </div>
+                    </td>
+                      <td style={{padding: '1rem', fontSize: '0.875rem', color: '#1e293b'}}>
+                        {transaction.transactionType === 'transport_payment' && transaction.fromLocation && transaction.toLocation ? (
+                          <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                            <span style={{fontSize: '1rem'}}>🚌</span>
+                            <span style={{fontWeight: '500'}}>
+                              {transaction.fromLocation} → {transaction.toLocation}
+                            </span>
+                          </div>
+                        ) : (
+                          <span style={{color: '#9ca3af', fontStyle: 'italic'}}>—</span>
+                        )}
                     </td>
                       <td style={{padding: '1rem'}}>
                         <span style={{
