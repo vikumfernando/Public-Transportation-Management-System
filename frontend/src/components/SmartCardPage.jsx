@@ -215,6 +215,7 @@ function SmartCardPage() {
               </label>
               <input
                 type="text"
+                disabled = {true}
                 value={formData.cardNumber}
                 onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
                 style={{
