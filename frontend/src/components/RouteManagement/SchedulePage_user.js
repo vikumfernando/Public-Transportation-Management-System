@@ -70,8 +70,9 @@ function SchedulesPageUser() {
     }
   };
 
-
   // Generate PDF of the bus schedules
+
+  /*
   const generatePdf = () => {
     const doc = new jsPDF();
 
@@ -106,6 +107,64 @@ function SchedulesPageUser() {
     doc.save("schedules.pdf");
   };
 
+  */
+
+  const generatePdf = () => {
+    const doc = new jsPDF();
+
+    const logoImg = "/images/siteLogo.png";
+    const imgProps = doc.getImageProperties(logoImg);
+
+    doc.addImage(
+      logoImg,
+      "PNG",
+      14, // x
+      10, // y
+      30, // width
+      (imgProps.height * 30) / imgProps.width // height
+    );
+
+    
+    const now = new Date();
+    const dateStr = now.toLocaleDateString();
+    const timeStr = now.toLocaleTimeString();
+
+    doc.setFontSize(10);
+    doc.text("Company: ECO Transit", 14, 45);
+    doc.text("Phone: +94 77 344 2341", 14, 50);
+    doc.text("Email: ecotransit@gmail.com", 14, 55);
+    doc.text(`Date: ${dateStr}`, 160, 15);  // adjust X for alignment if needed
+    doc.text(`Time: ${timeStr}`, 160, 20);
+
+
+    const columns = [
+      "Vehicle Number",
+      "Stop Name",
+      "Time of Arrival",
+      "Day Type",
+    ];
+
+    const rows = buses.map((bus) => {
+      const stopsStr = bus.route.map((s) => s.stopName).join("\n");
+      const timesStr = bus.schedule.stopSchedules
+        .map((s) => s.expectedArrival)
+        .join("\n");
+
+      return [bus.vehicleNumber, stopsStr, timesStr, bus.schedule.dayType];
+    });
+
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      startY: 65,
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [100, 100, 100] },
+      theme: "grid",
+    });
+
+    doc.save("schedules.pdf");
+  };
+
   //Input validation
   function validRouteNum(routeNumber) {
     const input = document.getElementById("routeInput");
@@ -126,10 +185,8 @@ function SchedulesPageUser() {
 
   return (
     <div>
-
       {/* Bus Table */}
       <div className="tableContainer">
-    
         <div className="btnContainer">
           <form
             onSubmit={(e) => {
@@ -159,12 +216,14 @@ function SchedulesPageUser() {
               </button>
             </div>
 
-            <label className="warningText" id="warningText" style={{marginTop: "10px"}}>
-          ⚠️ Please enter a valid integer for the route number
-        </label>
+            <label
+              className="warningText"
+              id="warningText"
+              style={{ marginTop: "10px" }}
+            >
+              ⚠️ Please enter a valid integer for the route number
+            </label>
           </form>
-
-          
 
           <div className="pdfBtnContainer">
             <button
@@ -173,11 +232,11 @@ function SchedulesPageUser() {
               onClick={generatePdf}
             >
               <img
-               src = "/images/downloadicon.png"
-               style = {{width : "25px", height : "25px"}}/>
+                src="/images/downloadicon.png"
+                style={{ width: "25px", height: "25px" }}
+              />
             </button>
           </div>
-
         </div>
 
         <table className="tableFormat">
@@ -204,8 +263,6 @@ function SchedulesPageUser() {
                   ))}
                 </td>
                 <td>{bus.schedule.dayType}</td>
-                
-                
               </tr>
             ))}
           </tbody>

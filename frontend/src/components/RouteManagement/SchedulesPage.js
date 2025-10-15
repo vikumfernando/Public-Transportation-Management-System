@@ -110,19 +110,19 @@ function SchedulesPage() {
   };
 
   // HH:MM format
-const formatTime = ({ hour, minute, period }) => {
-  let h =
-    period === "PM" && hour < 12
-      ? hour + 12
-      : period === "AM" && hour === 12
-      ? 0
-      : hour;
+  const formatTime = ({ hour, minute, period }) => {
+    let h =
+      period === "PM" && hour < 12
+        ? hour + 12
+        : period === "AM" && hour === 12
+        ? 0
+        : hour;
 
-  const hh = h.toString().padStart(2, "0");
-  const mm = minute.toString().padStart(2, "0");
+    const hh = h.toString().padStart(2, "0");
+    const mm = minute.toString().padStart(2, "0");
 
-  return `${hh}:${mm}`;
-};
+    return `${hh}:${mm}`;
+  };
 
   // Submit new schedule
   const addSchedule = async (e) => {
@@ -157,22 +157,23 @@ const formatTime = ({ hour, minute, period }) => {
     if (!window.confirm("Are you sure you want to delete this schedule?")) {
       return;
     }
-    try{
-      const res = await axios.delete(`http://localhost:8070/Schedules/deleteSchedule/${scheduleId}`);
-      
+    try {
+      const res = await axios.delete(
+        `http://localhost:8070/Schedules/deleteSchedule/${scheduleId}`
+      );
+
       toast.error(`Schedule removed successfully`, {
         position: "bottom-right",
         autoClose: 4000,
       });
-      
-    }catch(err){
+    } catch (err) {
       toast.error("Schedule assigned to a Bus", {
         position: "bottom-right",
         autoClose: 4000,
       });
       console.error("Error deleting schedule: ", err);
     }
-  }
+  };
 
   function handlePopup(status) {
     const popup = document.getElementById("popupcontainer");
@@ -185,58 +186,66 @@ const formatTime = ({ hour, minute, period }) => {
   }
 
   const generatePdf = () => {
-  const doc = new jsPDF();
+    const doc = new jsPDF();
 
-  const logoImg = "/images/siteLogo.png"; 
-  const imgProps = doc.getImageProperties(logoImg);
+    const logoImg = "/images/siteLogo.png";
+    const imgProps = doc.getImageProperties(logoImg);
 
-  doc.addImage(
-    logoImg,
-    "PNG",        
-    14,           // x 
-    10,           // y
-    30,           // width
-    (imgProps.height * 30) / imgProps.width // height
-  );
+    doc.addImage(
+      logoImg,
+      "PNG",
+      14, // x
+      10, // y
+      30, // width
+      (imgProps.height * 30) / imgProps.width // height
+    );
 
-  doc.setFontSize(10);
-  doc.text("Company: ECO Transit", 14, 45);
-  doc.text("Phone: +94 77 344 2341", 14, 50);
-  doc.text("Email: ecotransit@gmail.com", 14, 55);
+    const now = new Date();
+    const dateStr = now.toLocaleDateString();
+    const timeStr = now.toLocaleTimeString();
 
-  const columns = ["Vehicle Number", "Stop Name", "Time of Arrival", "Day Type"];
+    doc.setFontSize(10);
+    doc.text("Company: ECO Transit", 14, 45);
+    doc.text("Phone: +94 77 344 2341", 14, 50);
+    doc.text("Email: ecotransit@gmail.com", 14, 55);
+    doc.text(`Date: ${dateStr}`, 160, 15); // adjust X for alignment if needed
+    doc.text(`Time: ${timeStr}`, 160, 20);
 
-  const rows = buses.map((bus) => {
-    const stopsStr = bus.route.map((s) => s.stopName).join("\n");
-    const timesStr = bus.schedule.stopSchedules
-      .map((s) => s.expectedArrival)
-      .join("\n");
+    const columns = [
+      "Vehicle Number",
+      "Stop Name",
+      "Time of Arrival",
+      "Day Type",
+    ];
 
-    return [bus.vehicleNumber, stopsStr, timesStr, bus.schedule.dayType];
-  });
+    const rows = buses.map((bus) => {
+      const stopsStr = bus.route.map((s) => s.stopName).join("\n");
+      const timesStr = bus.schedule.stopSchedules
+        .map((s) => s.expectedArrival)
+        .join("\n");
 
-  autoTable(doc, {
-    head: [columns],
-    body: rows,
-    startY: 65, 
-    styles: { fontSize: 10 },
-    headStyles: { fillColor: [100, 100, 100] },
-    theme: "grid",
-  });
+      return [bus.vehicleNumber, stopsStr, timesStr, bus.schedule.dayType];
+    });
 
-  doc.save("schedules.pdf");
-};
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      startY: 65,
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [100, 100, 100] },
+      theme: "grid",
+    });
 
+    doc.save("schedules.pdf");
+  };
 
   return (
     <div>
       {/* Popup Form */}
       <div className="popupContainer" id="popupcontainer">
         <div className="popupBox">
-
           <form onSubmit={addSchedule}>
             <div className="formContainer">
-
               {/* Left side */}
 
               <div className="leftSide">
@@ -464,20 +473,22 @@ const formatTime = ({ hour, minute, period }) => {
               onClick={generatePdf}
             >
               <img
-               src = "/images/downloadicon.png"
-               style = {{width : "25px", height : "25px"}}/>
+                src="/images/downloadicon.png"
+                style={{ width: "25px", height: "25px" }}
+              />
             </button>
           </div>
 
           <div className="addBtnContainer">
             <button
-              style={{ backgroundColor: "#8cdb66", color: "white"}}
+              style={{ backgroundColor: "#8cdb66", color: "white" }}
               onClick={() => handlePopup(true)}
               className="addBtn"
             >
               <img
-               src = "/images/addBusIcon.png"
-               style = {{width : "25px", height : "25px"}}/>
+                src="/images/addBusIcon.png"
+                style={{ width: "25px", height: "25px" }}
+              />
             </button>
           </div>
         </div>
@@ -508,31 +519,31 @@ const formatTime = ({ hour, minute, period }) => {
                   ))}
                 </td>
                 <td>{bus.schedule.dayType}</td>
-                <td style ={{width : "10%"}}>
+                <td style={{ width: "10%" }}>
                   <button
-                        className="editBtn"
-                        style = {{marginTop: "25px", marginLeft : "0px"}}
-                        onClick={() => {
-                        }}
-                      >
-                        <img
-                          style={{ width: "25px", height: "25px" }}
-                          src="/images/editicon.png"
-                        />
-                      </button>
+                    className="editBtn"
+                    style={{ marginTop: "25px", marginLeft: "0px" }}
+                    onClick={() => {}}
+                  >
+                    <img
+                      style={{ width: "25px", height: "25px" }}
+                      src="/images/editicon.png"
+                    />
+                  </button>
                 </td>
-                <td  style ={{width : "10%"}}>
+                <td style={{ width: "10%" }}>
                   <button
-                        className="deleteBtn"
-                        style = {{marginTop: "25px", marginLeft : "0px"}}
-                        onClick={() => { deleteSchedule(bus.schedule._id);
-                        }}
-                      >
-                        <img
-                          style={{ width: "25px", height: "25px" }}
-                          src="/images/trash.png"
-                        />
-                      </button>
+                    className="deleteBtn"
+                    style={{ marginTop: "25px", marginLeft: "0px" }}
+                    onClick={() => {
+                      deleteSchedule(bus.schedule._id);
+                    }}
+                  >
+                    <img
+                      style={{ width: "25px", height: "25px" }}
+                      src="/images/trash.png"
+                    />
+                  </button>
                 </td>
               </tr>
             ))}

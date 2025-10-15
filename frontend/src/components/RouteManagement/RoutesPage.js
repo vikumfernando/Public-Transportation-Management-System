@@ -116,11 +116,16 @@ function RoutePage() {
       );
 
       setRoutes(routes.filter((route) => route._id !== routeId));
+      toast.success(`Route deleted successfully`, {
+        position: "bottom-right",
+        autoClose: 4000,
+      });
+
     } catch (err) {
       if (err.response) {
         alert(err.response.data.message);
       }
-
+      
       console.log("Error while deleting Route " + err);
     }
   };

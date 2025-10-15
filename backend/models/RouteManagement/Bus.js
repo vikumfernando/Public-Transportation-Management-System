@@ -56,6 +56,7 @@ const busSchema = new Schema({
   busImage: {
     type: String,
     required: true,
+    default : "https://imgur.com/ZRcgrps.png"
   },
 });
 

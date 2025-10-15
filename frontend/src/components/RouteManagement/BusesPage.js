@@ -143,10 +143,17 @@ function BusesPage() {
       (imgProps.height * 30) / imgProps.width // height
     );
 
+    const now = new Date();
+    const dateStr = now.toLocaleDateString();
+    const timeStr = now.toLocaleTimeString();
+
     doc.setFontSize(10);
     doc.text("Company: ECO Transit", 14, 45);
     doc.text("Phone: +94 77 344 2341", 14, 50);
     doc.text("Email: ecotransit@gmail.com", 14, 55);
+    doc.text(`Date: ${dateStr}`, 160, 15);  // adjust X for alignment if needed
+    doc.text(`Time: ${timeStr}`, 160, 20);
+
 
     const columns = [
       "Vehicle Number",
