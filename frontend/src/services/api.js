@@ -1,4 +1,5 @@
 const API_BASE_URL = 'http://localhost:8070/api';
+const BOOKING_BASE_URL = 'http://localhost:8070';
 
 export const api = {
   // Smart Cards
@@ -160,6 +161,21 @@ export const api = {
     return response.json();
   },
 
+  getRevenueStats: async (period = '30d') => {
+    const response = await fetch(`${API_BASE_URL}/revenue/stats?period=${period}`);
+    return response.json();
+  },
+
+  getRevenueByDateRange: async (startDate, endDate) => {
+    const response = await fetch(`${API_BASE_URL}/revenue/date-range?startDate=${startDate}&endDate=${endDate}`);
+    return response.json();
+  },
+
+  getActiveCardsCount: async () => {
+    const response = await fetch(`${API_BASE_URL}/revenue/cards-count`);
+    return response.json();
+  },
+
   // Initialize sample data
   initSampleData: async () => {
     try {
@@ -212,7 +228,7 @@ export const api = {
   
   // Update card balance (for recharge functionality)
   updateCardBalance: async (cardNumber, amount) => {
-    const response = await fetch(`${API_BASE_URL}/cards/update-balance`, {
+    const response = await fetch(`${API_BASE_URL}/update-balance`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cardNumber, amount })
@@ -222,7 +238,7 @@ export const api = {
 
   // Add transaction record
   addTransaction: async (transactionData) => {
-    const response = await fetch(`${API_BASE_URL}/transactions`, {
+    const response = await fetch(`${API_BASE_URL}/transactions/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(transactionData)
@@ -250,6 +266,95 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });
+    return response.json();
+  },
+
+  // ==================== BOOKING MANAGEMENT ====================
+  
+  // Get bookings by user ID
+  getBookingsByUser: async (userId) => {
+    try {
+      console.log('📋 Fetching bookings from:', `${BOOKING_BASE_URL}/Bookings/by-user?userId=${userId}`);
+      const response = await fetch(`${BOOKING_BASE_URL}/Bookings/by-user?userId=${encodeURIComponent(userId)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('📋 Bookings response:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Error fetching bookings:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  },
+
+  // Get bookings by email
+  getBookingsByEmail: async (email) => {
+    try {
+      console.log('📋 Fetching bookings by email from:', `${BOOKING_BASE_URL}/Bookings/by-user?email=${email}`);
+      const response = await fetch(`${BOOKING_BASE_URL}/Bookings/by-user?email=${encodeURIComponent(email)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('📋 Bookings by email response:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Error fetching bookings by email:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  },
+
+  // Create a new booking
+  createBooking: async (bookingData) => {
+    console.log('🚀 Sending booking request to:', `${BOOKING_BASE_URL}/Bookings/book`);
+    console.log('📦 Request payload:', JSON.stringify(bookingData, null, 2));
+    
+    const response = await fetch(`${BOOKING_BASE_URL}/Bookings/book`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bookingData)
+    });
+    
+    console.log('📡 Response status:', response.status);
+    console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+    
+    const result = await response.json();
+    console.log('📋 Response data:', result);
+    
+    return result;
+  },
+
+  // Update booking
+  updateBooking: async (bookingId, updateData) => {
+    const response = await fetch(`${BOOKING_BASE_URL}/Bookings/${bookingId}/update`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updateData)
+    });
+    return response.json();
+  },
+
+  // Cancel booking
+  cancelBooking: async (bookingId) => {
+    const response = await fetch(`${BOOKING_BASE_URL}/Bookings/${bookingId}/cancel`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return response.json();
+  },
+
+  // Delete booking
+  deleteBooking: async (bookingId) => {
+    const response = await fetch(`${BOOKING_BASE_URL}/Bookings/${bookingId}`, {
+      method: 'DELETE'
+    });
+    return response.json();
+  },
+
+  // Get booking confirmation details
+  getBookingConfirmation: async (bookingId) => {
+    const response = await fetch(`${BOOKING_BASE_URL}/Bookings/confirmation/${bookingId}`);
     return response.json();
   },
 };
