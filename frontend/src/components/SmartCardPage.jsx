@@ -85,6 +85,21 @@ function SmartCardPage() {
     setShowAddForm(false);
   };
 
+  
+  const handleCardNumberChange = (e) => {
+    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 12);
+    setFormData({ ...formData, cardNumber: digitsOnly });
+  };
+
+  const onlyDigitKeys = (e) => {
+    const allowed = [
+      'Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'
+    ];
+    if (allowed.includes(e.key)) return;
+    if (!/^\d$/.test(e.key)) e.preventDefault();
+  };
+
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -95,6 +110,9 @@ function SmartCardPage() {
       </div>
     );
   }
+
+  
+
 
   return (
     <div style={{minHeight: '100vh', backgroundColor: '#f8fafc'}}>
@@ -214,21 +232,26 @@ function SmartCardPage() {
                 Card Number
               </label>
               <input
-                type="text"
-                value={formData.cardNumber}
-                onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.5rem',
-                  fontSize: '0.875rem',
-                  outline: 'none',
-                  transition: 'all 0.2s ease-in-out'
-                }}
-                placeholder="1234567890"
-                required
-              />
+                  type="text"
+                  value={formData.cardNumber}
+                  onChange={handleCardNumberChange}
+                  onKeyDown={onlyDigitKeys}
+                  inputMode="numeric"           // mobile numeric keypad
+                  maxLength={12}                // hard cap at 12
+                  pattern="\d{12}"              // optional HTML validation (exactly 12 digits)
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem',
+                    outline: 'none',
+                    transition: 'all 0.2s ease-in-out'
+                  }}
+                  placeholder="123456789012"
+                  required
+                />
+
             </div>
 
             <div>
