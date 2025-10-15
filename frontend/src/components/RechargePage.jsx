@@ -361,7 +361,7 @@ function RechargePage() {
                 <option value="">Choose Visa card</option>
                 {visaCards.map((card) => (
                   <option key={card._id} value={card.cardNumber}>
-                **** **** **** {card.cardNumber.slice(-4)} - Rs. {card.balance.toFixed(2)}
+                **** **** **** {card.cardNumber.slice(-4)} - {card.bank || 'Bank Not Set'}
                   </option>
                 ))}
               </select>
@@ -619,14 +619,14 @@ function RechargePage() {
                           color: '#3b82f6',
                           fontSize: '1.125rem',
                           margin: '0 0 0.25rem 0'
-                        }}>Rs. {card.balance.toFixed(2)}</p>
+                        }}>{card.bank || 'Bank Not Set'}</p>
                         <p style={{
                           fontSize: '0.75rem',
                           color: '#6b7280',
                           margin: '0',
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em'
-                        }}>Balance</p>
+                        }}>Bank</p>
                       </div>
                     </div>
                   </div>
