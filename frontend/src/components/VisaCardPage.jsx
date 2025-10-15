@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import styles from '../styles/combined.module.css';
 
 function VisaCardPage() {
   const [cards, setCards] = useState([]);
@@ -198,131 +199,90 @@ function VisaCardPage() {
           <h2 style={{fontSize: '1.875rem', fontWeight: '700', color: '#1f2937'}}>Your Visa Cards</h2>
           <button
             onClick={() => setShowAddForm(true)}
-            style={{
-              background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-              color: 'white',
-              padding: '0.875rem 1.75rem',
-              borderRadius: '0.875rem',
-              border: 'none',
-              fontSize: '0.875rem',
-              fontWeight: '700',
-              cursor: 'pointer',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: '0 6px 20px rgba(59, 130, 246, 0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.025em'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
-              e.target.style.transform = 'translateY(-2px) scale(1.05)';
-              e.target.style.boxShadow = '0 12px 30px rgba(59, 130, 246, 0.4)';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
-              e.target.style.transform = 'translateY(0) scale(1)';
-              e.target.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.3)';
-            }}
+            className={styles.visaAddCardButton}
           >
-            <span style={{fontSize: '1.125rem'}}>+</span> Add Visa Card
+            <span className={styles.visaAddCardButtonIcon}>+</span> Add Visa Card
           </button>
         </div>
 
       {/* Search Bar */}
-      <div style={{marginBottom: '2rem'}}>
-        <div style={{maxWidth: '28rem', margin: '0 auto'}}>
+      <div className={styles.visaSearchContainer}>
+        <div className={styles.visaSearchWrapper}>
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search by last 4 digits..."
-            style={{
-              width: '100%',
-              padding: '0.875rem 1.25rem',
-              border: '2px solid #e2e8f0',
-              borderRadius: '0.75rem',
-              fontSize: '0.875rem',
-              outline: 'none',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              background: 'white',
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = '#3b82f6';
-              e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-              e.target.style.transform = 'translateY(-1px)';
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = '#e2e8f0';
-              e.target.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
-              e.target.style.transform = 'translateY(0)';
-            }}
+            className={styles.visaSearchInput}
           />
         </div>
       </div>
 
-      {/* Add Card Form */}
+      {/* Enhanced Add Card Form */}
       {showAddForm && (
-        <div style={{
-          background: 'white',
-          borderRadius: '1rem',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-          padding: '2rem',
-          marginBottom: '2rem',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          border: '1px solid #e2e8f0'
-        }}>
-          <h2 style={{fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.5rem', color: '#1f2937'}}>
-            {editingCard ? 'Edit Visa Card' : 'Add New Visa Card'}
-          </h2>
-          <form onSubmit={handleSubmit} style={{display: 'flex', flexDirection: 'column', gap: '1.25rem'}}>
+        <div className={styles.visaFormContainer}>
+          {/* Form Background Pattern */}
+          <div className={styles.visaFormBackgroundPattern}></div>
+          
+          {/* Form Header */}
+          <div className={styles.visaFormHeader}>
+            <div className={styles.visaFormHeaderIcon}>
+              💳
+            </div>
             <div>
-              <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#374151'}}>
+              <h2 className={styles.visaFormTitle}>
+                {editingCard ? 'Edit Visa Card' : 'Add New Visa Card'}
+              </h2>
+              <p className={styles.visaFormSubtitle}>
+                {editingCard ? 'Update your card information' : 'Enter your card details to get started'}
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className={styles.visaForm}>
+            {/* Card Number Field */}
+            <div className={styles.visaFieldContainer}>
+              <label className={styles.visaFieldLabel}>
                 Card Number
               </label>
-              <input
-                type="text"
-                value={formData.cardNumber}
-                onChange={(e) => {
-                  // Only allow digits and limit to 16 characters
-                  const value = e.target.value.replace(/\D/g, '').slice(0, 16);
-                  setFormData({ ...formData, cardNumber: value });
-                }}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '2px solid #e2e8f0',
-                  borderRadius: '0.5rem',
-                  fontSize: '0.875rem',
-                  outline: 'none',
-                  transition: 'all 0.2s ease-in-out'
-                }}
-                placeholder="4532123456789012"
-                maxLength="16"
-                required
-              />
+              <div className={styles.visaFieldInputWrapper}>
+                <input
+                  type="text"
+                  value={formData.cardNumber}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 16);
+                    setFormData({ ...formData, cardNumber: value });
+                  }}
+                  className={styles.visaCardNumberInput}
+                  placeholder="4532 1234 5678 9012"
+                  maxLength="16"
+                  required
+                />
+                <div className={styles.visaFieldInputIcon}>
+                  💳
+                </div>
+              </div>
             </div>
 
+            {/* Card Holder Name Field */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{color: '#0B5648'}}>
+              <label className={styles.visaFieldLabel}>
                 Card Holder Name
               </label>
               <input
                 type="text"
                 value={formData.cardHolderName}
                 onChange={(e) => setFormData({ ...formData, cardHolderName: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none"
-                style={{borderColor: '#8CDB66'}}
-                placeholder="John Doe"
+                className={styles.visaCardHolderInput}
+                placeholder="JOHN DOE"
                 required
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            {/* Expiry Date and CVV Row */}
+            <div className={styles.visaExpiryCvvRow}>
               <div>
-                <label className="block text-sm font-medium mb-2" style={{color: '#0B5648'}}>
+                <label className={styles.visaFieldLabel}>
                   Expiry Date (MM/YY)
                 </label>
                 <input
@@ -331,37 +291,32 @@ function VisaCardPage() {
                   onChange={(e) => {
                     let value = e.target.value.replace(/\D/g, '');
                     
-                    // Validate month (MM) - first digit can only be 0 or 1
                     if (value.length >= 1) {
                       const firstDigit = value[0];
                       if (firstDigit !== '0' && firstDigit !== '1') {
-                        return; // Don't allow invalid first digit
+                        return;
                       }
                     }
                     
-                    // If first digit is 1, second digit can only be 0, 1, or 2
                     if (value.length >= 2) {
                       const firstDigit = value[0];
                       const secondDigit = value[1];
                       if (firstDigit === '1' && !['0', '1', '2'].includes(secondDigit)) {
-                        return; // Don't allow invalid second digit when first is 1
+                        return;
                       }
                     }
                     
-                    // Format with slash after 2 digits
                     if (value.length >= 2) {
                       value = value.slice(0, 2) + '/' + value.slice(2, 4);
                     }
                     
-                    // Limit total length to 5 (MM/YY)
                     if (value.length > 5) {
                       value = value.slice(0, 5);
                     }
                     
                     setFormData({ ...formData, expiryDate: value });
                   }}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transform hover:scale-105 transition-all duration-300"
-                  style={{borderColor: '#8CDB66'}}
+                  className={styles.visaExpiryInput}
                   placeholder="12/25"
                   maxLength="5"
                   required
@@ -369,19 +324,17 @@ function VisaCardPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-2" style={{color: '#0B5648'}}>
+                <label className={styles.visaFieldLabel}>
                   CVV
                 </label>
                 <input
                   type="text"
                   value={formData.cvv}
                   onChange={(e) => {
-                    // Only allow digits and limit to 3 characters
                     const value = e.target.value.replace(/\D/g, '').slice(0, 3);
                     setFormData({ ...formData, cvv: value });
                   }}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transform hover:scale-105 transition-all duration-300"
-                  style={{borderColor: '#8CDB66'}}
+                  className={styles.visaCvvInput}
                   placeholder="123"
                   maxLength="3"
                   required
@@ -389,95 +342,68 @@ function VisaCardPage() {
               </div>
             </div>
 
+            {/* Bank Selection */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{color: '#0B5648'}}>
+              <label className={styles.visaFieldLabel}>
                 Bank
               </label>
-              <select
-                value={formData.bank}
-                onChange={(e) => setFormData({ ...formData, bank: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transform hover:scale-105 transition-all duration-300"
-                style={{borderColor: '#8CDB66'}}
-                required
-              >
-                <option value="">Select Bank</option>
-                <option value="Sampath Bank">Sampath Bank</option>
-                <option value="Commercial Bank">Commercial Bank</option>
-                <option value="Peoples Bank">Peoples Bank</option>
-                <option value="NSB">NSB</option>
-                <option value="HND Bank">HND Bank</option>
-                <option value="NDB">NDB</option>
-              </select>
+              <div className={styles.visaFieldInputWrapper}>
+                <select
+                  value={formData.bank}
+                  onChange={(e) => setFormData({ ...formData, bank: e.target.value })}
+                  className={styles.visaBankSelect}
+                  required
+                >
+                  <option value="">Select Bank</option>
+                  <option value="Sampath Bank">Sampath Bank</option>
+                  <option value="Commercial Bank">Commercial Bank</option>
+                  <option value="Peoples Bank">Peoples Bank</option>
+                  <option value="NSB">NSB</option>
+                  <option value="HND Bank">HND Bank</option>
+                  <option value="NDB">NDB</option>
+                </select>
+                <div className={styles.visaFieldInputIcon}>
+                  🏦
+                </div>
+              </div>
             </div>
 
+            {/* Initial Amount Field */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{color: '#0B5648'}}>
+              <label className={styles.visaFieldLabel}>
                 Initial Amount
               </label>
-              <input
-                type="number"
-                value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transform hover:scale-105 transition-all duration-300"
-                style={{borderColor: '#8CDB66'}}
-                placeholder="0.00"
-                min="0"
-                step="0.01"
-                required
-              />
+              <div className={styles.visaFieldInputWrapper}>
+                <input
+                  type="number"
+                  value={formData.amount}
+                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                  className={styles.visaAmountInput}
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+                <div className={styles.visaFieldInputIcon}>
+                  💰
+                </div>
+              </div>
             </div>
 
-            <div style={{display: 'flex', gap: '1rem'}}>
-              <button
-                type="submit"
-                style={{
-                  background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                  color: 'white',
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '0.5rem',
-                  border: 'none',
-                  fontSize: '0.875rem',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.background = 'linear-gradient(135deg, #2563eb, #1d4ed8)';
-                  e.target.style.transform = 'translateY(-1px)';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
-                  e.target.style.transform = 'translateY(0)';
-                }}
-              >
-                {editingCard ? 'Update Card' : 'Add Card'}
-              </button>
+            {/* Action Buttons */}
+            <div className={styles.visaActionButtons}>
               <button
                 type="button"
                 onClick={handleCancel}
-                style={{
-                  background: 'linear-gradient(135deg, #6b7280, #4b5563)',
-                  color: 'white',
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '0.5rem',
-                  border: 'none',
-                  fontSize: '0.875rem',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: '0 4px 12px rgba(107, 114, 128, 0.3)'
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.background = 'linear-gradient(135deg, #4b5563, #374151)';
-                  e.target.style.transform = 'translateY(-1px)';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.background = 'linear-gradient(135deg, #6b7280, #4b5563)';
-                  e.target.style.transform = 'translateY(0)';
-                }}
+                className={styles.visaCancelButton}
               >
                 Cancel
+              </button>
+              <button
+                type="submit"
+                className={styles.visaSubmitButton}
+              >
+                {editingCard ? 'Update Card' : 'Add Card'}
               </button>
             </div>
           </form>
@@ -485,14 +411,14 @@ function VisaCardPage() {
       )}
 
       {/* Cards List */}
-      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem'}}>
+      <div className={styles.visaCardsGrid}>
         {filteredCards.length === 0 ? (
-          <div style={{gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 0'}}>
-            <div style={{fontSize: '4rem', marginBottom: '1rem', color: '#9ca3af'}}>💳</div>
-            <p style={{fontSize: '1.25rem', fontWeight: '600', color: '#374151', marginBottom: '0.5rem'}}>
+          <div className={styles.visaEmptyState}>
+            <div className={styles.visaEmptyStateIcon}>💳</div>
+            <p className={styles.visaEmptyStateTitle}>
               {searchTerm ? 'No cards found matching your search' : 'No visa cards found'}
             </p>
-            <p style={{color: '#6b7280'}}>
+            <p className={styles.visaEmptyStateText}>
               {searchTerm ? 'Try a different search term' : 'Add your first visa card to get started'}
             </p>
           </div>
