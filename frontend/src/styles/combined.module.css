@@ -3431,6 +3431,10 @@ th {
   font-size: 1rem;
 }
 
+.transactionAmountRefund {
+  color: #16a34a !important;
+}
+
 .transactionType {
   display: flex;
   align-items: center;

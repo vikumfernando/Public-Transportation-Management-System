@@ -285,8 +285,11 @@ function Dashboard() {
                           </div>
                         </td>
                         <td>
-                          <div className={styles.transactionAmount}>
-                            -Rs. {transaction.amount.toFixed(2)}
+                          <div className={`${styles.transactionAmount} ${transaction.transactionType === 'refund' ? styles.transactionAmountRefund : ''}`}>
+                            {transaction.transactionType === 'refund' 
+                              ? `+Rs. ${transaction.amount.toFixed(2)}`
+                              : `-Rs. ${transaction.amount.toFixed(2)}`
+                            }
                           </div>
                         </td>
                         <td>
