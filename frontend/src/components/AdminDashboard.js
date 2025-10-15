@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { api } from "../services/api";
 import "../styles/AdminDashboard.css";
 
 function AdminDashboard(){
@@ -7,7 +8,7 @@ function AdminDashboard(){
     const [activeBuses, setActiveBuses] = useState(0);
     const [activeRoute, setActiveRoutes] = useState([]);
     const [issues, setIssues] = useState([]);
-    const [totalRevenue, setRevenue] = useState("");
+    const [totalRevenue, setRevenue] = useState(0);
 
     useEffect(() => {
 
@@ -34,34 +35,42 @@ function AdminDashboard(){
         //implement the issue count function here
 
         //implement the total revenue function here
+        const getTotalRevenue = async () => {
+            try {
+                const revenueData = await api.getOverallRevenue('daily');
+                setRevenue(revenueData.totalAmount || 0);
+            } catch (error) {
+                console.error("Failed to fetch total revenue:", error);
+            }
+        };
 
         activeBusCount();
         activeRouteCount();
+        getTotalRevenue();
     }, []);
 
     return (
-            <div class="container">
-                <div class="stat-card">
-                    <div class="stat-title">Active Busses</div>
-                    <div class="stat-number">{activeBuses}</div>
-                </div> 
+        <div className="container">
+            <div className="stat-card">
+                <div className="stat-title">Active Busses</div>
+                <div className="stat-number">{activeBuses}</div>
+            </div> 
 
-                <div class="stat-card">
-                    <div class="stat-title">Active Routes</div>
-                    <div class="stat-number">{activeRoute}</div>
-                </div> 
+            <div className="stat-card">
+                <div className="stat-title">Active Routes</div>
+                <div className="stat-number">{activeRoute}</div>
+            </div> 
 
-                <div class="stat-card">
-                    <div class="stat-title">Issues</div>
-                    <div class="stat-number">1,234</div>
-                </div> 
+            <div className="stat-card">
+                <div className="stat-title">Issues</div>
+                <div className="stat-number">1,234</div>
+            </div> 
 
-                <div class="stat-card">
-                    <div class="stat-title">Total Revenue</div>
-                    <div class="stat-number">$1,234</div>
-                </div> 
-
-            </div>
+            <div className="stat-card">
+                <div className="stat-title">Total Revenue</div>
+                <div className="stat-number">Rs. {totalRevenue.toFixed(2)}</div>
+            </div> 
+        </div>
     )
 }
 
