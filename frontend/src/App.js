@@ -38,6 +38,7 @@ import { useState } from "react";
 import SearchPage from "./components/SearchPage";
 import BusDetailsPage from "./components/Busdetails";
 import SeatLayoutPage from "./components/SeatLayout";
+import MyBookings from "./components/MyBookings";
 
 function App() {
   const [busLocation, setBusLocation] = useState(null);
@@ -277,6 +278,16 @@ function App() {
             <div>
               <Header />
               <SeatLayoutPage />
+            </div>
+          }
+        />
+
+        <Route
+          path="/booking/mybookings"
+          element={
+            <div>
+              <Header />
+              <MyBookings />
             </div>
           }
         />
