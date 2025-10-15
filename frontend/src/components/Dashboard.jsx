@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
+//import '../styles/combined.css';
 
 function Dashboard() {
   const [user, setUser] = useState(null);
@@ -222,7 +223,7 @@ function Dashboard() {
                       <div className="card-number">{card.cardHolderName}</div>
                     </div>
                   </div>
-                  <div className="card-balance">Rs. {card.balance.toFixed(2)}</div>
+                  <div className="card-balance">{card.bank || 'Bank Not Set'}</div>
                 </div>
               ))}
             </div>
