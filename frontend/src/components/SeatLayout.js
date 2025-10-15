@@ -156,8 +156,12 @@ const SeatLayoutPage = () => {
                 busInfo: seatLayout?.busInfo
             };
 
-            // Navigate to Top-up page after booking confirmation
-            navigate('/topup');
+            // Navigate to Top-up page with booking data
+            navigate('/topup', { 
+              state: { 
+                bookingData: bookingData 
+              } 
+            });
         } catch (err) {
             console.error('Error preparing payment:', err);
             alert('Failed to proceed to payment. Please try again.');

@@ -198,7 +198,7 @@ function StripePaymentPage() {
                 <option value="">Choose Visa card</option>
                 {visaCards.map((card) => (
                   <option key={card._id} value={card.cardNumber}>
-                    **** **** **** {card.cardNumber.slice(-4)} - Rs. {card.balance.toFixed(2)}
+                    **** **** **** {card.cardNumber.slice(-4)} - {card.bank || 'Bank Not Set'}
                   </option>
                 ))}
               </select>
@@ -277,8 +277,8 @@ function StripePaymentPage() {
                         <p className="text-sm text-gray-500">{card.cardHolderName}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-green-600">Rs. {card.balance.toFixed(2)}</p>
-                        <p className="text-xs text-gray-500">Balance</p>
+                        <p className="font-bold text-green-600">{card.bank || 'Bank Not Set'}</p>
+                        <p className="text-xs text-gray-500">Bank</p>
                       </div>
                     </div>
                   </div>
