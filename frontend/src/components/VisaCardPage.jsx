@@ -13,7 +13,8 @@ function VisaCardPage() {
     cardHolderName: '',
     expiryDate: '',
     cvv: '',
-    balance: ''
+    bank: '',
+    amount: ''
   });
 
   useEffect(() => {
@@ -55,7 +56,7 @@ function VisaCardPage() {
         // Update existing card
         await api.updateVisaCard(editingCard._id, {
           ...formData,
-          balance: parseFloat(formData.balance) || 0
+          balance: parseFloat(formData.amount) || 0
         });
         setEditingCard(null);
       } else {
@@ -63,11 +64,11 @@ function VisaCardPage() {
         await api.addVisaCard({
           ...formData,
           userId: testUserId,
-          balance: parseFloat(formData.balance) || 0
+          balance: parseFloat(formData.amount) || 0
         });
       }
       
-      setFormData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '', balance: '' });
+      setFormData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '', bank: '', amount: '' });
       setShowAddForm(false);
       loadCards();
     } catch (error) {
@@ -82,7 +83,8 @@ function VisaCardPage() {
       cardHolderName: card.cardHolderName,
       expiryDate: card.expiryDate,
       cvv: card.cvv,
-      balance: card.balance.toString()
+      bank: card.bank || '',
+      amount: card.balance ? card.balance.toString() : ''
     });
     setShowAddForm(true);
   };
@@ -100,7 +102,7 @@ function VisaCardPage() {
 
   const handleCancel = () => {
     setEditingCard(null);
-    setFormData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '', balance: '' });
+    setFormData({ cardNumber: '', cardHolderName: '', expiryDate: '', cvv: '', bank: '', amount: '' });
     setShowAddForm(false);
   };
 
@@ -328,9 +330,34 @@ function VisaCardPage() {
                   value={formData.expiryDate}
                   onChange={(e) => {
                     let value = e.target.value.replace(/\D/g, '');
+                    
+                    // Validate month (MM) - first digit can only be 0 or 1
+                    if (value.length >= 1) {
+                      const firstDigit = value[0];
+                      if (firstDigit !== '0' && firstDigit !== '1') {
+                        return; // Don't allow invalid first digit
+                      }
+                    }
+                    
+                    // If first digit is 1, second digit can only be 0, 1, or 2
+                    if (value.length >= 2) {
+                      const firstDigit = value[0];
+                      const secondDigit = value[1];
+                      if (firstDigit === '1' && !['0', '1', '2'].includes(secondDigit)) {
+                        return; // Don't allow invalid second digit when first is 1
+                      }
+                    }
+                    
+                    // Format with slash after 2 digits
                     if (value.length >= 2) {
                       value = value.slice(0, 2) + '/' + value.slice(2, 4);
                     }
+                    
+                    // Limit total length to 5 (MM/YY)
+                    if (value.length > 5) {
+                      value = value.slice(0, 5);
+                    }
+                    
                     setFormData({ ...formData, expiryDate: value });
                   }}
                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transform hover:scale-105 transition-all duration-300"
@@ -364,17 +391,39 @@ function VisaCardPage() {
 
             <div>
               <label className="block text-sm font-medium mb-2" style={{color: '#0B5648'}}>
-                Initial Balance
+                Bank
+              </label>
+              <select
+                value={formData.bank}
+                onChange={(e) => setFormData({ ...formData, bank: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transform hover:scale-105 transition-all duration-300"
+                style={{borderColor: '#8CDB66'}}
+                required
+              >
+                <option value="">Select Bank</option>
+                <option value="Sampath Bank">Sampath Bank</option>
+                <option value="Commercial Bank">Commercial Bank</option>
+                <option value="Peoples Bank">Peoples Bank</option>
+                <option value="NSB">NSB</option>
+                <option value="HND Bank">HND Bank</option>
+                <option value="NDB">NDB</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{color: '#0B5648'}}>
+                Initial Amount
               </label>
               <input
                 type="number"
-                value={formData.balance}
-                onChange={(e) => setFormData({ ...formData, balance: e.target.value })}
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transform hover:scale-105 transition-all duration-300"
                 style={{borderColor: '#8CDB66'}}
                 placeholder="0.00"
                 min="0"
                 step="0.01"
+                required
               />
             </div>
 
@@ -492,8 +541,8 @@ function VisaCardPage() {
                   <p style={{fontSize: '0.75rem', color: '#6b7280', margin: '0', fontWeight: '500'}}>{card.cardHolderName}</p>
                 </div>
                 <div style={{textAlign: 'right'}}>
-                  <p style={{fontSize: '1.25rem', fontWeight: '800', color: '#059669', margin: '0', lineHeight: '1'}}>Rs. {card.balance.toFixed(2)}</p>
-                  <p style={{fontSize: '0.7rem', color: '#64748b', margin: '0', fontWeight: '500'}}>Balance</p>
+                  <p style={{fontSize: '1rem', fontWeight: '600', color: '#0B5648', margin: '0', lineHeight: '1'}}>{card.bank || 'Bank Not Set'}</p>
+                  <p style={{fontSize: '0.7rem', color: '#64748b', margin: '0', fontWeight: '500'}}>Bank</p>
                 </div>
               </div>
               
