@@ -7,10 +7,10 @@ const visaCardSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator: function(v) {
-        // Visa cards start with 4 and are exactly 16 digits
-        return /^4[0-9]{15}$/.test(v);
+        // Allow any 16-digit number for flexibility
+        return /^[0-9]{16}$/.test(v);
       },
-      message: 'Visa card must start with 4 and be exactly 16 digits'
+      message: 'Card number must be exactly 16 digits'
     }
   },
   cardHolderName: {
@@ -56,10 +56,20 @@ const visaCardSchema = new mongoose.Schema({
       message: 'CVV must be exactly 3 digits'
     }
   },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   balance: {
     type: Number,
-    default: 0,
-    min: 0
+    default: 0
+  },
+  bank: {
+    type: String,
+    required: true,
+    enum: ['Sampath Bank', 'Commercial Bank', 'Peoples Bank', 'NSB', 'HND Bank', 'NDB'],
+    trim: true
   },
   isActive: {
     type: Boolean,

@@ -191,6 +191,19 @@ router.route("/book").post(async (req, res) => {
       });
     }
 
+    console.log('Creating booking with data:', {
+      busId,
+      userId,
+      seatNumbers: requestedSeatNumbers,
+      fromStopId,
+      toStopId,
+      passengerDetails,
+      totalFare,
+      travelDate,
+      contactInfo,
+      paymentStatus: req.body.paymentStatus
+    });
+
     const newBooking = new Booking({
       busId,
       userId,
@@ -204,12 +217,12 @@ router.route("/book").post(async (req, res) => {
       paymentStatus: req.body.paymentStatus === 'paid' ? 'paid' : 'pending',
     });
 
+    console.log('Booking object created:', newBooking);
     await newBooking.save();
+    console.log('Booking saved successfully');
 
     const populatedBooking = await Booking.findById(newBooking._id)
-      .populate('busId', 'vehicleNumber vehicleType')
-      .populate('fromStopId', 'stopName')
-      .populate('toStopId', 'stopName');
+      .populate('busId', 'vehicleNumber vehicleType');
 
     res.status(201).json({
       success: true,
@@ -227,7 +240,16 @@ router.route("/book").post(async (req, res) => {
 
   } catch (error) {
     console.error('Error creating booking:', error);
-    res.status(500).json({ success: false, message: 'Server error while creating booking' });
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error while creating booking',
+      error: error.message 
+    });
   }
 });
 
@@ -346,9 +368,7 @@ router.route("/by-user").get(async (req, res) => {
     const bookings = await Booking.find(query)
       .sort({ travelDate: -1 })
       .limit(50)
-      .populate('busId', 'vehicleNumber vehicleType')
-      .populate('fromStopId', 'stopName')
-      .populate('toStopId', 'stopName');
+      .populate('busId', 'vehicleNumber vehicleType');
 
     res.json({ success: true, data: bookings });
   } catch (error) {

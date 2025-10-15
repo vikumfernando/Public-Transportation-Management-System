@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const cardController = require("../controllers/cardController");
-const SmartCard = require('../models/SmartCard');
+const SmartCard = require('../models/NFCCard');
 const VisaCard = require('../models/VisaCard');
 
 // Device-only tap route (for IoT NFC readers)
@@ -29,13 +29,10 @@ router.post("/smart-cards", async (req, res) => {
     const { cardNumber, userId, balance, cardType } = req.body;
     const card = new SmartCard({ 
       cardNumber, 
-      cardId: cardNumber, // Use cardNumber as cardId for NFC compatibility
       userId, 
       balance, 
-      balanceCents: balance * 100, // Convert to cents
       cardType,
-      isActive: true,
-      status: 'active'
+      isActive: true
     });
     await card.save();
     res.json(card);
@@ -85,8 +82,16 @@ router.get("/visa-cards/:userId", async (req, res) => {
 
 router.post("/visa-cards", async (req, res) => {
   try {
-    const { cardNumber, cardHolderName, expiryDate, cvv, userId, balance } = req.body;
-    const card = new VisaCard({ cardNumber, cardHolderName, expiryDate, cvv, userId, balance });
+    const { cardNumber, cardHolderName, expiryDate, cvv, userId, bank, balance } = req.body;
+    const card = new VisaCard({ 
+      cardNumber, 
+      cardHolderName, 
+      expiryDate, 
+      cvv, 
+      userId, 
+      bank, 
+      balance: balance !== undefined && balance !== null ? Number(balance) : 0
+    });
     await card.save();
     res.json(card);
   } catch (error) {
@@ -96,10 +101,17 @@ router.post("/visa-cards", async (req, res) => {
 
 router.put("/visa-cards/:id", async (req, res) => {
   try {
-    const { cardNumber, cardHolderName, expiryDate, cvv, balance } = req.body;
+    const { cardNumber, cardHolderName, expiryDate, cvv, bank, balance } = req.body;
     const card = await VisaCard.findByIdAndUpdate(
       req.params.id,
-      { cardNumber, cardHolderName, expiryDate, cvv, balance },
+      { 
+        cardNumber, 
+        cardHolderName, 
+        expiryDate, 
+        cvv, 
+        bank, 
+        balance: balance !== undefined && balance !== null ? Number(balance) : 0
+      },
       { new: true, runValidators: true }
     );
     
