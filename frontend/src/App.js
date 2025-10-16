@@ -30,6 +30,7 @@ import TopupPage from "./components/TopupPage";
 import RechargePage from "./components/RechargePage";
 import TransactionsPage from "./components/TransactionsPage";
 import RefundPage from "./components/RefundPage";
+import RevenueDashboard from "./components/RevenueDashboard";
 
 import PassengerProfile from "./components/PassengerProfile";
 
@@ -53,7 +54,7 @@ function App() {
           path="/"
           element={
             <div>
-              <LandingPage/>
+              <LandingPage />
             </div>
           }
         />
@@ -248,6 +249,16 @@ function App() {
             <div>
               <Header />
               <RefundPage />
+            </div>
+          }
+        />
+
+        <Route
+          path="/revenue-dashboard"
+          element={
+            <div>
+              <Header />
+              <RevenueDashboard />
             </div>
           }
         />
