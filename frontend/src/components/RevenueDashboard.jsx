@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { api } from '../services/api';
 
 function RevenueDashboard() {
+  const location = useLocation();
   const [revenueStats, setRevenueStats] = useState(null);
   const [activeCardsCount, setActiveCardsCount] = useState(null);
   const [overallRevenue, setOverallRevenue] = useState(null);
@@ -12,21 +14,35 @@ function RevenueDashboard() {
     endDate: ''
   });
   const [customRangeRevenue, setCustomRangeRevenue] = useState(null);
+  const [cancelledBooking, setCancelledBooking] = useState(null);
+  const [refundData, setRefundData] = useState(null);
+  const [showRefundStatus, setShowRefundStatus] = useState(false);
+  const [refundMessage, setRefundMessage] = useState('');
 
   useEffect(() => {
     loadRevenueData();
-  }, [selectedPeriod]);
+
+    // Check if we came from a cancelled booking
+    if (location.state) {
+      if (location.state.cancelledBooking) {
+        setCancelledBooking(location.state.cancelledBooking);
+        setRefundData(location.state.refundData);
+        setShowRefundStatus(location.state.showRefundStatus || false);
+        setRefundMessage(location.state.message || '');
+      }
+    }
+  }, [selectedPeriod, location.state]);
 
   const loadRevenueData = async () => {
     try {
       setLoading(true);
-      
+
       const [statsData, cardsData, overallData] = await Promise.all([
         api.getRevenueStats(selectedPeriod),
         api.getActiveCardsCount(),
         api.getOverallRevenue('daily')
       ]);
-      
+
       setRevenueStats(statsData);
       setActiveCardsCount(cardsData);
       setOverallRevenue(overallData);
@@ -68,7 +84,7 @@ function RevenueDashboard() {
         minHeight: '100vh',
         backgroundColor: '#f8fafc'
       }}>
-        <div style={{textAlign: 'center'}}>
+        <div style={{ textAlign: 'center' }}>
           <div style={{
             width: '3rem',
             height: '3rem',
@@ -78,14 +94,22 @@ function RevenueDashboard() {
             animation: 'spin 1s linear infinite',
             margin: '0 auto 1rem auto'
           }}></div>
-          <div style={{fontSize: '1.125rem', color: '#374151'}}>Loading revenue data...</div>
+          <div style={{ fontSize: '1.125rem', color: '#374151' }}>Loading revenue data...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{backgroundColor: '#F0EBE8', minHeight: '100vh', padding: '2rem'}}>
+    <div style={{ backgroundColor: '#F0EBE8', minHeight: '100vh', padding: '2rem' }}>
+      <style>
+        {`
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+          }
+        `}
+      </style>
       {/* Header */}
       <div style={{
         background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%)',
@@ -105,12 +129,161 @@ function RevenueDashboard() {
         }}>
           📊 Revenue Dashboard
         </h1>
-        <p style={{fontSize: '1.125rem', opacity: '0.9'}}>
+        <p style={{ fontSize: '1.125rem', opacity: '0.9' }}>
           Comprehensive revenue analytics and insights
         </p>
       </div>
 
-      <div style={{maxWidth: '1400px', margin: '0 auto'}}>
+      {/* Real-time Refund Status */}
+      {showRefundStatus && cancelledBooking && (
+        <div style={{ maxWidth: '1400px', margin: '0 auto', marginBottom: '2rem' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+            borderRadius: '1.25rem',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            padding: '2rem',
+            border: '1px solid #e2e8f0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              <div style={{
+                width: '2.5rem',
+                height: '2.5rem',
+                borderRadius: '0.75rem',
+                background: 'linear-gradient(135deg, #10b981, #059669)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+              }}>
+                <span style={{ fontSize: '1.25rem', color: 'white' }}>🔄</span>
+              </div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1e293b', margin: '0' }}>Real-time Refund Status</h2>
+            </div>
+
+            {refundMessage && (
+              <div style={{
+                padding: '1rem',
+                borderRadius: '0.75rem',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                color: 'white',
+                background: 'linear-gradient(135deg, #10b981, #059669)',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                border: '1px solid #047857',
+                marginBottom: '1.5rem'
+              }}>
+                {refundMessage}
+              </div>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+              {/* Booking Details */}
+              <div style={{
+                padding: '1.5rem',
+                borderRadius: '0.75rem',
+                background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+                border: '1px solid #cbd5e1'
+              }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', color: '#1f2937' }}>📄 Cancelled Booking Details</h3>
+                <div style={{ display: 'grid', gap: '0.75rem' }}>
+                  <div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Booking ID</span>
+                    <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0' }}>{cancelledBooking.bookingId}</p>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bus</span>
+                    <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0' }}>
+                      {cancelledBooking.busId?.vehicleNumber || 'N/A'} ({cancelledBooking.busId?.vehicleType || 'N/A'})
+                    </p>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Seats</span>
+                    <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0' }}>
+                      {Array.isArray(cancelledBooking.seatNumbers) ? cancelledBooking.seatNumbers.join(', ') : cancelledBooking.seatNumbers || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Travel Date</span>
+                    <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0' }}>
+                      {cancelledBooking.travelDate ? new Date(cancelledBooking.travelDate).toLocaleDateString() : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Refund Details */}
+              {refundData && (
+                <div style={{
+                  padding: '1.5rem',
+                  borderRadius: '0.75rem',
+                  background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+                  border: '1px solid #bbf7d0'
+                }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', color: '#1f2937' }}>💰 Refund Details</h3>
+                  <div style={{ display: 'grid', gap: '0.75rem' }}>
+                    <div>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Refund Amount</span>
+                      <p style={{ fontSize: '1.25rem', fontWeight: '700', color: '#059669', margin: '0.25rem 0 0 0' }}>
+                        Rs. {refundData.refundAmount?.toFixed(2) || '0.00'}
+                      </p>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>New Card Balance</span>
+                      <p style={{ fontSize: '1rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0' }}>
+                        Rs. {refundData.newBalance?.toFixed(2) || 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Refund Status</span>
+                      <p style={{ fontSize: '0.875rem', fontWeight: '600', color: refundData.success ? '#059669' : '#dc2626', margin: '0.25rem 0 0 0' }}>
+                        {refundData.success ? '✅ Completed' : '❌ Failed'}
+                      </p>
+                      {!refundData.success && refundData.error && (
+                        <p style={{ fontSize: '0.75rem', color: '#dc2626', margin: '0.25rem 0 0 0' }}>
+                          Error: {refundData.error}
+                        </p>
+                      )}
+                    </div>
+                    {refundData.refundTransactionId && (
+                      <div>
+                        <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Transaction ID</span>
+                        <p style={{ fontSize: '0.75rem', fontWeight: '500', color: '#6b7280', margin: '0.25rem 0 0 0', fontFamily: 'monospace' }}>
+                          {refundData.refundTransactionId}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Real-time Status Indicator */}
+            <div style={{
+              marginTop: '1.5rem',
+              padding: '1rem',
+              borderRadius: '0.75rem',
+              background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+              border: '1px solid #93c5fd',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem'
+            }}>
+              <div style={{
+                width: '1rem',
+                height: '1rem',
+                borderRadius: '50%',
+                background: '#10b981',
+                animation: 'pulse 2s infinite'
+              }}></div>
+              <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1e40af' }}>
+                Real-time Status: Refund processed and reflected in revenue analytics
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         {/* Period Selection */}
         <div style={{
           background: 'white',
@@ -119,12 +292,12 @@ function RevenueDashboard() {
           marginBottom: '2rem',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
         }}>
-          <h3 style={{fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem', color: '#1f2937'}}>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem', color: '#1f2937' }}>
             📅 Time Period Selection
           </h3>
-          <div style={{display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap'}}>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <div>
-              <label style={{fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginRight: '0.5rem'}}>
+              <label style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginRight: '0.5rem' }}>
                 Period:
               </label>
               <select
@@ -144,15 +317,15 @@ function RevenueDashboard() {
                 <option value="1y">Last Year</option>
               </select>
             </div>
-            
-            <div style={{display: 'flex', gap: '0.5rem', alignItems: 'center'}}>
-              <label style={{fontSize: '0.875rem', fontWeight: '500', color: '#374151'}}>
+
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <label style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>
                 Custom Range:
               </label>
               <input
                 type="date"
                 value={dateRange.startDate}
-                onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
+                onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
                 style={{
                   padding: '0.5rem',
                   border: '2px solid #e5e7eb',
@@ -160,11 +333,11 @@ function RevenueDashboard() {
                   fontSize: '0.875rem'
                 }}
               />
-              <span style={{color: '#6b7280'}}>to</span>
+              <span style={{ color: '#6b7280' }}>to</span>
               <input
                 type="date"
                 value={dateRange.endDate}
-                onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+                onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
                 style={{
                   padding: '0.5rem',
                   border: '2px solid #e5e7eb',
@@ -206,12 +379,12 @@ function RevenueDashboard() {
             color: 'white',
             boxShadow: '0 8px 25px rgba(16, 185, 129, 0.3)'
           }}>
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <h3 style={{fontSize: '1rem', fontWeight: '500', opacity: '0.9', margin: '0 0 0.5rem 0'}}>
+                <h3 style={{ fontSize: '1rem', fontWeight: '500', opacity: '0.9', margin: '0 0 0.5rem 0' }}>
                   Total Revenue
                 </h3>
-                <p style={{fontSize: '2.5rem', fontWeight: '800', margin: '0'}}>
+                <p style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0' }}>
                   {revenueStats ? formatCurrency(revenueStats.revenue.netRevenue) : 'Rs. 0.00'}
                 </p>
               </div>
@@ -238,12 +411,12 @@ function RevenueDashboard() {
             color: 'white',
             boxShadow: '0 8px 25px rgba(59, 130, 246, 0.3)'
           }}>
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <h3 style={{fontSize: '1rem', fontWeight: '500', opacity: '0.9', margin: '0 0 0.5rem 0'}}>
+                <h3 style={{ fontSize: '1rem', fontWeight: '500', opacity: '0.9', margin: '0 0 0.5rem 0' }}>
                   Fare Revenue
                 </h3>
-                <p style={{fontSize: '2.5rem', fontWeight: '800', margin: '0'}}>
+                <p style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0' }}>
                   {revenueStats ? formatCurrency(revenueStats.revenue.totalFareRevenue) : 'Rs. 0.00'}
                 </p>
               </div>
@@ -270,12 +443,12 @@ function RevenueDashboard() {
             color: 'white',
             boxShadow: '0 8px 25px rgba(245, 158, 11, 0.3)'
           }}>
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <h3 style={{fontSize: '1rem', fontWeight: '500', opacity: '0.9', margin: '0 0 0.5rem 0'}}>
+                <h3 style={{ fontSize: '1rem', fontWeight: '500', opacity: '0.9', margin: '0 0 0.5rem 0' }}>
                   Top-up Revenue
                 </h3>
-                <p style={{fontSize: '2.5rem', fontWeight: '800', margin: '0'}}>
+                <p style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0' }}>
                   {revenueStats ? formatCurrency(revenueStats.revenue.totalTopupRevenue) : 'Rs. 0.00'}
                 </p>
               </div>
@@ -302,12 +475,12 @@ function RevenueDashboard() {
             color: 'white',
             boxShadow: '0 8px 25px rgba(139, 92, 246, 0.3)'
           }}>
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <h3 style={{fontSize: '1rem', fontWeight: '500', opacity: '0.9', margin: '0 0 0.5rem 0'}}>
+                <h3 style={{ fontSize: '1rem', fontWeight: '500', opacity: '0.9', margin: '0 0 0.5rem 0' }}>
                   Active Cards
                 </h3>
-                <p style={{fontSize: '2.5rem', fontWeight: '800', margin: '0'}}>
+                <p style={{ fontSize: '2.5rem', fontWeight: '800', margin: '0' }}>
                   {activeCardsCount ? formatNumber(activeCardsCount.activeCards) : '0'}
                 </p>
               </div>
@@ -341,10 +514,10 @@ function RevenueDashboard() {
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
             textAlign: 'center'
           }}>
-            <h4 style={{fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0'}}>
+            <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0' }}>
               Fare Transactions
             </h4>
-            <p style={{fontSize: '2rem', fontWeight: '800', color: '#3b82f6', margin: '0'}}>
+            <p style={{ fontSize: '2rem', fontWeight: '800', color: '#3b82f6', margin: '0' }}>
               {revenueStats ? formatNumber(revenueStats.transactions.totalFareTransactions) : '0'}
             </p>
           </div>
@@ -356,10 +529,10 @@ function RevenueDashboard() {
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
             textAlign: 'center'
           }}>
-            <h4 style={{fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0'}}>
+            <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0' }}>
               Top-up Transactions
             </h4>
-            <p style={{fontSize: '2rem', fontWeight: '800', color: '#f59e0b', margin: '0'}}>
+            <p style={{ fontSize: '2rem', fontWeight: '800', color: '#f59e0b', margin: '0' }}>
               {revenueStats ? formatNumber(revenueStats.transactions.totalTopupTransactions) : '0'}
             </p>
           </div>
@@ -371,10 +544,10 @@ function RevenueDashboard() {
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
             textAlign: 'center'
           }}>
-            <h4 style={{fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0'}}>
+            <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0' }}>
               Total Cards
             </h4>
-            <p style={{fontSize: '2rem', fontWeight: '800', color: '#8b5cf6', margin: '0'}}>
+            <p style={{ fontSize: '2rem', fontWeight: '800', color: '#8b5cf6', margin: '0' }}>
               {activeCardsCount ? formatNumber(activeCardsCount.totalCards) : '0'}
             </p>
           </div>
@@ -386,10 +559,10 @@ function RevenueDashboard() {
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
             textAlign: 'center'
           }}>
-            <h4 style={{fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0'}}>
+            <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0' }}>
               Blocked Cards
             </h4>
-            <p style={{fontSize: '2rem', fontWeight: '800', color: '#ef4444', margin: '0'}}>
+            <p style={{ fontSize: '2rem', fontWeight: '800', color: '#ef4444', margin: '0' }}>
               {activeCardsCount ? formatNumber(activeCardsCount.blockedCards) : '0'}
             </p>
           </div>
@@ -404,7 +577,7 @@ function RevenueDashboard() {
             marginBottom: '2rem',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
           }}>
-            <h3 style={{fontSize: '1.5rem', fontWeight: '700', color: '#1f2937', marginBottom: '1rem'}}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1f2937', marginBottom: '1rem' }}>
               📅 Custom Date Range Results
             </h3>
             <div style={{
@@ -412,27 +585,27 @@ function RevenueDashboard() {
               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: '1rem'
             }}>
-              <div style={{textAlign: 'center'}}>
-                <h4 style={{fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0'}}>
+              <div style={{ textAlign: 'center' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0' }}>
                   Total Revenue
                 </h4>
-                <p style={{fontSize: '1.5rem', fontWeight: '800', color: '#10b981', margin: '0'}}>
+                <p style={{ fontSize: '1.5rem', fontWeight: '800', color: '#10b981', margin: '0' }}>
                   {formatCurrency(customRangeRevenue.revenue.totalRevenue)}
                 </p>
               </div>
-              <div style={{textAlign: 'center'}}>
-                <h4 style={{fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0'}}>
+              <div style={{ textAlign: 'center' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0' }}>
                   Transactions
                 </h4>
-                <p style={{fontSize: '1.5rem', fontWeight: '800', color: '#3b82f6', margin: '0'}}>
+                <p style={{ fontSize: '1.5rem', fontWeight: '800', color: '#3b82f6', margin: '0' }}>
                   {formatNumber(customRangeRevenue.revenue.totalTransactions)}
                 </p>
               </div>
-              <div style={{textAlign: 'center'}}>
-                <h4 style={{fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0'}}>
+              <div style={{ textAlign: 'center' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', margin: '0 0 0.5rem 0' }}>
                   Avg Amount
                 </h4>
-                <p style={{fontSize: '1.5rem', fontWeight: '800', color: '#f59e0b', margin: '0'}}>
+                <p style={{ fontSize: '1.5rem', fontWeight: '800', color: '#f59e0b', margin: '0' }}>
                   {formatCurrency(customRangeRevenue.revenue.avgTransactionAmount)}
                 </p>
               </div>
@@ -449,28 +622,28 @@ function RevenueDashboard() {
             marginBottom: '2rem',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
           }}>
-            <h3 style={{fontSize: '1.5rem', fontWeight: '700', color: '#1f2937', marginBottom: '1rem'}}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1f2937', marginBottom: '1rem' }}>
               📈 Daily Revenue Breakdown
             </h3>
-            <div style={{overflowX: 'auto'}}>
-              <table style={{width: '100%', borderCollapse: 'collapse'}}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{borderBottom: '2px solid #e5e7eb'}}>
-                    <th style={{padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#374151'}}>Date</th>
-                    <th style={{padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#374151'}}>Revenue</th>
-                    <th style={{padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#374151'}}>Transactions</th>
+                  <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+                    <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#374151' }}>Date</th>
+                    <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#374151' }}>Revenue</th>
+                    <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#374151' }}>Transactions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {revenueStats.dailyBreakdown.slice(-10).map((day, index) => (
-                    <tr key={index} style={{borderBottom: '1px solid #f3f4f6'}}>
-                      <td style={{padding: '1rem', color: '#374151'}}>
+                    <tr key={index} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                      <td style={{ padding: '1rem', color: '#374151' }}>
                         {day._id.year}-{String(day._id.month).padStart(2, '0')}-{String(day._id.day).padStart(2, '0')}
                       </td>
-                      <td style={{padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#10b981'}}>
+                      <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#10b981' }}>
                         {formatCurrency(day.dailyRevenue)}
                       </td>
-                      <td style={{padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#3b82f6'}}>
+                      <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#3b82f6' }}>
                         {formatNumber(day.dailyTransactions)}
                       </td>
                     </tr>
@@ -489,28 +662,28 @@ function RevenueDashboard() {
             padding: '2rem',
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
           }}>
-            <h3 style={{fontSize: '1.5rem', fontWeight: '700', color: '#1f2937', marginBottom: '1rem'}}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1f2937', marginBottom: '1rem' }}>
               🚌 Top Revenue Routes
             </h3>
-            <div style={{overflowX: 'auto'}}>
-              <table style={{width: '100%', borderCollapse: 'collapse'}}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{borderBottom: '2px solid #e5e7eb'}}>
-                    <th style={{padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#374151'}}>Route ID</th>
-                    <th style={{padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#374151'}}>Revenue</th>
-                    <th style={{padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#374151'}}>Transactions</th>
+                  <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+                    <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600', color: '#374151' }}>Route ID</th>
+                    <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#374151' }}>Revenue</th>
+                    <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#374151' }}>Transactions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {revenueStats.topRoutes.map((route, index) => (
-                    <tr key={index} style={{borderBottom: '1px solid #f3f4f6'}}>
-                      <td style={{padding: '1rem', color: '#374151'}}>
+                    <tr key={index} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                      <td style={{ padding: '1rem', color: '#374151' }}>
                         Route {route._id}
                       </td>
-                      <td style={{padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#10b981'}}>
+                      <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#10b981' }}>
                         {formatCurrency(route.routeRevenue)}
                       </td>
-                      <td style={{padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#3b82f6'}}>
+                      <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#3b82f6' }}>
                         {formatNumber(route.routeTransactions)}
                       </td>
                     </tr>

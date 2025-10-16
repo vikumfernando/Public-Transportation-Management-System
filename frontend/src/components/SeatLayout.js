@@ -18,13 +18,21 @@ const SeatLayoutPage = () => {
     const [error, setError] = useState(null);
     const [bookingInProgress, setBookingInProgress] = useState(false);
     const [showPassengerForm, setShowPassengerForm] = useState(false);
-    const [contactInfo, setContactInfo] = useState({
-        email: '',
-        phone: ''
-    });
 
     useEffect(() => {
         if (busId && fromStopId && toStopId && travelDate) {
+            // Check if travel date is not in the past
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const selectedDate = new Date(travelDate);
+            selectedDate.setHours(0, 0, 0, 0);
+
+            if (selectedDate < today) {
+                setError('Cannot access seat layout for previous dates. Please select today or a future date.');
+                setLoading(false);
+                return;
+            }
+
             fetchSeatLayout();
         } else {
             setError('Missing required parameters');
@@ -34,20 +42,32 @@ const SeatLayoutPage = () => {
 
     const fetchSeatLayout = async () => {
         try {
+            console.log('Fetching seat layout with params:', { busId, travelDate, fromStopId, toStopId });
+
+            // Skip bus test for now and go directly to seat layout
+            console.log('Skipping bus test, going directly to seat layout API');
+
             const params = new URLSearchParams({
                 travelDate,
                 fromStopId,
                 toStopId
             });
 
-            const response = await fetch(`http://localhost:8070/Bookings/seat-layout/${busId}?${params}`);
+            const url = `http://localhost:8070/Bookings/seat-layout/${busId}?${params}`;
+            console.log('Fetching from URL:', url);
+
+            const response = await fetch(url);
+            console.log('Response status:', response.status);
+
             const data = await response.json();
+            console.log('Response data:', data);
 
             if (data.success) {
                 setSeatLayout(data.data);
                 // Initialize passenger details array
                 setPassengerDetails([]);
             } else {
+                console.error('API returned error:', data);
                 setError(data.message || 'Failed to fetch seat layout');
             }
         } catch (err) {
@@ -94,13 +114,6 @@ const SeatLayoutPage = () => {
         });
     };
 
-    const handleContactInfoChange = (field, value) => {
-        setContactInfo(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
-
     const handleProceedToPassengerDetails = () => {
         if (selectedSeats.length === 0) {
             alert('Please select at least one seat');
@@ -109,12 +122,12 @@ const SeatLayoutPage = () => {
         setShowPassengerForm(true);
     };
 
-    const validatePassengerDetails = () => {
-        if (!contactInfo.email || !contactInfo.phone) {
-            alert('Please provide contact information');
-            return false;
-        }
+    const validatePhone = (phone) => {
+        const phoneRegex = /^(\+\d{1,3}[- ]?)?\d{10}$/;
+        return phoneRegex.test(phone);
+    };
 
+    const validatePassengerDetails = () => {
         for (let i = 0; i < passengerDetails.length; i++) {
             const passenger = passengerDetails[i];
             if (!passenger.name || !passenger.age) {
@@ -123,6 +136,10 @@ const SeatLayoutPage = () => {
             }
             if (passenger.age < 1 || passenger.age > 100) {
                 alert(`Please enter a valid age for passenger ${i + 1}`);
+                return false;
+            }
+            if (passenger.phone && !validatePhone(passenger.phone)) {
+                alert(`Please enter a valid phone number for passenger ${i + 1}`);
                 return false;
             }
         }
@@ -152,15 +169,14 @@ const SeatLayoutPage = () => {
                 passengerDetails,
                 totalFare,
                 travelDate,
-                contactInfo,
                 busInfo: seatLayout?.busInfo
             };
 
             // Navigate to Top-up page with booking data
-            navigate('/topup', { 
-              state: { 
-                bookingData: bookingData 
-              } 
+            navigate('/topup', {
+                state: {
+                    bookingData: bookingData
+                }
             });
         } catch (err) {
             console.error('Error preparing payment:', err);
@@ -279,7 +295,7 @@ const SeatLayoutPage = () => {
                                                                 className={`seat ${getSeatStatusColor(seat)} ${seat.type}`}
                                                                 onClick={() => handleSeatClick(seat)}
                                                                 disabled={seat.status === 'booked' || seat.status === 'unavailable'}
-                                                                title={`Seat ${seat.seatId} - ${seat.type} - Rs.${seat.fare}`}
+                                                                title={`Seat ${seat.seatId} - ${seat.type}`}
                                                             >
                                                                 {seat.seatId}
                                                             </button>
@@ -348,32 +364,7 @@ const SeatLayoutPage = () => {
                             <p>Please fill in the details for all passengers</p>
                         </div>
 
-                        {/* Contact Information */}
-                        <div className="contact-section">
-                            <h3>Contact Information</h3>
-                            <div className="contact-form">
-                                <div className="form-group">
-                                    <label>Email Address *</label>
-                                    <input
-                                        type="email"
-                                        value={contactInfo.email}
-                                        onChange={(e) => handleContactInfoChange('email', e.target.value)}
-                                        placeholder="Enter your email"
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Phone Number *</label>
-                                    <input
-                                        type="tel"
-                                        value={contactInfo.phone}
-                                        onChange={(e) => handleContactInfoChange('phone', e.target.value)}
-                                        placeholder="Enter your phone number"
-                                        required
-                                    />
-                                </div>
-                            </div>
-                        </div>
+                        {/* Contact Information removed as requested */}
 
                         {/* Passenger Details */}
                         <div className="passengers-section">

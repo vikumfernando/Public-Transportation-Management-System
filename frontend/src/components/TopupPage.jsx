@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 
 function TopupPage() {
   // keep your constant user for now
   const TEST_USER_ID = "507f1f77bcf86cd799439011";
   const location = useLocation();
+  const navigate = useNavigate();
 
   // === existing states you already had for cards/UI ===
   const [selectedCard, setSelectedCard] = useState('');
@@ -58,7 +59,7 @@ function TopupPage() {
 
   const bookingInfo = useMemo(() => {
     if (!bookingData) return null;
-    
+
     // Map of stop IDs to stop names (from our database)
     const stopNames = {
       '68d441acd1ce3741243f1b42': 'Kaduwela',
@@ -72,34 +73,43 @@ function TopupPage() {
       '68d451691863f0ff0dd9d2be': 'Park Stop',
       '68d4518e1863f0ff0dd9d2c1': 'Bellanwila'
     };
-    
+
     // Fix date formatting - use proper date format
-    const dateStr = bookingData.travelDate ? 
+    const dateStr = bookingData.travelDate ?
       new Date(bookingData.travelDate).toLocaleDateString('en-US', {
         year: 'numeric',
-        month: '2-digit', 
+        month: '2-digit',
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
         hour12: true
       }) : '—';
-    
+
     const fromName = bookingData.fromStopId?.stopName || stopNames[bookingData.fromStopId] || bookingData.fromStopId || '—';
     const toName = bookingData.toStopId?.stopName || stopNames[bookingData.toStopId] || bookingData.toStopId || '—';
     const seats = Array.isArray(bookingData.seatNumbers) ? bookingData.seatNumbers.join(', ') : '';
     const bus = bookingData.busInfo?.vehicleNumber || 'Bus';
     const vType = bookingData.busInfo?.vehicleType || '';
-    
+
+    // Get route information
+    const routeInfo = bookingData.busInfo?.route;
+    const routeDisplay = routeInfo ?
+      `Route ${routeInfo.routeNum}: ${routeInfo.routeName}` :
+      `${fromName} → ${toName}`;
+
     // Use real booking ID if available, otherwise temporary
     const bookingId = bookingData.bookingId || 'TEMP_' + Date.now();
-    
+
     // Determine title based on payment status
     const title = bookingData.paymentStatus === 'paid' ? 'Booking Details' : 'Booking Details (Pending Payment)';
 
     return {
       bookingId,
       dateStr,
-      routeStr: `${fromName} → ${toName}`,
+      routeStr: routeDisplay,
+      routeInfo: routeInfo,
+      fromName,
+      toName,
       seats,
       bus,
       vType,
@@ -128,6 +138,19 @@ function TopupPage() {
         return;
       }
 
+      // Check if travel date is not in the past
+      if (bookingData.travelDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selectedDate = new Date(bookingData.travelDate);
+        selectedDate.setHours(0, 0, 0, 0);
+
+        if (selectedDate < today) {
+          setMessage('❌ Cannot make payment for previous dates. Please select today or a future date.');
+          return;
+        }
+      }
+
       // ensure card has enough balance
       const card = nfcCards.find(c => c.cardNumber === selectedCard);
       if (!card) {
@@ -148,48 +171,42 @@ function TopupPage() {
 
       // NOW CREATE THE BOOKING IN DATABASE AFTER SUCCESSFUL PAYMENT
       try {
-        // Always use a valid bus ID from the database
-        const validBusId = '6885c99ea9921b32915ecd6f'; // This is a valid bus ID from the database
+        // Use actual IDs and seat numbers from bookingData to properly block seats
+        const validBusId = bookingData.busId;
+        const validFromStopId = bookingData.fromStopId;
+        const validToStopId = bookingData.toStopId;
 
-        // Use real stop IDs from the database
-        const validFromStopId = bookingData.fromStopId || '68d441acd1ce3741243f1b42'; // Kaduwela
-        const validToStopId = bookingData.toStopId || '68d44235d1ce3741243f1b4b'; // Malabe
+        const seatNumbersToBook = (bookingData.seatNumbers || []).map(String);
 
-        // Create completely unique seat numbers to avoid any conflicts
-        const uniqueSeatNumbers = bookingData.seatNumbers.map((seat, index) => 
-          `SEAT_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${index}`
-        );
-        
-        console.log('Original seat numbers:', bookingData.seatNumbers);
-        console.log('Unique seat numbers:', uniqueSeatNumbers);
+        console.log('Seat numbers to book:', seatNumbersToBook);
         console.log('Booking data userId:', bookingData.userId);
         console.log('Using userId:', bookingData.userId || TEST_USER_ID);
         console.log('Fare amount:', fare);
         console.log('Travel date:', bookingData.travelDate);
 
+        // Create new booking
         const bookingPayload = {
           busId: validBusId,
           userId: bookingData.userId || TEST_USER_ID,
-          seatNumbers: uniqueSeatNumbers,
+          seatNumbers: seatNumbersToBook,
           fromStopId: validFromStopId,
           toStopId: validToStopId,
           passengerDetails: bookingData.passengerDetails,
           totalFare: fare, // Use the fare state that was displayed to user and deducted from card
           travelDate: bookingData.travelDate,
-          contactInfo: bookingData.contactInfo,
           paymentStatus: 'paid' // Mark as paid since payment just succeeded
         };
 
         console.log('Booking payload:', JSON.stringify(bookingPayload, null, 2));
-        
+
         const bookingResult = await api.createBooking(bookingPayload);
         console.log('Booking result:', bookingResult);
-        
+
         if (!bookingResult.success) {
           console.error('Booking creation failed:', bookingResult);
           throw new Error(bookingResult.message || 'Failed to create booking');
         }
-        
+
         console.log('✅ Booking created successfully:', bookingResult.data);
 
         // Record transaction linked to the new booking
@@ -212,12 +229,11 @@ function TopupPage() {
             }
           }
         };
-        
+
         await api.addTransaction(transactionData);
 
         setMessage(`✅ Payment successful! Booking created. Fare: Rs. ${fare.toFixed(2)} | New balance: Rs. ${Number(debit.balance).toFixed(2)} | Booking ID: ${bookingResult.data.bookingId}`);
 
-        // Update booking data with payment status
         setBookingData(prev => ({
           ...prev,
           paymentStatus: 'paid',
@@ -260,30 +276,30 @@ function TopupPage() {
 
   if (loading && nfcCards.length === 0 && !bookingData) {
     return (
-      <div style={{ display:'flex', justifyContent:'center', alignItems:'center', minHeight:'60vh' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <div>Loading…</div>
       </div>
     );
   }
 
   return (
-    <div style={{minHeight: '100vh', backgroundColor: '#f8fafc'}}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
       {/* Hero Section (unchanged style) */}
-      <div style={{position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%)', padding: '4rem 0'}}>
-        <div style={{maxWidth: '1200px', margin: '0 auto', padding: '0 1rem', position: 'relative', zIndex: '1'}}>
-          <div style={{textAlign: 'center'}}>
-            <h1 style={{fontSize: '2.5rem', fontWeight: '700', marginBottom: '1rem', color: '#ffffff'}}>
+      <div style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%)', padding: '4rem 0' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem', position: 'relative', zIndex: '1' }}>
+          <div style={{ textAlign: 'center' }}>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: '700', marginBottom: '1rem', color: '#ffffff' }}>
               Transport Payment
             </h1>
-            <p style={{fontSize: '1.125rem', marginBottom: '2rem', color: '#cbd5e1'}}>
+            <p style={{ fontSize: '1.125rem', marginBottom: '2rem', color: '#cbd5e1' }}>
               Complete your booking payment — booking will be created after successful payment.
             </p>
           </div>
         </div>
       </div>
 
-      <div style={{maxWidth: '1200px', margin: '0 auto', padding: '0 1rem', paddingTop: '2rem', paddingBottom: '2rem'}}>
-        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '2rem'}}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem', paddingTop: '2rem', paddingBottom: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '2rem' }}>
 
           {/* Payment Form (kept the same style you used) */}
           <div style={{
@@ -297,14 +313,14 @@ function TopupPage() {
             overflow: 'hidden',
             cursor: 'pointer'
           }}>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem'}}>
-              <h2 style={{fontSize: '1.25rem', fontWeight: '700', color: '#1f2937'}}>💳 Complete Booking Payment</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1f2937' }}>💳 Complete Booking Payment</h2>
             </div>
 
-            <form onSubmit={handleTransportPayment} style={{display: 'flex', flexDirection: 'column', gap: '1.25rem'}}>
+            <form onSubmit={handleTransportPayment} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {/* NFC Card select (unchanged) */}
               <div>
-                <label style={{display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#374151'}}>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#374151' }}>
                   Select NFC Card
                 </label>
                 <select
@@ -339,35 +355,35 @@ function TopupPage() {
                   background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
                   border: '1px solid #cbd5e1'
                 }}>
-                  <h3 style={{fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', color: '#1f2937'}}>📄 {bookingInfo?.title || 'Booking Details'}</h3>
-                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem'}}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', color: '#1f2937' }}>📄 {bookingInfo?.title || 'Booking Details'}</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
                     <div>
-                      <span style={{fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Booking ID</span>
-                      <p style={{fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0'}}>{bookingInfo.bookingId}</p>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Booking ID</span>
+                      <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0' }}>{bookingInfo.bookingId}</p>
                     </div>
                     <div>
-                      <span style={{fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Bus</span>
-                      <p style={{fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0'}}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bus</span>
+                      <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0' }}>
                         {bookingInfo.bus} {bookingInfo.vType ? `(${bookingInfo.vType})` : ''}
                       </p>
                     </div>
                     <div>
-                      <span style={{fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Date</span>
-                      <p style={{fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0'}}>{bookingInfo.dateStr}</p>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Date</span>
+                      <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0' }}>{bookingInfo.dateStr}</p>
                     </div>
                     <div>
-                      <span style={{fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Route</span>
-                      <p style={{fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0'}}>{bookingInfo.routeStr}</p>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Route</span>
+                      <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0' }}>{bookingInfo.routeStr}</p>
                     </div>
                     {bookingInfo.seats && (
                       <div>
-                        <span style={{fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Seats</span>
-                        <p style={{fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0'}}>{bookingInfo.seats}</p>
+                        <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Seats</span>
+                        <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0' }}>{bookingInfo.seats}</p>
                       </div>
                     )}
                     <div>
-                      <span style={{fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em'}}>Status</span>
-                      <p style={{fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0'}}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</span>
+                      <p style={{ fontSize: '0.875rem', fontWeight: '600', color: '#1f2937', margin: '0.25rem 0 0 0' }}>
                         {(bookingInfo.paymentStatus || '').toUpperCase()}
                       </p>
                     </div>
@@ -395,9 +411,9 @@ function TopupPage() {
                   boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
                   transition: 'all 0.3s ease'
                 }}>
-                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem'}}>
-                    <span style={{fontSize: '1.125rem', fontWeight: '700', color: '#ffffff'}}>💰 Fare {bookingInfo?.paymentStatus === 'paid' ? '(Paid)' : '(Pending Payment)'}:</span>
-                    <span style={{fontSize: '1.75rem', fontWeight: '800', color: '#ffffff'}}>Rs. {fare.toFixed(2)}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <span style={{ fontSize: '1.125rem', fontWeight: '700', color: '#ffffff' }}>💰 Fare {bookingInfo?.paymentStatus === 'paid' ? '(Paid)' : '(Pending Payment)'}:</span>
+                    <span style={{ fontSize: '1.75rem', fontWeight: '800', color: '#ffffff' }}>Rs. {fare.toFixed(2)}</span>
                   </div>
                 </div>
               )}
@@ -425,10 +441,10 @@ function TopupPage() {
                   letterSpacing: '0.025em'
                 }}
               >
-                {loading ? '⏳ Processing Payment...' : 
-                 bookingInfo?.paymentStatus === 'paid' ? 
-                 '✅ Payment Completed' : 
-                 `💳 Pay Rs. ${fare.toFixed(2)}`}
+                {loading ? '⏳ Processing Payment...' :
+                  bookingInfo?.paymentStatus === 'paid' ?
+                    '✅ Payment Completed' :
+                    `💳 Pay Rs. ${fare.toFixed(2)}`}
               </button>
             </form>
 
@@ -457,11 +473,11 @@ function TopupPage() {
             padding: '2rem',
             border: '1px solid #e2e8f0'
           }}>
-            <h2 style={{fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.5rem', color: '#1f2937'}}>ℹ️ Payment Process</h2>
-            <p style={{fontSize: '0.95rem', color: '#374151'}}>
-              <strong>Step 1:</strong> Select seats and passenger details<br/>
-              <strong>Step 2:</strong> Choose NFC card for payment<br/>
-              <strong>Step 3:</strong> Complete payment to create booking in database<br/>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.5rem', color: '#1f2937' }}>ℹ️ Payment Process</h2>
+            <p style={{ fontSize: '0.95rem', color: '#374151' }}>
+              <strong>Step 1:</strong> Select seats and passenger details<br />
+              <strong>Step 2:</strong> Choose NFC card for payment<br />
+              <strong>Step 3:</strong> Complete payment to create booking in database<br />
               <strong>Step 4:</strong> Booking is confirmed and saved
             </p>
           </div>

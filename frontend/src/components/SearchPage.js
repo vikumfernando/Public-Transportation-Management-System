@@ -87,6 +87,17 @@ const SearchPage = () => {
             return;
         }
 
+        // Check if travel date is not in the past
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selectedDate = new Date(formData.travelDate);
+        selectedDate.setHours(0, 0, 0, 0);
+
+        if (selectedDate < today) {
+            alert('Cannot search for buses on previous dates. Please select today or a future date.');
+            return;
+        }
+
         setLoading(true);
         try {
             const response = await fetch('http://localhost:8070/BusSearch/buses', {
@@ -96,7 +107,7 @@ const SearchPage = () => {
                 },
                 body: JSON.stringify(formData)
             });
-            
+
             const data = await response.json();
             if (data.success) {
                 const found = (data.data && data.data.buses) ? data.data.buses : [];
@@ -258,7 +269,7 @@ const SearchPage = () => {
                                                 <h3>{bus.vehicleNumber}</h3>
                                                 <span className="bus-type">{bus.vehicleType}</span>
                                             </div>
-                                            
+
                                             <div className="bus-route">
                                                 <div className="route-info">
                                                     <div className="departure">
@@ -286,11 +297,11 @@ const SearchPage = () => {
                                                     out of {bus.totalSeats}
                                                 </span>
                                             </div>
-                                            
+
                                             <div className="fare-info">
                                                 <span className="fare">Rs. {bus.fare.toFixed(2)}</span>
                                             </div>
-                                            
+
                                             <div style={{ display: 'flex', gap: 8 }}>
                                                 <button
                                                     className="select-button"

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import "../styles/MyBookings.css";
@@ -10,10 +10,10 @@ const MyBookings = () => {
   const [error, setError] = useState(null);
   const [listResults, setListResults] = useState([]);
   const location = useLocation();
+  const navigate = useNavigate();
   const [successBanner, setSuccessBanner] = useState(false);
   const [editingId, setEditingId] = useState('');
   const [editPassengers, setEditPassengers] = useState([]);
-  const [editContact, setEditContact] = useState({ email: '', phone: '' });
   const [activeFilter, setActiveFilter] = useState('all'); // all | upcoming | past
   const [sortBy, setSortBy] = useState('date_desc'); // date_desc | date_asc
 
@@ -196,18 +196,28 @@ const MyBookings = () => {
   };
 
   const cancelBooking = async (bookingId) => {
-    const confirmCancel = window.confirm('Are you sure you want to cancel this booking?');
+    const confirmCancel = window.confirm('Are you sure you want to cancel this booking? This will process an automatic refund.');
     if (!confirmCancel) return;
 
     try {
       const b = listResults.find(x => x.bookingId === bookingId);
+      let refundData = null;
 
-      // First cancel (business state), then delete (hard remove)
+      // First cancel (business state) with automatic refund
       if (b?._id) {
-        await fetch(`http://localhost:8070/Bookings/${b._id}/cancel`, { method: 'PUT' });
-        const del = await fetch(`http://localhost:8070/Bookings/${b._id}`, { method: 'DELETE' });
-        const dj = await del.json();
-        if (!dj.success) throw new Error(dj.message || 'Delete failed');
+        const cancelResponse = await fetch(`http://localhost:8070/Bookings/${b._id}/cancel`, { method: 'PUT' });
+        const cancelResult = await cancelResponse.json();
+
+        if (cancelResult.success) {
+          refundData = cancelResult.refund;
+
+          // Only delete if cancellation was successful
+          const del = await fetch(`http://localhost:8070/Bookings/${b._id}`, { method: 'DELETE' });
+          const dj = await del.json();
+          if (!dj.success) throw new Error(dj.message || 'Delete failed');
+        } else {
+          throw new Error(cancelResult.message || 'Cancellation failed');
+        }
       } else {
         // fallback by bookingId only
         await fetch('http://localhost:8070/Bookings/cancel', {
@@ -222,10 +232,19 @@ const MyBookings = () => {
 
       // Remove locally for snappy UI
       setListResults(prev => prev.filter(x => x.bookingId !== bookingId));
-      alert('Booking cancelled and deleted successfully');
+
+      // Navigate to Revenue Dashboard to show refund process
+      navigate('/revenue-dashboard', {
+        state: {
+          cancelledBooking: b,
+          refundData: refundData,
+          message: 'Booking cancelled successfully! Refund has been processed automatically.',
+          showRefundStatus: true
+        }
+      });
     } catch (e) {
       console.error(e);
-      alert('Failed to cancel booking');
+      alert('Failed to cancel booking: ' + e.message);
     }
   };
 
@@ -237,10 +256,6 @@ const MyBookings = () => {
       gender: p.gender || 'male',
       phone: p.phone || ''
     })));
-    setEditContact({
-      email: b.contactInfo?.email || '',
-      phone: b.contactInfo?.phone || ''
-    });
   };
 
   const handleEditPassengerChange = (index, field, value) => {
@@ -251,23 +266,10 @@ const MyBookings = () => {
     });
   };
 
-  const handleEditContactChange = (field, value) => {
-    setEditContact(prev => ({ ...prev, [field]: value }));
-  };
-
   const saveBookingEdits = async (b) => {
-    // Validate contact email/phone formats and passenger phone before saving
-    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/;
+    // Validate existing passengers
     const phoneRegex = /^(\+\d{1,3}[- ]?)?\d{10}$/;
 
-    if (editContact.email && !emailRegex.test(String(editContact.email).trim())) {
-      alert('Please enter a valid contact email');
-      return;
-    }
-    if (editContact.phone && !phoneRegex.test(String(editContact.phone).trim())) {
-      alert('Please enter a valid contact phone number');
-      return;
-    }
     for (let i = 0; i < editPassengers.length; i++) {
       const p = editPassengers[i];
       if (!p.name || !p.age) {
@@ -288,13 +290,13 @@ const MyBookings = () => {
       const res = await fetch(`http://localhost:8070/Bookings/${b._id}/update`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ passengerDetails: editPassengers, contactInfo: editContact })
+        body: JSON.stringify({ passengerDetails: editPassengers })
       });
       const data = await res.json();
       if (data.success) {
-        // Update the item locally
         setListResults(prev => prev.map(x => x._id === b._id ? { ...x, ...data.data } : x));
         setEditingId('');
+        alert('Booking updated successfully!');
       } else {
         alert(data.message || 'Failed to update booking');
       }
@@ -307,7 +309,6 @@ const MyBookings = () => {
   const cancelBookingEdits = () => {
     setEditingId('');
     setEditPassengers([]);
-    setEditContact({ email: '', phone: '' });
   };
 
   const downloadPdf = (b) => {
@@ -317,8 +318,8 @@ const MyBookings = () => {
     doc.setFontSize(12);
     doc.text(`Booking ID: ${b.bookingId}`, 14, 30);
     doc.text(`Bus: ${b.busId?.vehicleNumber || ''} (${b.busId?.vehicleType || ''})`, 14, 38);
-    doc.text(`From: ${b.fromStopId?.stopName || ''}`, 14, 46);
-    doc.text(`To: ${b.toStopId?.stopName || ''}`, 14, 54);
+    doc.text(`From: ${b.fromStopId?.stopName || b.fromStopId || 'N/A'}`, 14, 46);
+    doc.text(`To: ${b.toStopId?.stopName || b.toStopId || 'N/A'}`, 14, 54);
     doc.text(`Travel Date: ${new Date(b.travelDate).toDateString()}`, 14, 62);
     doc.text(`Status: ${b.bookingStatus} | Payment: ${b.paymentStatus}`, 14, 70);
     doc.text(`Total Fare: Rs. ${Number(b.totalFare).toFixed(2)}`, 14, 78);
@@ -378,12 +379,12 @@ const MyBookings = () => {
             <div className="route-info">
               <div className="location-item">
                 <span className="location-label">From</span>
-                <span className="location-value">{booking.fromStopId?.stopName}</span>
+                <span className="location-value">{booking.fromStopId?.stopName || booking.fromStopId || 'N/A'}</span>
               </div>
               <div className="route-divider">→</div>
               <div className="location-item">
                 <span className="location-label">To</span>
-                <span className="location-value">{booking.toStopId?.stopName}</span>
+                <span className="location-value">{booking.toStopId?.stopName || booking.toStopId || 'N/A'}</span>
               </div>
             </div>
 
@@ -482,31 +483,7 @@ const MyBookings = () => {
               ))}
             </div>
 
-            <div className="contact-edit">
-              <h5>Contact Info</h5>
-              <div className="contact-grid">
-                <div className="field">
-                  <label>Email</label>
-                  <input
-                    className="input"
-                    type="email"
-                    value={editContact.email}
-                    onChange={(e) => handleEditContactChange('email', e.target.value)}
-                    placeholder="Email"
-                  />
-                </div>
-                <div className="field">
-                  <label>Phone</label>
-                  <input
-                    className="input"
-                    type="tel"
-                    value={editContact.phone}
-                    onChange={(e) => handleEditContactChange('phone', e.target.value)}
-                    placeholder="Phone"
-                  />
-                </div>
-              </div>
-            </div>
+            {/* Contact Info section removed as requested */}
           </div>
         ) : (
           <div className="passengers-section">
