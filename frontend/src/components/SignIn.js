@@ -55,7 +55,7 @@ function SignIn() {
                     window.history.replaceState(null, '', '/');
                     
                     const userRole = response.data.user.role;
-                    if (userRole === 'admin') navigate('/admin', { replace: true }); 
+                    if (userRole === 'admin') navigate('/stoppage', { replace: true }); 
                     else navigate('/location', { replace: true });
                 }, 2000);
             }

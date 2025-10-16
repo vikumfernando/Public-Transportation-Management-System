@@ -10,7 +10,7 @@ function RoleBasedRedirect() {
         if (user) {
             const userRole = user.role;
             if (userRole === 'admin') {
-                navigate('/admin');
+                navigate('/stoppage');
             } else {
                 // For passengers and drivers, go to location page
                 navigate('/location');
