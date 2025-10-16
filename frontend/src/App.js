@@ -11,6 +11,8 @@ import UserSchedule from "./components/RouteManagement/SchedulePage_user";
 
 import SignUp from "./components/SignUp";
 import SignIn from "./components/SignIn";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
 import LandingPage from "./components/landingPage";
 
 //Admin components
@@ -20,6 +22,9 @@ import BusStopPage from "./components/RouteManagement/BusStopPage";
 import SchedulesPage from "./components/RouteManagement/SchedulesPage";
 
 import UserManagement from "./components/UserManagement";
+import UserCreate from "./components/UserCreate";
+import UserEdit from "./components/UserEdit";
+import UserView from "./components/UserView";
 import BusesPage from "./components/RouteManagement/BusesPage";
 
 //Payment components
@@ -35,7 +40,7 @@ import RevenueDashboard from "./components/RevenueDashboard";
 import PassengerProfile from "./components/PassengerProfile";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SearchPage from "./components/SearchPage";
 import BusDetailsPage from "./components/Busdetails";
 import SeatLayoutPage from "./components/SeatLayout";
@@ -44,6 +49,31 @@ import MyBookings from "./components/MyBookings";
 function App() {
   const [busLocation, setBusLocation] = useState(null);
   const [stops, setStops] = useState([]);
+
+  // Global session management to prevent back navigation after signout
+  useEffect(() => {
+    const handlePopState = (event) => {
+      const user = localStorage.getItem('user');
+      const token = localStorage.getItem('token');
+      
+      // Only redirect if trying to access protected routes without session
+      const currentPath = window.location.pathname;
+      const protectedRoutes = ['/admin', '/dashboard', '/users', '/routes', '/buses', '/schedules', '/busstops', '/payment', '/smart-cards', '/visa-cards', '/topup', '/recharge', '/transactions', '/refunds', '/booking', '/me', '/location'];
+      
+      if ((!user || !token) && protectedRoutes.some(route => currentPath.startsWith(route))) {
+        window.history.replaceState(null, '', '/');
+        window.location.href = '/';
+      }
+    };
+
+    // Add event listener for back button only
+    window.addEventListener('popstate', handlePopState);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   return (
     <Router>
@@ -120,6 +150,8 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
 
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         <Route
           path="/users"
@@ -128,6 +160,39 @@ function App() {
               <Header />
               <OffCanvas />
               <UserManagement />
+            </div>
+          }
+        />
+
+        <Route
+          path="/users/create"
+          element={
+            <div>
+              <Header />
+              <OffCanvas />
+              <UserCreate />
+            </div>
+          }
+        />
+
+        <Route
+          path="/users/:id"
+          element={
+            <div>
+              <Header />
+              <OffCanvas />
+              <UserView />
+            </div>
+          }
+        />
+
+        <Route
+          path="/users/:id/edit"
+          element={
+            <div>
+              <Header />
+              <OffCanvas />
+              <UserEdit />
             </div>
           }
         />

@@ -26,12 +26,44 @@ const ProtectedRoute = ({
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Handle redirect if user is already authenticated and redirectIfAuthenticated is true
+  // Check session validity on component mount and when location changes
   useEffect(() => {
-    if (!loading && isAuthenticated && redirectIfAuthenticated) {
-      navigate(redirectPath, { replace: true });
-    }
-  }, [isAuthenticated, loading, navigate, redirectIfAuthenticated, redirectPath]);
+    const checkSession = () => {
+      const user = localStorage.getItem('user');
+      const token = localStorage.getItem('token');
+      
+      // If no user or token in localStorage, clear everything and redirect
+      if (!user || !token) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('remember_email');
+        
+        // Clear browser history to prevent back navigation
+        window.history.replaceState(null, '', '/');
+        
+        // Force redirect to landing page
+        navigate('/', { replace: true });
+        return;
+      }
+      
+      // If user exists but AuthContext doesn't have it, sync it
+      if (user && !isAuthenticated) {
+        try {
+          const userData = JSON.parse(user);
+          // You might want to validate the token here as well
+          // For now, we'll trust localStorage
+        } catch (error) {
+          // Invalid user data, clear everything
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
+          localStorage.removeItem('remember_email');
+          navigate('/', { replace: true });
+        }
+      }
+    };
+    
+    checkSession();
+  }, [isAuthenticated, navigate, location.pathname]);
 
   // Show loading spinner while checking auth state
   if (loading) {
@@ -49,24 +81,24 @@ const ProtectedRoute = ({
     return children;
   }
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    // Save the current location to redirect back after login
-    return (
-      <Navigate 
-        to="/login" 
-        state={{ 
-          from: {
-            pathname: location.pathname,
-            search: location.search,
-            hash: location.hash,
-          },
-          ...(location.state || {}) 
-        }} 
-        replace 
-      />
-    );
-  }
+    // Redirect to landing page if not authenticated
+    if (!isAuthenticated) {
+      // Save the current location to redirect back after login
+      return (
+        <Navigate 
+          to="/" 
+          state={{ 
+            from: {
+              pathname: location.pathname,
+              search: location.search,
+              hash: location.hash,
+            },
+            ...(location.state || {}) 
+          }} 
+          replace 
+        />
+      );
+    }
 
   // Check if route is role protected and user has required role
   if (roles.length > 0 && !roles.some(role => user.roles?.includes(role))) {

@@ -56,6 +56,11 @@ const userSchema = new mongoose.Schema(
       select: false,
       validate: {
         validator: function(v) {
+          // Skip validation if password is already hashed (starts with $2b$)
+          if (v && v.startsWith('$2b$')) {
+            return true;
+          }
+          // Only validate plain text passwords
           return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(v);
         },
         message: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
@@ -72,6 +77,42 @@ const userSchema = new mongoose.Schema(
     },
     resetPasswordExpires: {
         type: Date,
+        default: null
+    },
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
+    emailVerificationToken: {
+        type: String,
+        default: null
+    },
+    emailVerificationExpires: {
+        type: Date,
+        default: null
+    },
+    passwordResetToken: {
+        type: String,
+        default: null
+    },
+    passwordResetExpires: {
+        type: Date,
+        default: null
+    },
+    loginAttempts: {
+        type: Number,
+        default: 0
+    },
+    lockUntil: {
+        type: Date,
+        default: null
+    },
+    lastLogin: {
+        type: Date,
+        default: null
+    },
+    profilePicture: {
+        type: String,
         default: null
     }
   },
@@ -91,11 +132,11 @@ userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
   try {
-    // Only hash the password if it's modified or new
-    if (!this.isModified('password')) return next();
-    
-    // Hash the password with cost of 12
-    this.password = await bcrypt.hash(this.password, 12);
+    // Only hash the password if it's not already hashed
+    if (!this.password.startsWith('$2b$')) {
+      // Hash the password with cost of 12
+      this.password = await bcrypt.hash(this.password, 12);
+    }
     
     // Delete passwordConfirm field
     this.passwordConfirm = undefined;
@@ -167,6 +208,71 @@ userSchema.methods.createEmailVerificationToken = function() {
   
   return verificationToken;
 };
+
+// Instance method to generate password reset token
+userSchema.methods.generatePasswordResetToken = function() {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+    
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  
+  return resetToken;
+};
+
+// Instance method to generate email verification token
+userSchema.methods.generateEmailVerificationToken = function() {
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+  
+  this.emailVerificationToken = crypto
+    .createHash('sha256')
+    .update(verificationToken)
+    .digest('hex');
+    
+  this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  
+  return verificationToken;
+};
+
+// Instance method to compare password
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Instance method to increment login attempts
+userSchema.methods.incLoginAttempts = function() {
+  // If we have a previous lock that has expired, restart at 1
+  if (this.lockUntil && this.lockUntil < Date.now()) {
+    return this.updateOne({
+      $unset: { lockUntil: 1 },
+      $set: { loginAttempts: 1 }
+    });
+  }
+  
+  const updates = { $inc: { loginAttempts: 1 } };
+  
+  // Lock account after 3 failed attempts for 2 hours
+  if (this.loginAttempts + 1 >= 3 && !this.isLocked) {
+    updates.$set = { lockUntil: Date.now() + 2 * 60 * 60 * 1000 }; // 2 hours
+  }
+  
+  return this.updateOne(updates);
+};
+
+// Instance method to reset login attempts
+userSchema.methods.resetLoginAttempts = function() {
+  return this.updateOne({
+    $unset: { loginAttempts: 1, lockUntil: 1 }
+  });
+};
+
+// Virtual for checking if account is locked
+userSchema.virtual('isLocked').get(function() {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+});
 
 const User = mongoose.model('User', userSchema);
 

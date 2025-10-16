@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const { sendEmail } = require('../utils/mailer');
+const emailService = require('../services/emailService');
 
 const router = express.Router();
 
@@ -115,11 +116,11 @@ router.post('/', async (req, res) => {
         }
 
         // Password strength validation
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        const passwordRegex = /^.{6,}$/;
         if (!passwordRegex.test(password)) {
             return res.status(400).json({
                 success: false,
-                message: 'Password must contain at least 8 characters including uppercase, lowercase, number, and special character'
+                message: 'Password must be at least 6 characters long'
             });
         }
 
@@ -132,21 +133,24 @@ router.post('/', async (req, res) => {
             });
         }
 
-        // Hash password
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-        // Create new user
+        // Create new user (password will be hashed by pre-save hook)
         const newUser = new User({
             firstName,
             lastName,
             phone,
             email,
-            password: hashedPassword,
+            password: password, // Plain text password - will be hashed by pre-save hook
             role: role || 'passenger'
         });
 
         await newUser.save();
+
+        // Send professional welcome email for admin-created accounts
+        try {
+            await emailService.sendAccountCreatedEmail(newUser);
+        } catch (e) {
+            console.warn('Welcome email failed:', e?.message);
+        }
 
         res.status(201).json({
             success: true,
@@ -232,15 +236,15 @@ router.put('/:id', async (req, res) => {
 
         // Handle password update if provided
         if (password) {
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            const passwordRegex = /^.{6,}$/;
             if (!passwordRegex.test(password)) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Password must contain at least 8 characters including uppercase, lowercase, number, and special character'
+                    message: 'Password must be at least 6 characters long'
                 });
             }
-            const saltRounds = 10;
-            updateData.password = await bcrypt.hash(password, saltRounds);
+            // Don't hash here - let the model's pre-save hook handle it
+            updateData.password = password;
         }
 
         const updatedUser = await User.findByIdAndUpdate(
@@ -252,16 +256,58 @@ router.put('/:id', async (req, res) => {
         // Notify user if sensitive fields changed
         try {
             if (password) {
-                await sendEmail({
-                    to: updatedUser.email,
-                    subject: 'Your password was changed',
-                    html: `<p>Hi ${updatedUser.firstName},</p><p>Your password was recently changed by an administrator or via profile update. If this wasn't you, contact support immediately.</p>`
-                });
+                await emailService.sendPasswordChangedEmail(updatedUser, 'admin', req);
             } else if (email && email !== user.email) {
                 await sendEmail({
                     to: email,
-                    subject: 'Your email was updated',
-                    html: `<p>Hi ${updatedUser.firstName},</p><p>Your account email was changed to this address.</p>`
+                    subject: '📧 Email Address Updated - Transportation Hub',
+                    html: `
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>Email Updated</title>
+                            <style>
+                                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }
+                                .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                                .header { background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 30px; text-align: center; }
+                                .header h1 { margin: 0; font-size: 28px; font-weight: 300; }
+                                .content { padding: 40px 30px; }
+                                .info-box { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 20px; border-radius: 8px; margin: 20px 0; }
+                                .footer { background-color: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="container">
+                                <div class="header">
+                                    <h1>🚌 Transportation Hub</h1>
+                                    <p style="margin: 10px 0 0 0; opacity: 0.9;">Email Address Updated</p>
+                                </div>
+                                
+                                <div class="content">
+                                    <p>Hi ${updatedUser.firstName},</p>
+                                    
+                                    <div class="info-box">
+                                        <h3 style="margin-top: 0;">📧 Email Address Changed</h3>
+                                        <p>Your Transportation Hub account email address has been successfully updated.</p>
+                                        <p><strong>New Email:</strong> ${email}</p>
+                                        <p><strong>Change Date:</strong> ${new Date().toLocaleString()}</p>
+                                    </div>
+                                    
+                                    <p>All future communications from Transportation Hub will be sent to your new email address. Please update your records accordingly.</p>
+                                    
+                                    <p>If you didn't request this change, please contact our support team immediately as your account may be compromised.</p>
+                                </div>
+                                
+                                <div class="footer">
+                                    <p>© 2024 Transportation Hub. All rights reserved.</p>
+                                    <p>This email was sent to ${email}. If you didn't make this change, please contact us immediately.</p>
+                                </div>
+                            </div>
+                        </body>
+                        </html>
+                    `
                 });
             }
         } catch (e) {
@@ -308,12 +354,9 @@ router.delete('/:id', async (req, res) => {
 
         await User.findByIdAndDelete(userId);
 
+        // Send professional account deletion notification
         try {
-            await sendEmail({
-                to: user.email,
-                subject: 'Your account has been deleted',
-                html: `<p>Hi ${user.firstName},</p><p>Your account has been deleted. If this was a mistake, please contact support.</p>`
-            });
+            await emailService.sendAccountDeletedEmail(user);
         } catch (e) {
             console.warn('Deletion email failed:', e?.message);
         }

@@ -20,15 +20,13 @@ const createAdminUser = async () => {
             process.exit(0);
         }
 
-        // Create admin user
-        const hashedPassword = await bcrypt.hash('Admin123!', 10);
-        
+        // Create admin user with plain text password (will be hashed by pre-save hook)
         const adminUser = new User({
             firstName: 'System',
             lastName: 'Administrator',
             email: 'admin@transport.com',
             phone: '1234567890',
-            password: hashedPassword,
+            password: 'Admin123!', // Plain text password that meets validation criteria
             role: 'admin'
         });
 

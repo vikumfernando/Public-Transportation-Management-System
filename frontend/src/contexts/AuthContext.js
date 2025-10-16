@@ -69,10 +69,20 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.post('/auth/signin', formData);
+      const res = await axios.post('http://localhost:8070/auth/signin', formData);
       // Backend doesn't return token, just user data
       setUser(res.data.user);
       localStorage.setItem('user', JSON.stringify(res.data.user));
+      
+      // Role-based redirection
+      const userRole = res.data.user.role;
+      if (userRole === 'admin') {
+        navigate('/admin');
+      } else {
+        // For passengers and drivers, go to location page
+        navigate('/location');
+      }
+      
       return { success: true };
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Login failed';
@@ -91,10 +101,18 @@ export const AuthProvider = ({ children }) => {
 
   // Logout user
   const logout = useCallback(() => {
+    // Clear all authentication data
     setToken(null);
     setUser(null);
     localStorage.removeItem('user');
-    navigate('/login');
+    localStorage.removeItem('token');
+    localStorage.removeItem('remember_email');
+    
+    // Clear browser history to prevent back navigation
+    window.history.replaceState(null, '', '/');
+    
+    // Navigate to landing page and replace history
+    navigate('/', { replace: true });
   }, [navigate]);
 
   // Clear errors

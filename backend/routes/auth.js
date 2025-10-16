@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const User = require('../models/User');
 const { sendEmail } = require('../utils/mailer');
+const emailService = require('../services/emailService');
 
 const router = express.Router();
 
@@ -28,11 +29,11 @@ router.post('/signup', async (req, res) => {
         }
 
         // Password strength validation
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        const passwordRegex = /^.{6,}$/;
         if (!passwordRegex.test(password)) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Password must contain at least 8 characters including uppercase, lowercase, number, and special character' 
+                message: 'Password must be at least 6 characters long' 
             });
         }
 
@@ -56,13 +57,9 @@ router.post('/signup', async (req, res) => {
 
         await newUser.save();
 
-        // Send welcome email (non-blocking best-effort)
+        // Send professional welcome email
         try {
-            await sendEmail({
-                to: newUser.email,
-                subject: 'Welcome to Transportation Hub',
-                html: `<p>Hi ${newUser.firstName},</p><p>Welcome to Transportation Hub! Your account has been created successfully.</p>`
-            });
+            await emailService.sendAccountCreatedEmail(newUser);
         } catch (e) {
             console.warn('Welcome email failed:', e?.message);
         }
@@ -236,9 +233,9 @@ router.post('/reset-password', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Passwords do not match' });
         }
 
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        const passwordRegex = /^.{6,}$/;
         if (!passwordRegex.test(password)) {
-            return res.status(400).json({ success: false, message: 'Password must contain at least 8 characters including uppercase, lowercase, number, and special character' });
+            return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long' });
         }
 
         const user = await User.findOne({ email: email.toLowerCase() });
@@ -258,11 +255,7 @@ router.post('/reset-password', async (req, res) => {
         await user.save();
 
         try {
-            await sendEmail({
-                to: user.email,
-                subject: 'Your password was changed',
-                html: `<p>Hi ${user.firstName},</p><p>Your password was recently changed. If this wasn’t you, please contact support immediately.</p>`
-            });
+            await emailService.sendPasswordChangedEmail(user, 'user', req);
         } catch (e) {
             console.warn('Password change email failed:', e?.message);
         }

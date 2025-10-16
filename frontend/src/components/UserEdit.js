@@ -11,6 +11,7 @@ function UserEdit() {
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState('');
 	const [success, setSuccess] = useState('');
+	const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
 	useEffect(() => {
 		const load = async () => {
@@ -53,8 +54,11 @@ function UserEdit() {
 			if (form.password) payload.password = form.password;
 			const res = await axios.put(`http://localhost:8070/users/${id}`, payload);
 			if (res.data.success) {
-				setSuccess('User updated successfully');
-				setTimeout(() => navigate(`/users/${id}`), 800);
+				setShowSuccessPopup(true);
+				setTimeout(() => {
+					setShowSuccessPopup(false);
+					navigate(`/users/${id}`);
+				}, 2000);
 			}
 		} catch (e) {
 			setError(e?.response?.data?.message || 'Failed to update user');
@@ -66,6 +70,7 @@ function UserEdit() {
 	if (loading) return <div className="user-edit-page"><div className="loading">Loading...</div></div>;
 
 	return (
+		<>
 		<div className="user-edit-page">
 			<div className="edit-header">
 				<button className="back-button" onClick={() => navigate('/users')}>← Back to Users</button>
@@ -104,7 +109,7 @@ function UserEdit() {
 						<option value="driver">Driver</option>
 						<option value="admin">Admin</option>
 					</select>
-					<small className="form-hint">Admins can change user type here.</small>
+					<small className="form-hint">Role can be changed by admins.</small>
 				</div>
 				<div className="form-group">
 					<label>New Password (optional)</label>
@@ -116,6 +121,54 @@ function UserEdit() {
 				</div>
 			</form>
 		</div>
+
+		{/* Success Popup */}
+		{showSuccessPopup && (
+			<div 
+				className="position-fixed d-flex align-items-center justify-content-center"
+				style={{
+					top: 0,
+					left: 0,
+					right: 0,
+					bottom: 0,
+					backgroundColor: 'rgba(0,0,0,0.5)',
+					zIndex: 9999,
+					animation: 'fadeIn 0.3s ease-out'
+				}}
+			>
+				<div 
+					className="bg-white rounded-3 p-4 text-center"
+					style={{
+						maxWidth: 400,
+						boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+						animation: 'slideInUp 0.3s ease-out'
+					}}
+				>
+					<div className="mb-3">
+						<div 
+							className="rounded-circle d-inline-flex align-items-center justify-content-center"
+							style={{ 
+								width: 60, 
+								height: 60, 
+								backgroundColor: '#10b981',
+								color: 'white',
+								fontSize: '24px'
+							}}
+						>
+							✓
+						</div>
+					</div>
+					<h4 className="mb-2" style={{ color: '#0B5648' }}>User Updated Successfully!</h4>
+					<p className="text-muted mb-0">Redirecting to user details...</p>
+				</div>
+			</div>
+		)}
+
+		<style>{`
+			@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+			@keyframes slideInUp { from { opacity: 0; transform: translateY(30px) } to { opacity: 1; transform: translateY(0) } }
+		`}</style>
+		</>
 	);
 }
 

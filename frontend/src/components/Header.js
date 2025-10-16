@@ -29,9 +29,16 @@ function Header() {
   };
 
   const handleSignOut = () => {
+    // Clear all authentication data
     localStorage.removeItem("user");
-    setUser(null);
-    navigate("/");
+    localStorage.removeItem("token");
+    localStorage.removeItem("remember_email");
+    
+    // Clear browser history to prevent back navigation
+    window.history.replaceState(null, '', '/');
+    
+    // Navigate to landing page and replace history
+    navigate("/", { replace: true });
   };
 
   return (

@@ -44,6 +44,13 @@ const register = async (req, res) => {
     // Send verification email
     const emailResult = await emailService.sendVerificationEmail(user, verificationToken);
     
+    // Send welcome email
+    try {
+      await emailService.sendAccountCreatedEmail(user);
+    } catch (e) {
+      console.warn('Welcome email failed:', e?.message);
+    }
+    
     if (!emailResult.success) {
       console.error('Failed to send verification email:', emailResult.error);
     }
@@ -339,6 +346,13 @@ const resetPassword = async (req, res) => {
     user.lockUntil = null;
 
     await user.save();
+
+    // Send password change notification
+    try {
+      await emailService.sendPasswordChangedEmail(user, 'user', req);
+    } catch (e) {
+      console.warn('Password change notification failed:', e?.message);
+    }
 
     res.json({
       success: true,

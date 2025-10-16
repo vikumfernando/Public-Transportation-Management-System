@@ -14,21 +14,11 @@ function UserManagement() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedRole, setSelectedRole] = useState('all');
-    const [showCreateModal, setShowCreateModal] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
-    const [showViewModal, setShowViewModal] = useState(false);
-    const [editingUser, setEditingUser] = useState(null);
-    const [viewingUser, setViewingUser] = useState(null);
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        password: '',
-        role: 'passenger'
-    });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
 
     useEffect(() => {
         fetchUserStats();
@@ -63,105 +53,40 @@ function UserManagement() {
         }
     };
 
-    const handleCreateUser = async (e) => {
-        e.preventDefault();
+
+    const handleDeleteUser = (user) => {
+        setUserToDelete(user);
+        setShowDeleteConfirm(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!userToDelete) return;
+        
         try {
-            const response = await axios.post('http://localhost:8070/users', {
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                email: formData.email,
-                phone: formData.phone,
-                password: formData.password,
-                role: formData.role
-            });
+            const response = await axios.delete(`http://localhost:8070/users/${userToDelete._id}`);
             if (response.data.success) {
-                setSuccess('User created successfully');
-                setShowCreateModal(false);
-                resetForm();
+                setShowDeleteConfirm(false);
+                setShowDeleteSuccess(true);
                 fetchUsers();
                 fetchUserStats();
+                setTimeout(() => {
+                    setShowDeleteSuccess(false);
+                }, 2000);
             }
         } catch (error) {
-            setError(error.response?.data?.message || 'Failed to create user');
+            setError(error.response?.data?.message || 'Failed to delete user');
+            setShowDeleteConfirm(false);
         }
     };
 
-    const handleUpdateUser = async (e) => {
-        e.preventDefault();
-        try {
-            const updateData = { ...formData };
-            if (!updateData.password) {
-                delete updateData.password; // Don't update password if not provided
-            }
-            // Role cannot be changed from edit screen
-            delete updateData.role;
-            
-            const response = await axios.put(`http://localhost:8070/users/${editingUser._id}`, updateData);
-            if (response.data.success) {
-                setSuccess('User updated successfully');
-                setShowEditModal(false);
-                setEditingUser(null);
-                resetForm();
-                fetchUsers();
-                fetchUserStats();
-            }
-        } catch (error) {
-            setError(error.response?.data?.message || 'Failed to update user');
-        }
-    };
-
-    const handleDeleteUser = async (userId) => {
-        if (window.confirm('Are you sure you want to delete this user?')) {
-            try {
-                const response = await axios.delete(`http://localhost:8070/users/${userId}`);
-                if (response.data.success) {
-                    setSuccess('User deleted successfully');
-                    fetchUsers();
-                    fetchUserStats();
-                }
-            } catch (error) {
-                setError(error.response?.data?.message || 'Failed to delete user');
-            }
-        }
-    };
-
-    const handleEditUser = (user) => {
-        setEditingUser(user);
-        setFormData({
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            phone: user.phone,
-            password: '',
-            role: user.role
-        });
-        setShowEditModal(true);
+    const cancelDelete = () => {
+        setShowDeleteConfirm(false);
+        setUserToDelete(null);
     };
 
     const handleViewUser = (user) => {
         // Navigate to dedicated view page
         navigate(`/users/${user._id}`);
-    };
-
-    const resetForm = () => {
-        setFormData({
-            firstName: '',
-            lastName: '',
-            email: '',
-            phone: '',
-            password: '',
-            role: 'passenger'
-        });
-    };
-
-    const closeModals = () => {
-        setShowCreateModal(false);
-        setShowEditModal(false);
-        setShowViewModal(false);
-        setEditingUser(null);
-        setViewingUser(null);
-        resetForm();
-        setError('');
     };
 
     const formatDate = (dateString) => {
@@ -173,6 +98,7 @@ function UserManagement() {
     };
 
     return (
+        <>
         <div className="user-management">
             {/* Alert Messages */}
             {error && (
@@ -277,7 +203,7 @@ function UserManagement() {
                                                 Edit
                                             </button>
                                             <button 
-                                                onClick={() => handleDeleteUser(user._id)}
+                                                onClick={() => handleDeleteUser(user)}
                                                 className="delete-btn"
                                             >
                                                 Delete
@@ -291,167 +217,120 @@ function UserManagement() {
                 </table>
             </div>
 
-            {/* Create User Modal */}
-            {showCreateModal && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <div className="modal-header">
-                            <h3>Create New User</h3>
-                            <button onClick={closeModals} className="modal-close">×</button>
-                        </div>
-                        <form onSubmit={handleCreateUser} className="user-form">
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>First Name</label>
-                                    <input
-                                        type="text"
-                                        value={formData.firstName}
-                                        onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Last Name</label>
-                                    <input
-                                        type="text"
-                                        value={formData.lastName}
-                                        onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label>Email</label>
-                                <input
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Phone</label>
-                                <input
-                                    type="tel"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Password</label>
-                                <input
-                                    type="password"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Role</label>
-                                <select
-                                    value={formData.role}
-                                    onChange={(e) => setFormData({...formData, role: e.target.value})}
-                                    required
-                                >
-                                    <option value="passenger">Passenger</option>
-                                    <option value="driver">Driver</option>
-                                    <option value="admin">Admin</option>
-                                </select>
-                            </div>
-                            <div className="form-actions">
-                                <button type="button" onClick={closeModals} className="cancel-btn">
-                                    Cancel
-                                </button>
-                                <button type="submit" className="submit-btn">
-                                    Create User
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* View modal removed in favor of dedicated page */}
-
-            {/* Edit User Modal */}
-            {showEditModal && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <div className="modal-header">
-                            <h3>Edit User</h3>
-                            <button onClick={closeModals} className="modal-close">×</button>
-                        </div>
-                        <form onSubmit={handleUpdateUser} className="user-form">
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>First Name</label>
-                                    <input
-                                        type="text"
-                                        value={formData.firstName}
-                                        onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Last Name</label>
-                                    <input
-                                        type="text"
-                                        value={formData.lastName}
-                                        onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className="form-group">
-                                <label>Email</label>
-                                <input
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Phone</label>
-                                <input
-                                    type="tel"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                                    required
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Password (leave blank to keep current)</label>
-                                <input
-                                    type="password"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                    placeholder="Enter new password or leave blank"
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Role</label>
-                                <select value={formData.role} disabled>
-                                    <option value="passenger">Passenger</option>
-                                    <option value="driver">Driver</option>
-                                    <option value="admin">Admin</option>
-                                </select>
-                                <small className="form-hint">Role cannot be changed from Edit. Use Create New User to assign a different role.</small>
-                            </div>
-                            <div className="form-actions">
-                                <button type="button" onClick={closeModals} className="cancel-btn">
-                                    Cancel
-                                </button>
-                                <button type="submit" className="submit-btn">
-                                    Update User
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
+
+        {/* Delete Confirmation Popup */}
+        {showDeleteConfirm && (
+            <div 
+                className="position-fixed d-flex align-items-center justify-content-center"
+                style={{
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    zIndex: 9999,
+                    animation: 'fadeIn 0.3s ease-out'
+                }}
+            >
+                <div 
+                    className="bg-white rounded-3 p-4 text-center"
+                    style={{
+                        maxWidth: 400,
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+                        animation: 'slideInUp 0.3s ease-out'
+                    }}
+                >
+                    <div className="mb-3">
+                        <div 
+                            className="rounded-circle d-inline-flex align-items-center justify-content-center"
+                            style={{ 
+                                width: 60, 
+                                height: 60, 
+                                backgroundColor: '#ef4444',
+                                color: 'white',
+                                fontSize: '24px'
+                            }}
+                        >
+                            ⚠️
+                        </div>
+                    </div>
+                    <h4 className="mb-2" style={{ color: '#0B5648' }}>Confirm Delete</h4>
+                    <p className="text-muted mb-3">
+                        Are you sure you want to delete <strong>{userToDelete?.firstName} {userToDelete?.lastName}</strong>? 
+                        This action cannot be undone.
+                    </p>
+                    <div className="d-flex gap-2 justify-content-center">
+                        <button 
+                            onClick={cancelDelete}
+                            className="btn btn-outline-secondary"
+                            style={{ borderRadius: '8px' }}
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            onClick={confirmDelete}
+                            className="btn"
+                            style={{ 
+                                backgroundColor: '#ef4444', 
+                                color: 'white', 
+                                borderRadius: '8px' 
+                            }}
+                        >
+                            Delete User
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Delete Success Popup */}
+        {showDeleteSuccess && (
+            <div 
+                className="position-fixed d-flex align-items-center justify-content-center"
+                style={{
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    zIndex: 9999,
+                    animation: 'fadeIn 0.3s ease-out'
+                }}
+            >
+                <div 
+                    className="bg-white rounded-3 p-4 text-center"
+                    style={{
+                        maxWidth: 400,
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+                        animation: 'slideInUp 0.3s ease-out'
+                    }}
+                >
+                    <div className="mb-3">
+                        <div 
+                            className="rounded-circle d-inline-flex align-items-center justify-content-center"
+                            style={{ 
+                                width: 60, 
+                                height: 60, 
+                                backgroundColor: '#10b981',
+                                color: 'white',
+                                fontSize: '24px'
+                            }}
+                        >
+                            ✓
+                        </div>
+                    </div>
+                    <h4 className="mb-2" style={{ color: '#0B5648' }}>User Deleted Successfully!</h4>
+                    <p className="text-muted mb-0">The user has been removed from the system.</p>
+                </div>
+            </div>
+        )}
+
+        <style>{`
+            @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+            @keyframes slideInUp { from { opacity: 0; transform: translateY(30px) } to { opacity: 1; transform: translateY(0) } }
+        `}</style>
+        </>
     );
 }
 

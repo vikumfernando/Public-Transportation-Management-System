@@ -8,6 +8,7 @@ function UserCreate() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -90,11 +91,11 @@ function UserCreate() {
             const response = await axios.post('http://localhost:8070/users', createData, { timeout: 15000 });
             
             if (response.data.success) {
-                setSuccess('User created successfully!');
-                // Redirect to user management after 2 seconds
+                setShowSuccessPopup(true);
                 setTimeout(() => {
+                    setShowSuccessPopup(false);
                     navigate('/users');
-                }, 800);
+                }, 2000);
             }
         } catch (error) {
             console.error('Create user error:', error);
@@ -141,6 +142,7 @@ function UserCreate() {
     };
 
     return (
+        <>
         <div className="create-user-container" style={{ '--page-bg': `url(${process.env.PUBLIC_URL}/images/background.png)` }}>
             {/* Header */}
             <div className="create-header">
@@ -366,6 +368,54 @@ function UserCreate() {
                 </form>
             </div>
         </div>
+
+        {/* Success Popup */}
+        {showSuccessPopup && (
+            <div 
+                className="position-fixed d-flex align-items-center justify-content-center"
+                style={{
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    zIndex: 9999,
+                    animation: 'fadeIn 0.3s ease-out'
+                }}
+            >
+                <div 
+                    className="bg-white rounded-3 p-4 text-center"
+                    style={{
+                        maxWidth: 400,
+                        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+                        animation: 'slideInUp 0.3s ease-out'
+                    }}
+                >
+                    <div className="mb-3">
+                        <div 
+                            className="rounded-circle d-inline-flex align-items-center justify-content-center"
+                            style={{ 
+                                width: 60, 
+                                height: 60, 
+                                backgroundColor: '#10b981',
+                                color: 'white',
+                                fontSize: '24px'
+                            }}
+                        >
+                            ✓
+                        </div>
+                    </div>
+                    <h4 className="mb-2" style={{ color: '#0B5648' }}>User Created Successfully!</h4>
+                    <p className="text-muted mb-0">Redirecting to user management...</p>
+                </div>
+            </div>
+        )}
+
+        <style>{`
+            @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+            @keyframes slideInUp { from { opacity: 0; transform: translateY(30px) } to { opacity: 1; transform: translateY(0) } }
+        `}</style>
+        </>
     );
 }
 
