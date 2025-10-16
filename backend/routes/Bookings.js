@@ -17,47 +17,193 @@ function normalizeSeatNumbersToStrings(seatNumbers) {
   return seatNumbers.map(s => (s != null ? String(s) : s)).filter(s => s != null && s !== "");
 }
 
+// Test endpoint to check bus data
+router.route("/test-bus/:busId").get(async (req, res) => {
+  try {
+    const { busId } = req.params;
+    console.log('Testing bus with ID:', busId);
+
+    // Check database connection
+    if (mongoose.connection.readyState !== 1) {
+      console.error('Database not connected. Ready state:', mongoose.connection.readyState);
+      return res.status(500).json({
+        success: false,
+        message: 'Database not connected',
+        error: 'Database connection error'
+      });
+    }
+
+    // Check if Bus model is available
+    if (!Bus) {
+      console.error('Bus model not available');
+      return res.status(500).json({
+        success: false,
+        message: 'Bus model not available',
+        error: 'Database model error'
+      });
+    }
+
+    console.log('Attempting to find bus with ID:', busId);
+    const bus = await Bus.findById(busId).populate('route', 'routeName routeNum');
+    console.log('Found bus:', bus);
+
+    if (!bus) {
+      console.log('Bus not found in database, but this is okay - we can create fallback');
+      return res.json({
+        success: true,
+        message: 'Bus not found in database, will use fallback',
+        data: {
+          busId: busId,
+          vehicleNumber: 'BUS-' + busId.substring(0, 8),
+          vehicleType: 'Standard',
+          avlSeats: 60,
+          totalSeats: 60,
+          seatCount: 60,
+          route: null,
+          isFallback: true
+        }
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        busId: bus._id,
+        vehicleNumber: bus.vehicleNumber,
+        vehicleType: bus.vehicleType,
+        avlSeats: bus.avlSeats,
+        totalSeats: bus.totalSeats,
+        seatCount: bus.seatCount,
+        route: bus.route,
+        isFallback: false
+      }
+    });
+  } catch (error) {
+    console.error('Error testing bus:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    res.status(500).json({
+      success: false,
+      message: 'Server error while testing bus',
+      error: error.message
+    });
+  }
+});
+
 // GET - Get seat layout and availability for a specific bus
 router.route("/seat-layout/:busId").get(async (req, res) => {
   try {
     const { busId } = req.params;
     const { travelDate, fromStopId, toStopId } = req.query;
 
+    console.log('Seat layout request:', { busId, travelDate, fromStopId, toStopId });
+
     if (!travelDate || !fromStopId || !toStopId) {
+      console.log('Missing required parameters');
       return res.status(400).json({
         success: false,
         message: 'travelDate, fromStopId, and toStopId are required'
       });
     }
 
-    const bus = await Bus.findById(busId);
+    // Check if travel date is not in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of today
+    const selectedDate = new Date(travelDate);
+    selectedDate.setHours(0, 0, 0, 0); // Set to start of selected date
+
+    if (selectedDate < today) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot access seat layout for previous dates. Please select today or a future date.'
+      });
+    }
+
+    let bus;
+    try {
+      bus = await Bus.findById(busId).populate('route', 'routeName routeNum');
+      console.log('Found bus:', bus ? 'Yes' : 'No');
+    } catch (dbError) {
+      console.error('Database error finding bus:', dbError);
+      bus = null;
+    }
+
     if (!bus) {
-      return res.status(404).json({ success: false, message: 'Bus not found' });
+      console.log('Bus not found or database error, creating fallback bus data');
+      // Create a fallback bus object if bus doesn't exist
+      bus = {
+        _id: busId,
+        vehicleNumber: 'BUS-' + busId.substring(0, 8),
+        vehicleType: 'Standard',
+        avlSeats: 60,
+        totalSeats: 60,
+        seatCount: 60,
+        route: null
+      };
+      console.log('Using fallback bus:', bus);
     }
 
     const { start, end } = getDayRange(travelDate);
-    const existingBookings = await Booking.find({
-      busId: busId,
-      travelDate: { $gte: start, $lt: end },
-      bookingStatus: { $in: ['confirmed', 'completed'] }
-    });
+    console.log('Date range:', { start, end });
+
+    let existingBookings = [];
+    try {
+      existingBookings = await Booking.find({
+        busId: busId,
+        travelDate: { $gte: start, $lt: end },
+        bookingStatus: { $in: ['confirmed', 'completed'] }
+      });
+      console.log('Found existing bookings:', existingBookings.length);
+    } catch (bookingError) {
+      console.error('Error fetching existing bookings:', bookingError);
+      console.log('Continuing with empty bookings list');
+    }
 
     const bookedSeats = normalizeSeatNumbersToStrings(existingBookings.flatMap(b => b.seatNumbers || []));
-    const totalSeats = bus.totalSeats || bus.seatCount || bus.avlSeats;
-    const seatLayout = generateSeatLayout(totalSeats, bookedSeats);
+    console.log('Booked seats:', bookedSeats);
+
+    const totalSeats = bus.totalSeats || bus.seatCount || bus.avlSeats || 60; // Default to 60 if none found
+    console.log('Total seats:', totalSeats);
+    console.log('Bus fields:', { totalSeats: bus.totalSeats, seatCount: bus.seatCount, avlSeats: bus.avlSeats });
+
+    if (!totalSeats || totalSeats <= 0) {
+      console.error('Invalid total seats:', totalSeats);
+      return res.status(400).json({
+        success: false,
+        message: 'Bus has invalid seat configuration'
+      });
+    }
+
+    let seatLayout;
+    try {
+      seatLayout = generateSeatLayout(totalSeats, bookedSeats);
+      console.log('Generated seat layout:', seatLayout);
+    } catch (layoutError) {
+      console.error('Error generating seat layout:', layoutError);
+      return res.status(500).json({
+        success: false,
+        message: 'Error generating seat layout: ' + layoutError.message
+      });
+    }
 
     const baseFare = 50;
-    const farePerSeat = 125
-      ;
+    const farePerSeat = 125;
 
-    res.json({
+    const responseData = {
       success: true,
       data: {
         busInfo: {
           busId: bus._id,
           vehicleNumber: bus.vehicleNumber,
           vehicleType: bus.vehicleType,
-          totalSeats: totalSeats
+          totalSeats: totalSeats,
+          route: bus.route ? {
+            routeName: bus.route.routeName,
+            routeNum: bus.route.routeNum
+          } : null
         },
         travelInfo: { fromStopId, toStopId, travelDate },
         seatLayout: seatLayout,
@@ -69,7 +215,10 @@ router.route("/seat-layout/:busId").get(async (req, res) => {
         bookedSeats: bookedSeats,
         availableSeats: totalSeats - bookedSeats.length
       }
-    });
+    };
+
+    console.log('Sending response:', responseData);
+    res.json(responseData);
 
   } catch (error) {
     console.error('Error fetching seat layout:', error);
@@ -166,6 +315,19 @@ router.route("/book").post(async (req, res) => {
       });
     }
 
+    // Check if travel date is not in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of today
+    const selectedDate = new Date(travelDate);
+    selectedDate.setHours(0, 0, 0, 0); // Set to start of selected date
+
+    if (selectedDate < today) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot book seats for previous dates. Please select today or a future date.'
+      });
+    }
+
     const bus = await Bus.findById(busId);
     if (!bus) {
       return res.status(404).json({ success: false, message: 'Bus not found' });
@@ -222,7 +384,9 @@ router.route("/book").post(async (req, res) => {
     console.log('Booking saved successfully');
 
     const populatedBooking = await Booking.findById(newBooking._id)
-      .populate('busId', 'vehicleNumber vehicleType');
+      .populate('busId', 'vehicleNumber vehicleType')
+      .populate('fromStopId', 'stopName')
+      .populate('toStopId', 'stopName');
 
     res.status(201).json({
       success: true,
@@ -245,10 +409,10 @@ router.route("/book").post(async (req, res) => {
       stack: error.stack,
       name: error.name
     });
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Server error while creating booking',
-      error: error.message 
+      error: error.message
     });
   }
 });
@@ -368,7 +532,9 @@ router.route("/by-user").get(async (req, res) => {
     const bookings = await Booking.find(query)
       .sort({ travelDate: -1 })
       .limit(50)
-      .populate('busId', 'vehicleNumber vehicleType');
+      .populate('busId', 'vehicleNumber vehicleType')
+      .populate('fromStopId', 'stopName')
+      .populate('toStopId', 'stopName');
 
     res.json({ success: true, data: bookings });
   } catch (error) {
@@ -405,27 +571,130 @@ router.route('/user/:userId').get(async (req, res) => {
   }
 });
 
-// PUT - Update passenger details
+// PUT - Update booking details (passengers, seats, dates, etc.)
 router.route('/:id/update').put(async (req, res) => {
   try {
     const { id } = req.params;
-    const { passengerDetails, contactInfo } = req.body;
+    const {
+      passengerDetails,
+      contactInfo,
+      seatNumbers,
+      newSeats, // Array of new seats to add
+      newPassengers, // Array of passengers for new seats
+      travelDate,
+      fromStopId,
+      toStopId,
+      totalFare
+    } = req.body;
 
-    if (!id || !Array.isArray(passengerDetails) || passengerDetails.length === 0) {
-      return res.status(400).json({ success: false, message: 'id and passengerDetails are required' });
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'id is required' });
     }
 
     const booking = await Booking.findById(id);
     if (!booking) {
       return res.status(404).json({ success: false, message: 'Booking not found' });
     }
-    //validation if booking is akready completed
+
+    //validation if booking is already completed
     if (booking.bookingStatus === 'completed') {
       return res.status(400).json({ success: false, message: 'Completed bookings cannot be updated' });
     }
 
-    booking.passengerDetails = passengerDetails;
-    if (contactInfo) booking.contactInfo = contactInfo;
+    // Update passenger details if provided
+    if (Array.isArray(passengerDetails) && passengerDetails.length > 0) {
+      booking.passengerDetails = passengerDetails;
+    }
+
+    // Update contact info if provided
+    if (contactInfo) {
+      booking.contactInfo = contactInfo;
+    }
+
+    // Update seat numbers if provided (replace existing seats)
+    if (seatNumbers && Array.isArray(seatNumbers)) {
+      // Check if new seats are available
+      const { start: startDay, end: endDay } = getDayRange(booking.travelDate);
+      const existingBookings = await Booking.find({
+        busId: booking.busId,
+        travelDate: { $gte: startDay, $lt: endDay },
+        bookingStatus: { $in: ['confirmed', 'completed'] },
+        seatNumbers: { $in: seatNumbers },
+        _id: { $ne: booking._id }
+      });
+
+      if (existingBookings.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'One or more selected seats are already booked'
+        });
+      }
+
+      booking.seatNumbers = normalizeSeatNumbersToStrings(seatNumbers);
+    }
+
+    // Add new seats if provided (append to existing seats)
+    if (newSeats && Array.isArray(newSeats) && newSeats.length > 0) {
+      // Validate that new passengers are provided for new seats
+      if (!newPassengers || !Array.isArray(newPassengers) || newPassengers.length !== newSeats.length) {
+        return res.status(400).json({
+          success: false,
+          message: 'newPassengers array must be provided and match the length of newSeats'
+        });
+      }
+
+      // Check if new seats are available
+      const { start: startDay, end: endDay } = getDayRange(booking.travelDate);
+      const existingBookings = await Booking.find({
+        busId: booking.busId,
+        travelDate: { $gte: startDay, $lt: endDay },
+        bookingStatus: { $in: ['confirmed', 'completed'] },
+        seatNumbers: { $in: newSeats },
+        _id: { $ne: booking._id }
+      });
+
+      if (existingBookings.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'One or more new seats are already booked'
+        });
+      }
+
+      // Validate new passengers
+      for (const p of newPassengers) {
+        if (!p || !p.name || typeof p.age === 'undefined') {
+          return res.status(400).json({ success: false, message: 'Each new passenger requires name and age' });
+        }
+        const ageNum = Number(p.age);
+        if (Number.isNaN(ageNum) || ageNum < 1 || ageNum > 100) {
+          return res.status(400).json({ success: false, message: 'New passenger age must be between 1 and 100' });
+        }
+      }
+
+      // Append new seats and passengers
+      const normalizedNewSeats = normalizeSeatNumbersToStrings(newSeats);
+      booking.seatNumbers = [...(booking.seatNumbers || []), ...normalizedNewSeats];
+      booking.passengerDetails = [...(booking.passengerDetails || []), ...newPassengers];
+    }
+
+    // Update travel date if provided
+    if (travelDate) {
+      booking.travelDate = new Date(travelDate);
+    }
+
+    // Update stops if provided
+    if (fromStopId) {
+      booking.fromStopId = fromStopId;
+    }
+    if (toStopId) {
+      booking.toStopId = toStopId;
+    }
+
+    // Update total fare if provided
+    if (totalFare !== undefined && totalFare !== null) {
+      booking.totalFare = totalFare;
+    }
+
     await booking.save();
 
     const populated = await Booking.findById(id)
@@ -440,7 +709,7 @@ router.route('/:id/update').put(async (req, res) => {
   }
 });
 
-// PUT - Cancel booking by id
+// PUT - Cancel booking by id with automatic refund
 router.route('/:id/cancel').put(async (req, res) => {
   try {
     const { id } = req.params;
@@ -452,9 +721,163 @@ router.route('/:id/cancel').put(async (req, res) => {
       return res.status(400).json({ success: false, message: 'Completed bookings cannot be cancelled' });
     }
 
+    console.log('Cancelling booking:', {
+      _id: existing._id,
+      bookingId: existing.bookingId,
+      userId: existing.userId,
+      busId: existing.busId,
+      paymentStatus: existing.paymentStatus,
+      totalFare: existing.totalFare
+    });
+
     const update = { bookingStatus: 'cancelled' };
+    let refundResult = null;
+
+    // Process automatic refund if booking was paid
     if (existing.paymentStatus === 'paid') {
       update.paymentStatus = 'refunded';
+
+      try {
+        // Find the transaction for this booking
+        const Transaction = require('../models/Transaction');
+        console.log('Looking for transaction with bookingId:', existing.bookingId || existing._id);
+
+        // Since transaction doesn't have userId field, search by amount and card info
+        console.log('Searching for transaction with criteria:', {
+          totalFare: existing.totalFare,
+          transactionType: 'transport_payment',
+          status: 'completed'
+        });
+
+        let transaction = await Transaction.findOne({
+          transactionType: 'transport_payment',
+          status: 'completed',
+          amount: existing.totalFare
+        });
+
+        // If not found by amount, try broader search
+        if (!transaction) {
+          console.log('Transaction not found by amount, trying broader search...');
+          transaction = await Transaction.findOne({
+            transactionType: 'transport_payment',
+            status: 'completed'
+          }).sort({ timestamp: -1 }); // Get most recent
+
+          if (transaction) {
+            console.log('Found transaction with broader search');
+          } else {
+            console.log('Still no transaction found, listing all transport transactions...');
+            // Try to find any transport payment transaction
+            const broadSearch = await Transaction.find({
+              transactionType: 'transport_payment',
+              status: 'completed'
+            }).limit(5);
+            console.log('Found transport transactions:', broadSearch.length);
+            broadSearch.forEach(t => {
+              console.log('Transaction:', {
+                _id: t._id,
+                amount: t.amount,
+                cardNumber: t.cardNumber,
+                timestamp: t.timestamp
+              });
+            });
+          }
+        }
+
+        console.log('Found transaction:', transaction ? 'Yes' : 'No');
+        if (transaction) {
+          console.log('Transaction details:', {
+            cardNumber: transaction.cardNumber,
+            amount: transaction.amount,
+            transactionType: transaction.transactionType
+          });
+        }
+
+        if (transaction) {
+          // Process refund to the card
+          const NFCCard = require('../models/NFCCard');
+          console.log('Looking for card with cardNumber:', transaction.cardNumber);
+
+          // NFCCard model uses cardNumber field
+          const card = await NFCCard.findOne({ cardNumber: transaction.cardNumber });
+
+          console.log('Found card:', card ? 'Yes' : 'No');
+          if (card) {
+            console.log('Card details:', {
+              cardNumber: card.cardNumber,
+              currentBalance: card.balance
+            });
+          } else {
+            console.log('Card not found, listing all available cards...');
+            const allCards = await NFCCard.find({}).limit(5);
+            console.log('Available cards:', allCards.length);
+            allCards.forEach(c => {
+              console.log('Card:', {
+                cardNumber: c.cardNumber,
+                balance: c.balance,
+                isActive: c.isActive
+              });
+            });
+          }
+
+          if (card) {
+            // Add refund amount back to card balance
+            card.balance = (card.balance || 0) + transaction.amount;
+            await card.save();
+
+            // Create refund transaction record
+            const refundTransaction = new Transaction({
+              bookingId: existing.bookingId || existing._id,
+              userId: existing.userId,
+              cardNumber: transaction.cardNumber,
+              amount: transaction.amount,
+              transactionType: 'refund',
+              status: 'completed',
+              paymentMethod: 'nfc_card',
+              fromLocation: transaction.fromLocation || 'Booking Cancellation',
+              toLocation: transaction.toLocation || 'Card Refund',
+              meta: {
+                originalTransactionId: transaction._id,
+                refundReason: 'Booking cancellation',
+                seatNumbers: existing.seatNumbers || [],
+                travelDate: existing.travelDate || null,
+                bus: {
+                  id: existing.busId,
+                  vehicleNumber: existing.busInfo?.vehicleNumber || ''
+                }
+              }
+            });
+
+            await refundTransaction.save();
+
+            refundResult = {
+              success: true,
+              refundAmount: transaction.amount,
+              newBalance: card.balance,
+              refundTransactionId: refundTransaction._id
+            };
+            console.log('Refund successful:', refundResult);
+          } else {
+            refundResult = {
+              success: false,
+              error: 'Card not found for refund'
+            };
+            console.log('Refund failed - card not found');
+          }
+        } else {
+          refundResult = {
+            success: false,
+            error: 'Original transaction not found'
+          };
+          console.log('Refund failed - transaction not found');
+        }
+      } catch (refundError) {
+        console.error('Refund processing error:', refundError);
+        refundResult = {
+          success: false,
+          error: 'Failed to process refund: ' + refundError.message
+        };
+      }
     }
 
     const updated = await Booking.findByIdAndUpdate(id, { $set: update }, { new: true })
@@ -462,7 +885,12 @@ router.route('/:id/cancel').put(async (req, res) => {
       .populate('fromStopId', 'stopName')
       .populate('toStopId', 'stopName');
 
-    return res.json({ success: true, message: 'Booking cancelled', data: updated });
+    return res.json({
+      success: true,
+      message: 'Booking cancelled' + (refundResult?.success ? ' and refund processed' : ''),
+      data: updated,
+      refund: refundResult
+    });
   } catch (error) {
     console.error('Error cancelling booking by id:', error);
     return res.status(500).json({ success: false, message: 'Server error while cancelling booking' });

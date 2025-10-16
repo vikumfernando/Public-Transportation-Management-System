@@ -17,6 +17,19 @@ router.route("/buses").post(async (req, res) => {
             });
         }
 
+        // Check if travel date is not in the past
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Set to start of today
+        const selectedDate = new Date(travelDate);
+        selectedDate.setHours(0, 0, 0, 0); // Set to start of selected date
+
+        if (selectedDate < today) {
+            return res.status(400).json({
+                success: false,
+                message: 'Cannot search for buses on previous dates. Please select today or a future date.'
+            });
+        }
+
         // Find buses that serve the route between these stops
         const buses = await Bus.find({
             activeStatus: "On duty",
