@@ -21,6 +21,9 @@ function SchedulesPage() {
 
   const [dropdownStops, setDropdownStops] = useState([]);
 
+  const [editingBusId, setEditingBusId] = useState(null);
+  const [updatedTimes, setUpdatedTimes] = useState({});
+
   // Each stop has stopId + time object
   const [stopsData, setStopsData] = useState([
     { stopId: "", time: { hour: 8, minute: 0, period: "AM" } },
@@ -237,6 +240,51 @@ function SchedulesPage() {
     });
 
     doc.save("schedules.pdf");
+  };
+
+  const handleTimeInputChange = (index, newTime) => {
+    setUpdatedTimes((prevTimes) => ({
+      ...prevTimes,
+      [index]: newTime,
+    }));
+  };
+
+  const handleEditClick = (bus) => {
+    setEditingBusId(bus._id);
+
+    // Pre-fill updatedTimes with current schedule times
+    const times = {};
+    bus.schedule.stopSchedules.forEach((stop, i) => {
+      times[i] = stop.expectedArrival;
+    });
+    setUpdatedTimes(times);
+  };
+
+  const updateSchedule = async (busId) => {
+    try {
+      const stopSchedulesArray = Object.keys(updatedTimes)
+        .sort((a, b) => a - b)
+        .map((i) => updatedTimes[i]);
+
+      const res = await axios.put(
+        `http://localhost:8070/Shcedules/updateSchedule/${busId}`,
+        { stopSchedules: stopSchedulesArray }
+      );
+
+      toast.success("Schedule updated successfully!");
+
+      setEditingBusId(null);
+      setUpdatedTimes({});
+
+      const busesRes = await axios.get(
+        "http://localhost:8070/Busses/loadBuses"
+      );
+
+      setBuses(busesRes.data);
+    } catch (err) {
+      console.error("Error updating schedule: ", err);
+      toast.error("Failed to update schedule");
+    }
   };
 
   return (
@@ -513,17 +561,21 @@ function SchedulesPage() {
                     <div key={i}>{stop.stopName}</div>
                   ))}
                 </td>
+
                 <td>
                   {bus.schedule.stopSchedules.map((s, i) => (
                     <div key={i}>{s.expectedArrival}</div>
                   ))}
-                </td>
+                </td> 
+
                 <td>{bus.schedule.dayType}</td>
                 <td style={{ width: "10%" }}>
                   <button
                     className="editBtn"
                     style={{ marginTop: "25px", marginLeft: "0px" }}
-                    onClick={() => {}}
+                    onClick={() => {
+                      updateSchedule(bus._id);
+                    }}
                   >
                     <img
                       style={{ width: "25px", height: "25px" }}

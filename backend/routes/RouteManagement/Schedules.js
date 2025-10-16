@@ -97,34 +97,40 @@ router.route("/deleteSchedule/:id").delete(async(req, res) => {
   }
 });
 
+//updating schedule time
 router.route("/updateSchedule/:id").put(async(req, res) => {
   try{
-    const scheduleId = req.params.id;
-    const { routeId, dayType, stopSchedules } = req.body;
-    const startTime = stopSchedules[0].expectedArrival;   
-    const existingSchedule = await Schedule.findOne({
-      routeId: routeId,
-      "stopSchedules.0.expectedArrival": startTime,
-      _id: { $ne: scheduleId } // Exclude the current schedule from the search
-    }); 
-    if (existingSchedule) {
-      return res.status(400).json("Schedule already added");
-    }
-    const updatedSchedule = await Schedule.findByIdAndUpdate(
-      scheduleId,
-      { routeId, dayType, stopSchedules },
-      { new: true }
-    );    
-    if(!updatedSchedule){
+    const busId = req.params.id;
+    const { stopSchedules } = req.body; 
+
+    const bus = await Bus.findById(busId).populate("schedule");
+    if(!bus){
+      return res.status(404).json("Bus not found");
+    } 
+
+    const schedule = await Schedule.findById(bus.schedule._id);
+
+    if(!schedule){
       return res.status(404).json("Schedule not found");
     } 
-    console.log("Updated schedule:", updatedSchedule);
-    res.status(200).json("Schedule updated successfully");
+    
+    schedule.stopSchedules.forEach((stop, i) => {
+      if (stopSchedules[i]) stop.expectedArrival = stopSchedules[i];
+    });
+
+    await schedule.save();
+
+    res.status(200).json({
+      message: "Schedule times updated successfully.",
+      updatedSchedule: schedule,
+    });
+
+
   }catch(err){
     console.error("Error while updating schedule: ", err);
-    res.status(500).json("Error while updating schedule");
-  } 
-});
+    res.status(500).json("Error while updating schedule: " + err);  
+  }
 
+});
 
 module.exports = router;

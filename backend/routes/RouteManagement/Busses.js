@@ -74,6 +74,8 @@ router.route("/updateLocation").put(async (req, res) => {
     console.log("\nBus data found");
   }
 
+  //IRL Time
+  
   /*const arrivedTime = new Date().toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",

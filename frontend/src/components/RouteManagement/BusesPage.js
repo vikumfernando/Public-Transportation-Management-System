@@ -19,7 +19,7 @@ function BusesPage() {
   const [scheduleRoute, setScheduleRoute] = useState("");
 
   const [dropdownschedules, setDropdownschedules] = useState([]);
-  const [selectedSchedule, setSelectedSchedule] = useState("");
+
 
   useEffect(() => {
     const loadBuses = async () => {
@@ -94,7 +94,7 @@ function BusesPage() {
         avlSeats: e.target.seatCount.value,
         route: e.target.route.value,
         schedule: e.target.schedule.value,
-        busImage: "/images/bus.png", // Default bus image
+        busImage: "https://imgur.com/ZRcgrps.png", // Default bus image
       });
 
       toast.success(`Bus registered successfully`, {
@@ -425,7 +425,7 @@ function BusesPage() {
                       className="locationIcon"
                       src="/images/locationIcon.png"
                     />
-                    {bus.lat},{bus.lon}
+                    {bus.lat}<br/>{bus.lon}
                   </td>
                   <td>
                     <img className="busImageDiv" src={bus.busImage} />
