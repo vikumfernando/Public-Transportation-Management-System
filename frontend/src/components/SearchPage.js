@@ -154,7 +154,7 @@ const SearchPage = () => {
         <div className="search-page">
             <div className="hero-section">
                 <div className="hero-content">
-                    <h1>Online Seat Reservation</h1>
+                    <h1 >Online Seat Reservation</h1>
                     <p>Book your bus tickets easily and travel comfortably</p>
                 </div>
             </div>

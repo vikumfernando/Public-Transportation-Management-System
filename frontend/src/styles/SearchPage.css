@@ -57,12 +57,9 @@ body {
     font-size: 3rem;
     font-weight: 700;
     margin-bottom: 1rem;
+    color: white;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 
-    /* Green gradient text */
-    background: linear-gradient(135deg, #34d399, #10b981);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .hero-content p {

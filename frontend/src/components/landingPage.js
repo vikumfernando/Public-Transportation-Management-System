@@ -62,7 +62,7 @@ function landingPage() {
             />
           </div>
           <div className="stat-number">700</div>
-          <div className="stat-label">cities are powered by TransitFlow</div>
+          <div className="stat-label">cities are powered by Eco Transit</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon green">

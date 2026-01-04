@@ -45,131 +45,150 @@ router.route("/addBus").post(async (req, res) => {
 //Updating the current location of the bus
 //longtitude and latitude needs to be taken from the gps module - !! Important !!
 router.route("/updateLocation").put(async (req, res) => {
-  let destinationReached = false;
-  
-  //creating event to pass
-  const io = req.app.get("io");
+  try {
+    let destinationReached = false;
+    const io = req.app.get("io");
 
+    const { busId, lat, lon } = req.body;
+    console.log("Bus ID: " + busId);
 
-  //Lat and Lon taken from the GPS module
-  const { busId, lat, lon } = req.body;
+    // Fetch bus with route and schedule
+    const bus = await Bus.findById(busId)
+      .populate({
+        path: "route",
+        populate: { path: "stopsSequence", model: "BusStop" },
+      })
+      .populate("schedule");
 
-  //Testing cordinates
-  console.log("Bus ID :" + busId);
+    if (!bus || !bus.schedule || !bus.schedule.stopSchedules) {
+      console.log("Schedule data missing");
+      return res.status(404).json({ message: "Schedule not found for this bus" });
+    }
 
-  const bus = await Bus.findById(busId)
-    .populate({
-      path: "route",
-      populate: {
-        path: "stopsSequence",
-        model: "BusStop",
-      },
-    })
-    .populate("schedule");
+    console.log("Bus data found");
 
-  if (!bus || !bus.schedule || !bus.schedule.stopSchedules) {
-    console.log("\nSchedule data missing");
-    return res.status(404).json({ message: "Schedule not found for this bus" });
-  } else {
-    console.log("\nBus data found");
-  }
+    // Mock/demo time
+    const arrivedTime = "08:00";
+    console.log("Arrived time: " + arrivedTime);
 
-  //IRL Time
-  
-  /*const arrivedTime = new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }); */
+    const nextStopData =
+      bus.nextStopIndex < bus.route.stopsSequence.length
+        ? bus.route.stopsSequence[bus.nextStopIndex]
+        : bus.route.stopsSequence[bus.route.stopsSequence.length - 1];
 
-  //Just for testing
-  const arrivedTime = "08:50";
+    const previousStop =
+      bus.nextStopIndex > 0
+        ? bus.route.stopsSequence[bus.nextStopIndex - 1].stopName
+        : "Not started";
 
-  console.log("Arrived time : " + arrivedTime);
+    const expectedTime = bus.schedule.stopSchedules[bus.nextStopIndex].expectedArrival;
+    const arrivedDate = new Date(`1970-01-01T${arrivedTime}:00Z`);
+    const expectedDate = new Date(`1970-01-01T${expectedTime}:00Z`);
+    const busStatus = bus.status;
 
-  const nextStop =
-    bus.nextStopIndex < bus.route.stopsSequence.length
-      ? bus.route.stopsSequence[bus.nextStopIndex].stopName
-      : "Destination reached";
-  
-  const previousStop =
-    bus.nextStopIndex > 0
-      ? bus.route.stopsSequence[bus.nextStopIndex - 1].stopName
-      : "Not started";
+    // Update active status if at initial stop
+    if (arrivedTime === expectedTime) {
+      bus.activeStatus = "On duty";
+      await bus.save();
+    }
 
-  const expectedTime =
-    bus.schedule.stopSchedules[bus.nextStopIndex].expectedArrival;
-  console.log("Expected time : " + expectedTime);
+    // Interpolation function for smooth movement
+    const interpolateCoords = (start, end, steps) => {
+      const coords = [];
+      const latStep = (end.lat - start.lat) / steps;
+      const lonStep = (end.lon - start.lon) / steps;
+      for (let i = 1; i <= steps; i++) {
+        coords.push({ lat: start.lat + latStep * i, lon: start.lon + lonStep * i });
+      }
+      return coords;
+    };
 
-  // Convert both to Date objects
-  const arrivedDate = new Date(`1970-01-01T${arrivedTime}:00Z`);
-  const expectedDate = new Date(`1970-01-01T${expectedTime}:00Z`);
-
-  const busStatus = bus.status;
-
-  //updating the active status of the bus if the bus is in the initial bus stop
-  if (arrivedTime == expectedTime) {
-    bus.activeStatus = "On duty";
-    await bus.save();
-  }
-  const distance = calcDistance(
-    bus.route.stopsSequence[bus.nextStopIndex].lat,
-    bus.route.stopsSequence[bus.nextStopIndex].lon,
-    lat,
-    lon
-  );
-
-  console.log("Distance to the next bus stand : " + distance.toFixed(2) + " m");
-
-  //if the bus is in the radius of 5m, it's considered as arrived
-  if (distance <= 5) {
-    console.log(
-      "\nBus has arrived to the " +
-        bus.route.stopsSequence[bus.nextStopIndex].stopName +
-        " bus stop"
+    // Generate smooth points between current location and next stop
+    const smoothPoints = interpolateCoords(
+      { lat: bus.lat, lon: bus.lon },
+      { lat: nextStopData.lat, lon: nextStopData.lon },
+      45
     );
 
-    //checking if the bus has reached it's destination
-    if (bus.nextStopIndex == bus.route.stopsSequence.length - 1) {
-      console.log("Bus has arrived at it's destination");
-      destinationReached = true;
+    // Update bus location along intermediate points
+    for (let point of smoothPoints) {
+      bus.lat = point.lat;
+      bus.lon = point.lon;
+
+      const distance = calcDistance(nextStopData.lat, nextStopData.lon, point.lat, point.lon);
+
+      // Check if bus has arrived within 5 meters
+      if (distance <= 5) {
+        console.log(`Bus arrived at ${nextStopData.stopName}`);
+
+        // Check if destination reached
+        if (bus.nextStopIndex === bus.route.stopsSequence.length - 1) {
+          console.log("Bus has reached destination");
+          destinationReached = true;
+        }
+
+        // Check for delay
+        if (arrivedDate > expectedDate) {
+          bus.status = "Late";
+          const delay = Math.floor((arrivedDate - expectedDate) / 60000);
+          io.emit("busDelay", {
+            vehicleNumber: bus.vehicleNumber,
+            delay,
+            busStop: nextStopData.stopName,
+          });
+        } else {
+          bus.status = "Ontime";
+          io.emit("busOntime", {
+            vehicleNumber: bus.vehicleNumber,
+            busStop: nextStopData.stopName,
+          });
+        }
+
+        // Update next stop index
+        bus.nextStopIndex = destinationReached ? 0 : bus.nextStopIndex + 1;
+      }
+
+      await bus.save();
+
+      io.emit("busLocationUpdate", {
+        busId,
+        lat: point.lat,
+        lon: point.lon,
+        busStatus: bus.status,
+        nextStop: nextStopData.stopName,
+        previousStop: previousStop,
+        arrivedTime,
+        expectedTime,
+      });
+
+      await new Promise((r) => setTimeout(r, 100)); // Delay for smooth animation
     }
 
-    //checking whether the bus arrived on time
-    if (arrivedDate > expectedDate) {
-      console.log("Bus is late");
-      bus.status = "Late";
-      
-      const delay = Math.floor((new Date(`1970-01-01T${arrivedTime}Z`) - new Date(`1970-01-01T${expectedTime}Z`)) / 60000);
-      io.emit("busDelay", { vehicleNumber : bus.vehicleNumber, delay, busStop : bus.route.stopsSequence[bus.nextStopIndex].stopName});
+    // Ensure last stop is displayed on frontend
+    bus.lat = nextStopData.lat;
+    bus.lon = nextStopData.lon;
 
-    } else {
-      console.log("Bus On time");
-      bus.status = "Ontime";
+    io.emit("busLocationUpdate", {
+      busId,
+      lat: bus.lat,
+      lon: bus.lon,
+      busStatus: bus.status,
+      nextStop: nextStopData.stopName,
+      previousStop: previousStop,
+      arrivedTime,
+      expectedTime,
+    });
 
-      io.emit("busOntime", { vehicleNumber : bus.vehicleNumber, busStop : bus.route.stopsSequence[bus.nextStopIndex].stopName});
-    }
+    await bus.save();
 
-    //resetting bus information
-    if (destinationReached) {
-      bus.nextStopIndex = 0;
-      bus.status = "Ontime";
-    } else {
-      bus.nextStopIndex += 1;
-    }
-  } else {
-    console.log("Not arrived yet");
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("Error in updateLocation:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
-
-  //updating current cordinates of the bus
-  bus.lat = lat;
-  bus.lon = lon;
-
-  await bus.save();
-
-  io.emit("busLocationUpdate", { busId, lat, busStatus, lon, nextStop, previousStop, arrivedTime, expectedTime });
-  res.sendStatus(200);
 });
+
+
 
 
 //Loading all bus information
